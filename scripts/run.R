@@ -15,7 +15,11 @@ if (Sys.getenv("RDATACRAFT_DESKTOP") == "1") {
   parent <- suppressWarnings(as.integer(Sys.getenv("RDATACRAFT_PARENT_PID")))
   if (!is.na(parent) && parent > 1L) {
     watch_parent <- function() {
-      alive <- tryCatch(tools::pskill(parent, signal = 0L), error = function(e) FALSE)
+      # Windows pskill always calls TerminateProcess, even with signal=0.
+      # Query process state through ps instead of sending any Windows signal.
+      alive <- tryCatch(if (.Platform$OS.type == "windows") {
+        ps::ps_is_running(ps::ps_handle(parent))
+      } else tools::pskill(parent, signal = 0L), error = function(e) FALSE)
       if (!isTRUE(alive)) quit(save = "no", status = 0L)
       later::later(watch_parent, 2)
     }

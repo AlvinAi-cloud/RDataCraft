@@ -29,7 +29,7 @@ def build(dotnet, output):
     for package in ['microsoft.web.webview2','microsoft.netcore.app.runtime.win-x64','microsoft.windowsdesktop.app.runtime.win-x64']:
         for version in (nuget/package).glob('*'):
             for path in version.rglob('*'):
-                if path.is_file() and path.name.lower() in ['license','license.txt','license.md','notice.txt','thirdpartynotices.txt','thirdpartynotices.md']:
+                if path.is_file() and path.name.lower() in ['license','license.txt','license.md','notice.txt','thirdpartynotices.txt','thirdpartynotices.md','third-party-notices.txt']:
                     target=notice/package/path.relative_to(version); target.parent.mkdir(parents=True,exist_ok=True); shutil.copy2(path,target)
     records={str(p.relative_to(output)):hashlib.sha256(p.read_bytes()).hexdigest() for p in output.rglob('*') if p.is_file()}
     (output/'windows-host-build.json').write_text(json.dumps({'version':'0.3','interface':'WinForms + WebView2','runtime':'self-contained .NET 10 win-x64','files':records},indent=2)+'\n')

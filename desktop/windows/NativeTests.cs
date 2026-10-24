@@ -71,10 +71,10 @@ internal static class NativeTests
             await Until(window, "document.getElementById('help_search')!==null", "Help did not open");
             Checks.Add("Offline examples and analysis help opens");
             await JS(window, "document.querySelector('.modal.show [data-bs-dismiss=modal],.modal.show [data-dismiss=modal]')?.click()");
-            var second = Program.Open(); int secondPid = 0;
-            await Wait(() => Task.FromResult(second.Ready), "Second native window did not start", 120);
+            var second = Program.Open(newStudy: true); int secondPid = 0;
+            await Wait(() => Task.FromResult(second.Ready && second.HasDocument), "Second native study did not start", 120);
             secondPid = second.EnginePid;
-            Check(Program.Windows.Count == 2 && secondPid != window.EnginePid && !second.HasDocument, "New study opens an independent native window and R engine");
+            Check(Program.Windows.Count == 2 && secondPid != window.EnginePid && second.HasDocument && !second.Dirty, "New study opens an independent blank document, native window and R engine");
             second.CloseForTest();
             await Wait(() => Task.FromResult(!ProcessExists(secondPid)), "Second window left its R engine running");
             Checks.Add("Closing a window stops its own bundled R engine");

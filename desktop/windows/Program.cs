@@ -55,7 +55,7 @@ internal static class Program
         return Result;
     }
 
-    internal static StudyWindow Open(string? path = null)
+    internal static StudyWindow Open(string? path = null, bool newStudy = false)
     {
         if (path != null)
         {
@@ -63,7 +63,7 @@ internal static class Program
             var existing = Windows.FirstOrDefault(w => string.Equals(w.ProjectPath, path, StringComparison.OrdinalIgnoreCase));
             if (existing != null) { existing.Activate(); return existing; }
         }
-        var window = new StudyWindow(path);
+        var window = new StudyWindow(path, newStudy);
         Windows.Add(window);
         window.FormClosed += (_, _) => { Windows.Remove(window); if (Windows.Count == 0) Context.ExitThread(); };
         window.Show();
@@ -78,6 +78,7 @@ internal sealed class StudyWindow : Form
     private readonly CancellationTokenSource closing = new();
     private readonly string session = Guid.NewGuid().ToString("N");
     private readonly string? initialPath;
+    private readonly bool startsNewStudy;
     private readonly string logPath;
     private readonly string profile;
     private readonly object logLock = new();
@@ -91,9 +92,10 @@ internal sealed class StudyWindow : Form
     internal string? NextTestDestination;
     internal int EnginePid => engine?.Id ?? 0;
 
-    internal StudyWindow(string? path)
+    internal StudyWindow(string? path, bool newStudy)
     {
         initialPath = path;
+        startsNewStudy = newStudy;
         Text = "RDataCraft";
         Size = new Size(1380, 940);
         MinimumSize = new Size(960, 680);
@@ -127,7 +129,7 @@ internal sealed class StudyWindow : Form
         void Item(ToolStripMenuItem menu, string title, Keys keys, Action action)
         { var item = new ToolStripMenuItem(title, null, (_, _) => action()) { ShortcutKeys = keys }; menu.DropDownItems.Add(item); }
         var file = Menu("&File");
-        Item(file, "&New study", Keys.Control | Keys.N, () => Program.Open());
+        Item(file, "&New study", Keys.Control | Keys.N, () => Program.Open(newStudy: true));
         Item(file, "&Open study…", Keys.Control | Keys.O, OpenDialog);
         Item(file, "&Import data or Prism project…", Keys.Control | Keys.I, ImportDialog);
         file.DropDownItems.Add(new ToolStripSeparator());
@@ -266,7 +268,9 @@ internal sealed class StudyWindow : Form
                 case "ready":
                     if (Ready) break;
                     Ready = true; loading.Hide(); Web.BringToFront(); MainMenuStrip!.BringToFront();
-                    if (initialPath != null) await OpenFile(initialPath); break;
+                    if (initialPath != null) await OpenFile(initialPath);
+                    else if (startsNewStudy) await Send(new { type = "new" });
+                    break;
                 case "document":
                     HasDocument = data.TryGetProperty("open", out var open) && open.ValueKind == JsonValueKind.True;
                     Dirty = data.TryGetProperty("dirty", out var dirty) && dirty.ValueKind == JsonValueKind.True;
@@ -276,7 +280,7 @@ internal sealed class StudyWindow : Form
                     if (savingToClose && !Dirty) { allowClose = true; Close(); } break;
                 case "command":
                     switch (data.GetProperty("name").GetString())
-                    { case "new": Program.Open(); break; case "open": OpenDialog(); break; case "import": ImportDialog(); break; case "save-as": Save(true); break; }
+                    { case "new": Program.Open(newStudy: true); break; case "open": OpenDialog(); break; case "import": ImportDialog(); break; case "save-as": Save(true); break; }
                     break;
                 case "ai-status":
                     await Web.CoreWebView2.ExecuteScriptAsync("Shiny.setInputValue('assistant_connection',{nonce:Date.now()},{priority:'event'})"); break;
