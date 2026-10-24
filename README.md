@@ -119,7 +119,7 @@ python3 scripts/test.py --require-node
 python3 scripts/build_desktop.py --zip
 ```
 
-On Windows x64, install R 4.6.1 and make Rscript available, then:
+On Windows x64, install R 4.6.1 and the .NET 10 SDK, make Rscript available, then:
 
 ```text
 Rscript --vanilla scripts/install.R
@@ -135,12 +135,13 @@ sources when dependencies change. Architecture checks reject mismatched runtimes
 See [PLATFORM_SUPPORT.md](PLATFORM_SUPPORT.md) for build flags and platform limits.
 
 The GitHub workflow uses pinned action commits and runs tests/builds on Intel Mac,
-Apple Silicon and Windows. Validation reports upload automatically; binary artifact
-uploads require an explicitly selected manual run after redistribution review.
-It has to run in your repository before it provides evidence for those machines.
-This review executes the Intel Mac build; cross-built Apple Silicon/Windows
-artifacts require native execution tests. Development builds use ad-hoc Mac
-signatures and have no Apple notarization or Windows code signing.
+Apple Silicon and Windows. Validation reports upload automatically. Full binary
+artifact uploads use an explicitly selected manual run after redistribution review.
+A deliberate `[windows-package]` commit requests a Windows-only packaging run and
+returns the tested development installer as a one-day CI artifact. This does not
+create a public release. Read the actual run reports for platform execution evidence.
+Development builds use ad-hoc Mac signatures and have no Apple notarization or
+Windows code signing.
 See [RELEASE.md](RELEASE.md) for GitHub Desktop publishing steps, the app description,
 prepared signing tools and the remaining public-binary release requirements.
 

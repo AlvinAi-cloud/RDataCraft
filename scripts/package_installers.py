@@ -71,6 +71,8 @@ def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signto
     audit = verify_windows_runtime(bundle / 'runtime/R', bundle / 'runtime/library')
     native = (bundle/'RDataCraft.exe').is_file()
     if native:
+        from package_portable import verify_windows_host
+        audit.update(verify_windows_host(bundle))
         from fetch_windows_components import verify
         if not webview_installer:raise SystemExit('The native Windows installer requires --webview-installer for offline setup.')
         verify(webview_installer)

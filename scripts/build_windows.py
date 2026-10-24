@@ -32,7 +32,8 @@ def build(dotnet, output):
                 if path.is_file() and path.name.lower() in ['license','license.txt','license.md','notice.txt','thirdpartynotices.txt','thirdpartynotices.md','third-party-notices.txt']:
                     target=notice/package/path.relative_to(version); target.parent.mkdir(parents=True,exist_ok=True); shutil.copy2(path,target)
     records={str(p.relative_to(output)):hashlib.sha256(p.read_bytes()).hexdigest() for p in output.rglob('*') if p.is_file()}
-    (output/'windows-host-build.json').write_text(json.dumps({'version':'0.3','interface':'WinForms + WebView2','runtime':'self-contained .NET 10 win-x64','files':records},indent=2)+'\n')
+    source={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in project.parent.iterdir() if p.is_file()}
+    (output/'windows-host-build.json').write_text(json.dumps({'version':'0.3','interface':'WinForms + WebView2','runtime':'self-contained .NET 10 win-x64','source_files':source,'files':records},indent=2)+'\n')
     print(output)
 
 if __name__=='__main__':

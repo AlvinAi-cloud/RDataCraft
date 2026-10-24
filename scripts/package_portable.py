@@ -41,6 +41,25 @@ def verify_windows_runtime(home, library):
         if 'darwin' in built[1].lower() or 'aarch64' in built[1].lower():raise ValueError(f'Wrong package architecture: {desc.parent.name}')
     return {'x64_pe_files':count,'windows_packages':len(packages)}
 
+def verify_windows_host(host):
+    """Refuse stale native builds or incomplete self-contained payloads."""
+    metadata=json.loads((host/'windows-host-build.json').read_text(encoding='utf-8'))
+    if metadata['version']!=VERSION or not metadata.get('source_files'):raise ValueError('Rebuild the matching native Windows host.')
+    for name,digest in metadata['files'].items():
+        file=(host/name).resolve()
+        if host.resolve() not in file.parents or not file.is_file() or hashlib.sha256(file.read_bytes()).hexdigest()!=digest:
+            raise ValueError('The native host payload differs from its build manifest: '+name)
+    for name,digest in metadata['source_files'].items():
+        file=ROOT/'desktop/windows'/name
+        if file.parent!=ROOT/'desktop/windows' or not file.is_file() or hashlib.sha256(file.read_bytes()).hexdigest()!=digest:
+            raise ValueError('The native Windows host source changed; rebuild before packaging: '+name)
+    for name in ['RDataCraft.exe','RDataCraft.dll','coreclr.dll','hostfxr.dll','System.Private.CoreLib.dll','Microsoft.Web.WebView2.Core.dll','Microsoft.Web.WebView2.WinForms.dll','WebView2Loader.dll']:
+        if not (host/name).is_file():raise ValueError('The self-contained native host is missing '+name)
+    data=(host/'RDataCraft.exe').read_bytes();offset=struct.unpack_from('<I',data,0x3c)[0]
+    if data[:2]!=b'MZ' or data[offset:offset+4]!=b'PE\0\0' or struct.unpack_from('<H',data,offset+4)[0]!=0x8664 or struct.unpack_from('<H',data,offset+24+68)[0]!=2:
+        raise ValueError('The native Windows launcher must be an x64 GUI executable.')
+    return {'native_host':'WinForms + WebView2','host_files':len(metadata['files']),'source_files':len(metadata['source_files'])}
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--target',choices=['Darwin','Windows'],default=platform.system())
@@ -53,6 +72,7 @@ def main():
     system=args.target
     if args.native_host and (system != 'Windows' or not (args.native_host/'RDataCraft.exe').is_file()):
         raise SystemExit('Choose a published Windows host containing RDataCraft.exe.')
+    host_audit=verify_windows_host(args.native_host) if args.native_host else {}
     try:arch=portable_arch(system,args.arch)
     except ValueError as error:raise SystemExit(str(error))
     cross=system!=platform.system()
@@ -103,6 +123,8 @@ def main():
         raise SystemExit('Bundle packaging is configured for macOS and Windows; source can use an existing R elsewhere.')
     if args.native_host:
         shutil.copytree(args.native_host,destination,dirs_exist_ok=True)
+        shutil.copytree(ROOT/'desktop/windows',destination/'desktop/windows',ignore=shutil.ignore_patterns('bin','obj'))
+        audit.update(host_audit)
     manifest={'version':VERSION,'platform':system,'architecture':arch,'interface':'native Windows window (WebView2)' if args.native_host else 'local browser','engine':'bundled R',
               'status':'cross-assembled; Windows execution not tested on this host' if cross else 'built on target; consult validation report for tested workflows','binary_audit':audit}
     (destination/'build-platform.json').write_text(json.dumps(manifest,indent=2)+'\n')

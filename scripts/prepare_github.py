@@ -58,8 +58,8 @@ original project's `dist/` folder as **release assets**, rather than source comm
 
 The installers are larger than GitHub's ordinary file-upload/commit limits.
 They contain bundled R and packages. Current packages are development builds:
-Mac apps are ad-hoc signed, not notarized, and Apple Silicon/Windows execution
-requires checks on those platforms. Complete the corresponding-source and native
+Mac apps are ad-hoc signed, not notarized. Review the GitHub Actions reports for
+execution on each target platform. Complete the corresponding-source and native
 library audit in `licenses/REDISTRIBUTION.md` before publicly distributing binaries.
 No repository or release has been created by this preparation script.
 
@@ -70,7 +70,9 @@ then `python3 scripts/test.py` and `python3 scripts/build_desktop.py --zip`.
 On Windows, install R, run `Rscript --vanilla scripts/install.R`, then
 `python scripts/test.py`, `python scripts/build_windows.py` and
 `python scripts/package_portable.py --native-host artifacts/windows-host`.
-Python and Node are build/test tools; the installed application uses bundled R.
+The Windows desktop build also needs the .NET 10 SDK; its output includes the
+.NET runtime. Python, Node and the SDK are build/test tools; users run the packaged
+desktop executable with bundled R.
 See `PLATFORM_SUPPORT.md` for architecture flags, packaging and validation limits.
 `source-manifest.json` records dependency source provenance; run
 `scripts/fetch_sources.py` to collect missing matching archives for a release.
