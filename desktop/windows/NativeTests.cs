@@ -33,6 +33,10 @@ internal static class NativeTests
             Check(window.MainMenuStrip?.Items.Count >= 5, "Native menus are present");
             Check(!window.HasDocument, "Cold startup opens no study");
             Check(!window.Trusted("https://example.com/") && !window.Trusted("file:///C:/private") && !window.Trusted("http://127.0.0.1:1/"), "Remote pages and other local ports cannot use the host bridge");
+            Check(window.PermissionAllowed(window.Web.Source.AbsoluteUri, CoreWebView2PermissionKind.MultipleAutomaticDownloads) &&
+                !window.PermissionAllowed("https://example.com/", CoreWebView2PermissionKind.MultipleAutomaticDownloads) &&
+                !window.PermissionAllowed(window.Web.Source.AbsoluteUri, CoreWebView2PermissionKind.Camera),
+                "Successive exports are allowed only for the local app; unrelated permissions are denied");
             await Until(window, "document.body.dataset.runtime==='desktop'", "Desktop runtime bridge missing");
             Checks.Add("Embedded interface uses desktop mode");
             await window.OpenFile(Path.Combine(Program.Backend, "examples", "RDataCraft examples.rdatacraft"));

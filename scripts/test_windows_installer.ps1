@@ -15,6 +15,15 @@ try {
   $engine = Join-Path $installPath 'runtime/R/bin/x64/Rscript.exe'
   if (!(Test-Path $engine)) { $engine = Join-Path $installPath 'runtime/R/bin/Rscript.exe' }
   if (!(Test-Path $engine)) { throw 'The installed bundled R engine is missing.' }
+  $native = Join-Path $installPath 'RDataCraft.exe'
+  if (!(Test-Path $native)) { throw 'The native Windows executable is missing.' }
+  $nativeReports = Join-Path $reportDirectory 'installed-windows-native'
+  $test = Start-Process -FilePath $native -ArgumentList ('--native-test="' + $nativeReports + '"') -PassThru
+  if (!$test.WaitForExit(420000)) { $test.Kill(); throw 'The native Windows workflow tests timed out.' }
+  if ($test.ExitCode -ne 0) { throw 'The native Windows workflow tests failed; inspect installed-windows-native reports.' }
+  $nativeReport = Get-Content (Join-Path $nativeReports 'validation-windows-desktop.json') -Raw | ConvertFrom-Json
+  if ($nativeReport.status -ne 'passed') { throw 'Native Windows validation did not pass.' }
+  if (Get-Process -Id $nativeReport.engine_pid -ErrorAction SilentlyContinue) { throw 'The native app left its R engine running.' }
   Push-Location $installPath
   try {
     $env:R_LIBS_USER = Join-Path $installPath 'runtime/library'
@@ -26,15 +35,6 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Installed R workflow tests failed.' }
   } finally { Pop-Location }
   Copy-Item (Join-Path $installPath "artifacts/validation-native-$version.json") (Join-Path $reportDirectory "validation-installed-windows-$version.json")
-  $native = Join-Path $installPath 'RDataCraft.exe'
-  if (!(Test-Path $native)) { throw 'The native Windows executable is missing.' }
-  $nativeReports = Join-Path $reportDirectory 'installed-windows-native'
-  $test = Start-Process -FilePath $native -ArgumentList ('--native-test="' + $nativeReports + '"') -PassThru
-  if (!$test.WaitForExit(420000)) { $test.Kill(); throw 'The native Windows workflow tests timed out.' }
-  if ($test.ExitCode -ne 0) { throw 'The native Windows workflow tests failed; inspect installed-windows-native reports.' }
-  $nativeReport = Get-Content (Join-Path $nativeReports 'validation-windows-desktop.json') -Raw | ConvertFrom-Json
-  if ($nativeReport.status -ne 'passed') { throw 'Native Windows validation did not pass.' }
-  if (Get-Process -Id $nativeReport.engine_pid -ErrorAction SilentlyContinue) { throw 'The native app left its R engine running.' }
   $sentinel = Join-Path $installPath 'keep-study.rdatacraft'
   Set-Content -LiteralPath $sentinel -Value '{"original_test_study":true}'
   $uninstall = Start-Process -FilePath (Join-Path $installPath 'Uninstall.exe') -ArgumentList @('/S',"_?=$installPath") -PassThru -Wait

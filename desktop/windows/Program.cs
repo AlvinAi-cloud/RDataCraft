@@ -211,7 +211,13 @@ internal sealed class StudyWindow : Form
             core.Settings.IsPasswordAutosaveEnabled = false;
             core.Settings.IsGeneralAutofillEnabled = false;
             core.Settings.AreHostObjectsAllowed = false;
-            core.PermissionRequested += (_, e) => { e.State = CoreWebView2PermissionState.Deny; e.Handled = true; };
+            core.PermissionRequested += (_, e) =>
+            {
+                bool allowed = PermissionAllowed(e.Uri, e.PermissionKind);
+                Log("Permission " + e.PermissionKind + ": " + (allowed ? "allowed" : "denied"));
+                e.State = allowed ? CoreWebView2PermissionState.Allow : CoreWebView2PermissionState.Deny;
+                e.SavesInProfile = false; e.Handled = true;
+            };
             core.NavigationStarting += (_, e) => { if (!Trusted(e.Uri)) { e.Cancel = true; if (e.IsUserInitiated) External(e.Uri); } };
             core.FrameNavigationStarting += (_, e) => { if (!Trusted(e.Uri) && !e.Uri.StartsWith("about:") && !e.Uri.StartsWith("blob:" + endpoint.GetLeftPart(UriPartial.Authority))) e.Cancel = true; };
             core.NewWindowRequested += (_, e) => { e.Handled = true; if (e.IsUserInitiated) External(e.Uri); };
@@ -233,6 +239,8 @@ internal sealed class StudyWindow : Form
     }
 
     internal bool Trusted(string url) => Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri.Scheme == "http" && uri.Host == "127.0.0.1" && uri.Port == endpoint.Port;
+    internal bool PermissionAllowed(string url, CoreWebView2PermissionKind permission) =>
+        Trusted(url) && permission == CoreWebView2PermissionKind.MultipleAutomaticDownloads;
 
     private void External(string url)
     {
@@ -333,8 +341,9 @@ internal sealed class StudyWindow : Form
         var deferral = e.GetDeferral();
         try
         {
-            if (!Trusted(e.DownloadOperation.Uri)) { e.Cancel = true; return; }
+            if (!Trusted(e.DownloadOperation.Uri)) { Log("Download rejected: untrusted origin."); e.Cancel = true; return; }
             string filename = Path.GetFileName(e.ResultFilePath);
+            Log("Download requested: " + filename);
             bool project = filename.EndsWith(".rdatacraft", StringComparison.OrdinalIgnoreCase);
             string? destination = NextTestDestination; NextTestDestination = null;
             if (destination == null && project && !forceSaveAs) destination = ProjectPath;
@@ -359,6 +368,7 @@ internal sealed class StudyWindow : Form
                     if (operation.State == CoreWebView2DownloadState.Completed)
                     {
                         File.Move(temporary, destination, true);
+                        Log("Saved " + Path.GetFileName(destination));
                         if (project) await Send(new { type = "saved", path = destination });
                     }
                     else { savingToClose = false; Log("Download interrupted: " + operation.InterruptReason); if (Program.TestFolder == null) MessageBox.Show(this, "The file could not be saved. Your existing file has been kept.", "RDataCraft"); }
