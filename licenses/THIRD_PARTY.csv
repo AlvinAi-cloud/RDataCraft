@@ -1,0 +1,782 @@
+"package","version","license","author"
+"base64enc","0.1-6","GPL-2 | GPL-3","Simon Urbanek [aut, cre, cph] (https://urbanek.nz, ORCID:
+<https://orcid.org/0000-0003-2297-1732>)"
+"bslib","0.12.0","MIT + file LICENSE","Carson Sievert [aut, cre] (ORCID:
+<https://orcid.org/0000-0002-4958-2844>),
+Joe Cheng [aut],
+Garrick Aden-Buie [aut] (ORCID:
+<https://orcid.org/0000-0002-7111-0077>),
+Posit Software, PBC [cph, fnd],
+Bootstrap contributors [ctb] (Bootstrap library),
+Twitter, Inc [cph] (Bootstrap library),
+Javi Aguilar [ctb, cph] (Bootstrap colorpicker library),
+Thomas Park [ctb, cph] (Bootswatch library),
+PayPal [ctb, cph] (Bootstrap accessibility plugin)"
+"cachem","1.1.0","MIT + file LICENSE","Winston Chang [aut, cre],
+Posit Software, PBC [cph, fnd]"
+"cellranger","1.1.0","MIT + file LICENSE","Jennifer Bryan [cre, aut],
+Hadley Wickham [ctb]"
+"cli","3.6.6","MIT + file LICENSE","Gábor Csárdi [aut, cre],
+Hadley Wickham [ctb],
+Kirill Müller [ctb],
+Salim Brüggemann [ctb] (ORCID: <https://orcid.org/0000-0002-5329-5987>),
+Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)"
+"commonmark","2.0.0","BSD_2_clause + file LICENSE","Jeroen Ooms [aut, cre] (ORCID: <https://orcid.org/0000-0002-4035-0289>),
+John MacFarlane [cph] (Author of cmark)"
+"cpp11","0.5.5","MIT + file LICENSE","Davis Vaughan [aut, cre] (ORCID:
+<https://orcid.org/0000-0003-4777-038X>),
+Jim Hester [aut] (ORCID: <https://orcid.org/0000-0002-2739-7082>),
+Romain François [aut] (ORCID: <https://orcid.org/0000-0002-2444-4226>),
+Benjamin Kietzman [ctb],
+Posit Software, PBC [cph, fnd]"
+"crayon","1.5.3","MIT + file LICENSE","Gábor Csárdi [aut, cre],
+Brodie Gaslam [ctb],
+Posit Software, PBC [cph, fnd]"
+"crosstalk","1.2.2","MIT + file LICENSE","Joe Cheng [aut],
+Carson Sievert [aut, cre] (ORCID:
+<https://orcid.org/0000-0002-4958-2844>),
+Posit Software, PBC [cph, fnd],
+jQuery Foundation [cph] (jQuery library and jQuery UI library),
+jQuery contributors [ctb, cph] (jQuery library; authors listed in
+inst/www/shared/jquery-AUTHORS.txt),
+Mark Otto [ctb] (Bootstrap library),
+Jacob Thornton [ctb] (Bootstrap library),
+Bootstrap contributors [ctb] (Bootstrap library),
+Twitter, Inc [cph] (Bootstrap library),
+Brian Reavis [ctb, cph] (selectize.js library),
+Kristopher Michael Kowal [ctb, cph] (es5-shim library),
+es5-shim contributors [ctb, cph] (es5-shim library),
+Denis Ineshin [ctb, cph] (ion.rangeSlider library),
+Sami Samhuri [ctb, cph] (Javascript strftime library)"
+"digest","0.6.39","GPL (>= 2)","Dirk Eddelbuettel [aut, cre] (ORCID:
+<https://orcid.org/0000-0001-6419-907X>),
+Antoine Lucas [ctb] (ORCID: <https://orcid.org/0000-0002-8059-9767>),
+Jarek Tuszynski [ctb],
+Henrik Bengtsson [ctb] (ORCID: <https://orcid.org/0000-0002-7579-5165>),
+Simon Urbanek [ctb] (ORCID: <https://orcid.org/0000-0003-2297-1732>),
+Mario Frasca [ctb],
+Bryan Lewis [ctb],
+Murray Stokely [ctb],
+Hannes Muehleisen [ctb] (ORCID:
+<https://orcid.org/0000-0001-8552-0029>),
+Duncan Murdoch [ctb],
+Jim Hester [ctb] (ORCID: <https://orcid.org/0000-0002-2739-7082>),
+Wush Wu [ctb] (ORCID: <https://orcid.org/0000-0001-5180-0567>),
+Qiang Kou [ctb] (ORCID: <https://orcid.org/0000-0001-6786-5453>),
+Thierry Onkelinx [ctb] (ORCID: <https://orcid.org/0000-0001-8804-4216>),
+Michel Lang [ctb] (ORCID: <https://orcid.org/0000-0001-9754-0393>),
+Viliam Simko [ctb],
+Kurt Hornik [ctb] (ORCID: <https://orcid.org/0000-0003-4198-9911>),
+Radford Neal [ctb] (ORCID: <https://orcid.org/0000-0002-2473-3407>),
+Kendon Bell [ctb] (ORCID: <https://orcid.org/0000-0002-9093-8312>),
+Matthew de Queljoe [ctb],
+Dmitry Selivanov [ctb] (ORCID: <https://orcid.org/0000-0003-0492-6647>),
+Ion Suruceanu [ctb] (ORCID: <https://orcid.org/0009-0005-6446-4909>),
+Bill Denney [ctb] (ORCID: <https://orcid.org/0000-0002-5759-428X>),
+Dirk Schumacher [ctb],
+András Svraka [ctb] (ORCID: <https://orcid.org/0009-0008-8480-1329>),
+Sergey Fedorov [ctb] (ORCID: <https://orcid.org/0000-0002-5970-7233>),
+Will Landau [ctb] (ORCID: <https://orcid.org/0000-0003-1878-3253>),
+Floris Vanderhaeghe [ctb] (ORCID:
+<https://orcid.org/0000-0002-6378-6229>),
+Kevin Tappe [ctb],
+Harris McGehee [ctb],
+Tim Mastny [ctb],
+Aaron Peikert [ctb] (ORCID: <https://orcid.org/0000-0001-7813-818X>),
+Mark van der Loo [ctb] (ORCID: <https://orcid.org/0000-0002-9807-4686>),
+Chris Muir [ctb] (ORCID: <https://orcid.org/0000-0003-2555-3878>),
+Moritz Beller [ctb] (ORCID: <https://orcid.org/0000-0003-4852-0526>),
+Sebastian Campbell [ctb] (ORCID:
+<https://orcid.org/0009-0000-5948-4503>),
+Winston Chang [ctb] (ORCID: <https://orcid.org/0000-0002-1576-2126>),
+Dean Attali [ctb] (ORCID: <https://orcid.org/0000-0002-5645-3493>),
+Michael Chirico [ctb] (ORCID: <https://orcid.org/0000-0003-0787-087X>),
+Kevin Ushey [ctb] (ORCID: <https://orcid.org/0000-0003-2880-7407>),
+Carl Pearson [ctb] (ORCID: <https://orcid.org/0000-0003-0701-7860>)"
+"DT","0.34.0","MIT + file LICENSE","Yihui Xie [aut],
+Joe Cheng [aut],
+Xianying Tan [aut],
+Garrick Aden-Buie [aut, cre] (ORCID:
+<https://orcid.org/0000-0002-7111-0077>),
+JJ Allaire [ctb],
+Maximilian Girlich [ctb],
+Greg Freedman Ellis [ctb],
+Johannes Rauh [ctb],
+SpryMedia Limited [ctb, cph] (DataTables in htmlwidgets/lib),
+Brian Reavis [ctb, cph] (selectize.js in htmlwidgets/lib),
+Leon Gersen [ctb, cph] (noUiSlider in htmlwidgets/lib),
+Bartek Szopka [ctb, cph] (jquery.highlight.js in htmlwidgets/lib),
+Alex Pickering [ctb],
+William Holmes [ctb],
+Mikko Marttila [ctb],
+Andres Quintero [ctb],
+Stéphane Laurent [ctb],
+Posit Software, PBC [cph, fnd]"
+"evaluate","1.0.5","MIT + file LICENSE","Hadley Wickham [aut, cre],
+Yihui Xie [aut] (ORCID: <https://orcid.org/0000-0003-0645-5666>),
+Michael Lawrence [ctb],
+Thomas Kluyver [ctb],
+Jeroen Ooms [ctb],
+Barret Schloerke [ctb],
+Adam Ryczkowski [ctb],
+Hiroaki Yutani [ctb],
+Michel Lang [ctb],
+Karolis Koncevičius [ctb],
+Posit Software, PBC [cph, fnd]"
+"farver","2.1.2","MIT + file LICENSE","Thomas Lin Pedersen [cre, aut]
+(<https://orcid.org/0000-0002-5147-4711>),
+Berendea Nicolae [aut] (Author of the ColorSpace C++ library),
+Romain François [aut] (<https://orcid.org/0000-0002-2444-4226>),
+Posit, PBC [cph, fnd]"
+"fastmap","1.2.0","MIT + file LICENSE","Winston Chang [aut, cre],
+Posit Software, PBC [cph, fnd],
+Tessil [cph] (hopscotch_map library)"
+"fontawesome","0.5.3","MIT + file LICENSE","Richard Iannone [aut, cre] (<https://orcid.org/0000-0003-3925-190X>),
+Christophe Dervieux [ctb] (<https://orcid.org/0000-0003-4474-2498>),
+Winston Chang [ctb],
+Dave Gandy [ctb, cph] (Font-Awesome font),
+Posit Software, PBC [cph, fnd]"
+"fs","2.1.0","MIT + file LICENSE","Jim Hester [aut],
+Hadley Wickham [aut],
+Gábor Csárdi [aut],
+Jeroen Ooms [cre],
+libuv project contributors [cph] (libuv library),
+Joyent, Inc. and other Node contributors [cph] (libuv library),
+Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)"
+"ggplot2","4.0.3","MIT + file LICENSE","Hadley Wickham [aut] (ORCID: <https://orcid.org/0000-0003-4757-117X>),
+Winston Chang [aut] (ORCID: <https://orcid.org/0000-0002-1576-2126>),
+Lionel Henry [aut],
+Thomas Lin Pedersen [aut, cre] (ORCID:
+<https://orcid.org/0000-0002-5147-4711>),
+Kohske Takahashi [aut],
+Claus Wilke [aut] (ORCID: <https://orcid.org/0000-0002-7470-9261>),
+Kara Woo [aut] (ORCID: <https://orcid.org/0000-0002-5125-4188>),
+Hiroaki Yutani [aut] (ORCID: <https://orcid.org/0000-0002-3385-7233>),
+Dewey Dunnington [aut] (ORCID: <https://orcid.org/0000-0002-9415-4582>),
+Teun van den Brand [aut] (ORCID:
+<https://orcid.org/0000-0002-9335-7468>),
+Posit, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)"
+"glue","1.8.1","MIT + file LICENSE","Jim Hester [aut] (ORCID: <https://orcid.org/0000-0002-2739-7082>),
+Jennifer Bryan [aut, cre] (ORCID:
+<https://orcid.org/0000-0002-6983-2759>),
+Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)"
+"gtable","0.3.6","MIT + file LICENSE","Hadley Wickham [aut],
+Thomas Lin Pedersen [aut, cre],
+Posit Software, PBC [cph, fnd]"
+"highr","0.12","GPL","Yihui Xie [aut, cre] (ORCID: <https://orcid.org/0000-0003-0645-5666>),
+Yixuan Qiu [aut],
+Christopher Gandrud [ctb],
+Qiang Li [ctb]"
+"hms","1.1.4","MIT + file LICENSE","Kirill Müller [aut, cre] (ORCID:
+<https://orcid.org/0000-0002-1416-3412>),
+R Consortium [fnd],
+Posit Software, PBC [fnd] (ROR: <https://ror.org/03wc8by49>)"
+"htmltools","0.5.9","GPL (>= 2)","Joe Cheng [aut],
+Carson Sievert [aut, cre] (ORCID:
+<https://orcid.org/0000-0002-4958-2844>),
+Barret Schloerke [aut] (ORCID: <https://orcid.org/0000-0001-9986-114X>),
+Winston Chang [aut] (ORCID: <https://orcid.org/0000-0002-1576-2126>),
+Yihui Xie [aut],
+Jeff Allen [aut],
+Posit Software, PBC [cph, fnd]"
+"htmlwidgets","1.6.4","MIT + file LICENSE","Ramnath Vaidyanathan [aut, cph],
+Yihui Xie [aut],
+JJ Allaire [aut],
+Joe Cheng [aut],
+Carson Sievert [aut, cre] (<https://orcid.org/0000-0002-4958-2844>),
+Kenton Russell [aut, cph],
+Ellis Hughes [ctb],
+Posit Software, PBC [cph, fnd]"
+"httpuv","1.6.17","GPL (>= 2) | file LICENSE","Joe Cheng [aut],
+Winston Chang [aut, cre],
+Posit, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>),
+Hector Corrada Bravo [ctb],
+Jeroen Ooms [ctb],
+Andrzej Krzemienski [cph] (optional.hpp),
+libuv project contributors [cph] (libuv library, see src/libuv/AUTHORS
+file),
+Joyent, Inc. and other Node contributors [cph] (libuv library, see
+src/libuv/AUTHORS file; and http-parser library, see
+src/http-parser/AUTHORS file),
+Niels Provos [cph] (libuv subcomponent: tree.h),
+Internet Systems Consortium, Inc. [cph] (libuv subcomponent: inet_pton
+and inet_ntop, contained in src/libuv/src/inet.c),
+Alexander Chemeris [cph] (libuv subcomponent: stdint-msvc2008.h (from
+msinttypes)),
+Google, Inc. [cph] (libuv subcomponent: pthread-fixes.c),
+Sony Mobile Communcations AB [cph] (libuv subcomponent:
+pthread-fixes.c),
+Berkeley Software Design Inc. [cph] (libuv subcomponent:
+android-ifaddrs.h, android-ifaddrs.c),
+Kenneth MacKay [cph] (libuv subcomponent: android-ifaddrs.h,
+android-ifaddrs.c),
+Emergya (Cloud4all, FP7/2007-2013, grant agreement no 289016) [cph]
+(libuv subcomponent: android-ifaddrs.h, android-ifaddrs.c),
+Steve Reid [aut] (SHA-1 implementation),
+James Brown [aut] (SHA-1 implementation),
+Bob Trower [aut] (base64 implementation),
+Alexander Peslyak [aut] (MD5 implementation),
+Trantor Standard Systems [cph] (base64 implementation),
+Igor Sysoev [cph] (http-parser)"
+"isoband","0.3.0","MIT + file LICENSE","Hadley Wickham [aut] (ORCID: <https://orcid.org/0000-0003-4757-117X>),
+Claus O. Wilke [aut] (Original author, ORCID:
+<https://orcid.org/0000-0002-7470-9261>),
+Thomas Lin Pedersen [aut, cre] (ORCID:
+<https://orcid.org/0000-0002-5147-4711>),
+Posit, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)"
+"jquerylib","0.1.4","MIT + file LICENSE","Carson Sievert [aut, cre] (<https://orcid.org/0000-0002-4958-2844>),
+Joe Cheng [aut],
+RStudio [cph],
+jQuery Foundation [cph] (jQuery library and jQuery UI library),
+jQuery contributors [ctb, cph] (jQuery library; authors listed in
+inst/lib/jquery-AUTHORS.txt)"
+"jsonlite","2.0.0","MIT + file LICENSE","Jeroen Ooms [aut, cre] (<https://orcid.org/0000-0002-4035-0289>),
+Duncan Temple Lang [ctb],
+Lloyd Hilaiel [cph] (author of bundled libyajl)"
+"knitr","1.52","GPL","Yihui Xie [aut, cre] (ORCID: <https://orcid.org/0000-0003-0645-5666>,
+URL: https://yihui.org),
+Abhraneel Sarma [ctb],
+Adam Vogt [ctb],
+Alastair Andrew [ctb],
+Alex Zvoleff [ctb],
+Amar Al-Zubaidi [ctb],
+Andre Simon [ctb] (the CSS files under inst/themes/ were derived from
+the Highlight package http://www.andre-simon.de),
+Aron Atkins [ctb],
+Aaron Wolen [ctb],
+Ashley Manton [ctb],
+Atsushi Yasumoto [ctb] (ORCID: <https://orcid.org/0000-0002-8335-495X>),
+Ben Baumer [ctb],
+Brian Diggs [ctb],
+Brian Zhang [ctb],
+Bulat Yapparov [ctb],
+Cassio Pereira [ctb],
+Christophe Dervieux [ctb],
+David Hall [ctb],
+David Hugh-Jones [ctb],
+David Robinson [ctb],
+Doug Hemken [ctb],
+Duncan Murdoch [ctb],
+Elio Campitelli [ctb],
+Ellis Hughes [ctb],
+Emily Riederer [ctb],
+Fabian Hirschmann [ctb],
+Fitch Simeon [ctb],
+Forest Fang [ctb],
+Frank E Harrell Jr [ctb] (the Sweavel package at inst/misc/Sweavel.sty),
+Garrick Aden-Buie [ctb],
+Gregoire Detrez [ctb],
+Hadley Wickham [ctb],
+Hao Zhu [ctb],
+Heewon Jeon [ctb],
+Henrik Bengtsson [ctb],
+Hiroaki Yutani [ctb],
+Ian Lyttle [ctb],
+Hodges Daniel [ctb],
+Jacob Bien [ctb],
+Jake Burkhead [ctb],
+James Manton [ctb],
+Jared Lander [ctb],
+Jason Punyon [ctb],
+Javier Luraschi [ctb],
+Jeff Arnold [ctb],
+Jenny Bryan [ctb],
+Jeremy Ashkenas [ctb, cph] (the CSS file at
+inst/misc/docco-classic.css),
+Jeremy Stephens [ctb],
+Jim Hester [ctb],
+Joe Cheng [ctb],
+Johan Larsson [ctb],
+Johannes Ranke [ctb],
+John Honaker [ctb],
+John Muschelli [ctb],
+Jonathan Keane [ctb],
+JJ Allaire [ctb],
+Johan Toloe [ctb],
+Jonathan Sidi [ctb],
+Joseph Larmarange [ctb],
+Julien Barnier [ctb],
+Kaiyin Zhong [ctb],
+Kamil Slowikowski [ctb],
+Karl Forner [ctb],
+Kevin K. Smith [ctb],
+Kirill Mueller [ctb],
+Kohske Takahashi [ctb],
+Leonidas Zhak [ctb],
+Lorenz Walthert [ctb],
+Lucas Gallindo [ctb],
+Marius Hofert [ctb],
+Martin Modrák [ctb],
+Michael Chirico [ctb],
+Michael Friendly [ctb],
+Michal Bojanowski [ctb],
+Michel Kuhlmann [ctb],
+Miller Patrick [ctb],
+Nacho Caballero [ctb],
+Nick Salkowski [ctb],
+Niels Richard Hansen [ctb],
+Noam Ross [ctb],
+Obada Mahdi [ctb],
+Pavel N. Krivitsky [ctb] (ORCID:
+<https://orcid.org/0000-0002-9101-3362>),
+Pedro Faria [ctb],
+Qiang Li [ctb],
+Ramnath Vaidyanathan [ctb],
+Richard Cotton [ctb],
+Robert Krzyzanowski [ctb],
+Rodrigo Copetti [ctb],
+Romain Francois [ctb],
+Ruaridh Williamson [ctb],
+Sagiru Mati [ctb] (ORCID: <https://orcid.org/0000-0003-1413-3974>),
+Scott Kostyshak [ctb],
+Sebastian Meyer [ctb],
+Sietse Brouwer [ctb],
+Simon de Bernard [ctb],
+Sylvain Rousseau [ctb],
+Taiyun Wei [ctb],
+Thibaut Assus [ctb],
+Thibaut Lamadon [ctb],
+Thomas Leeper [ctb],
+Tim Mastny [ctb],
+Tom Torsney-Weir [ctb],
+Trevor Davis [ctb],
+Viktoras Veitas [ctb],
+Weicheng Zhu [ctb],
+Wush Wu [ctb],
+Zachary Foster [ctb],
+Zhian N. Kamvar [ctb] (ORCID: <https://orcid.org/0000-0003-1458-7108>),
+Posit Software, PBC [cph, fnd]"
+"labeling","0.4.3","MIT + file LICENSE | Unlimited","Justin Talbot,"
+"later","1.4.8","MIT + file LICENSE","Winston Chang [aut] (ORCID: <https://orcid.org/0000-0002-1576-2126>),
+Joe Cheng [aut],
+Charlie Gao [aut, cre] (ORCID: <https://orcid.org/0000-0002-0750-061X>),
+Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>),
+Marcus Geelnard [ctb, cph] (TinyCThread library,
+https://tinycthread.github.io/),
+Evan Nemerson [ctb, cph] (TinyCThread library,
+https://tinycthread.github.io/)"
+"lazyeval","0.2.3","GPL-3","Hadley Wickham [aut, cre],
+RStudio [cph]"
+"lifecycle","1.0.5","MIT + file LICENSE","Lionel Henry [aut, cre],
+Hadley Wickham [aut] (ORCID: <https://orcid.org/0000-0003-4757-117X>),
+Posit Software, PBC [cph, fnd]"
+"magrittr","2.0.5","MIT + file LICENSE","Stefan Milton Bache [aut, cph] (Original author and creator of
+magrittr),
+Hadley Wickham [aut],
+Lionel Henry [cre],
+Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)"
+"memoise","2.0.1","MIT + file LICENSE","Hadley Wickham [aut],
+Jim Hester [aut],
+Winston Chang [aut, cre],
+Kirill Müller [aut],
+Daniel Cook [aut],
+Mark Edmondson [ctb]"
+"mime","0.13","GPL","Yihui Xie [aut, cre] (<https://orcid.org/0000-0003-0645-5666>,
+https://yihui.org),
+Jeffrey Horner [ctb],
+Beilei Bian [ctb]"
+"otel","0.2.0","MIT + file LICENSE","Gábor Csárdi [aut, cre]"
+"pillar","1.11.1","MIT + file LICENSE","Kirill Müller [aut, cre] (ORCID:
+<https://orcid.org/0000-0002-1416-3412>),
+Hadley Wickham [aut],
+RStudio [cph]"
+"pkgconfig","2.0.3","MIT + file LICENSE","Gábor Csárdi"
+"prettyunits","1.2.0","MIT + file LICENSE","Gabor Csardi [aut, cre],
+Bill Denney [ctb] (<https://orcid.org/0000-0002-5759-428X>),
+Christophe Regouby [ctb]"
+"processx","3.9.0","MIT + file LICENSE","Gábor Csárdi [aut, cre, cph] (ORCID:
+<https://orcid.org/0000-0001-7098-9676>),
+Winston Chang [aut],
+Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>),
+Ascent Digital Services [cph, fnd]"
+"progress","1.2.3","MIT + file LICENSE","Gábor Csárdi [aut, cre],
+Rich FitzJohn [aut],
+Posit Software, PBC [cph, fnd]"
+"promises","1.5.0","MIT + file LICENSE","Joe Cheng [aut],
+Barret Schloerke [aut, cre] (ORCID:
+<https://orcid.org/0000-0001-9986-114X>),
+Winston Chang [aut] (ORCID: <https://orcid.org/0000-0002-1576-2126>),
+Charlie Gao [aut] (ORCID: <https://orcid.org/0000-0002-0750-061X>),
+Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)"
+"ps","1.9.3","MIT + file LICENSE","Jay Loden [aut],
+Dave Daeschler [aut],
+Giampaolo Rodola' [aut],
+Gábor Csárdi [aut, cre],
+Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)"
+"R6","2.6.1","MIT + file LICENSE","Winston Chang [aut, cre],
+Posit Software, PBC [cph, fnd]"
+"rappdirs","0.3.4","MIT + file LICENSE","Hadley Wickham [trl, cre, cph],
+Sridhar Ratnakumar [aut],
+Trent Mick [aut],
+ActiveState [cph] (R/appdir.r, R/cache.r, R/data.r, R/log.r translated
+from appdirs),
+Eddy Petrisor [ctb],
+Trevor Davis [trl, aut] (ORCID:
+<https://orcid.org/0000-0001-6341-4639>),
+Gabor Csardi [ctb],
+Gregory Jefferis [ctb],
+Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)"
+"RColorBrewer","1.1-3","Apache License 2.0","Erich Neuwirth [aut, cre]"
+"Rcpp","1.1.2","GPL (>= 2)","Dirk Eddelbuettel [aut, cre] (ORCID:
+<https://orcid.org/0000-0001-6419-907X>),
+Romain Francois [aut] (ORCID: <https://orcid.org/0000-0002-2444-4226>),
+JJ Allaire [aut] (ORCID: <https://orcid.org/0000-0003-0174-9868>),
+Kevin Ushey [aut] (ORCID: <https://orcid.org/0000-0003-2880-7407>),
+Qiang Kou [aut] (ORCID: <https://orcid.org/0000-0001-6786-5453>),
+Nathan Russell [aut],
+Iñaki Ucar [aut] (ORCID: <https://orcid.org/0000-0001-6403-5550>),
+Doug Bates [aut] (ORCID: <https://orcid.org/0000-0001-8316-9503>),
+John Chambers [aut]"
+"readxl","1.6.0","MIT + file LICENSE","Hadley Wickham [aut] (ORCID: <https://orcid.org/0000-0003-4757-117X>),
+Jennifer Bryan [aut, cre] (ORCID:
+<https://orcid.org/0000-0002-6983-2759>),
+Posit, PBC [cph, fnd] (Copyright holder of all R code and all C/C++
+code without explicit copyright attribution),
+Marcin Kalicinski [ctb, cph] (Author of included RapidXML code),
+Komarov Valery [ctb, cph] (Author of included libxls code),
+Christophe Leitienne [ctb, cph] (Author of included libxls code),
+Bob Colbert [ctb, cph] (Author of included libxls code),
+David Hoerl [ctb, cph] (Author of included libxls code),
+Evan Miller [ctb, cph] (Author of included libxls code),
+kokke [ctb] (Author of included tiny-AES-c code)"
+"rematch","2.0.0","MIT + file LICENSE","Gabor Csardi"
+"rlang","1.3.0","MIT + file LICENSE","Lionel Henry [aut, cre],
+Hadley Wickham [aut],
+mikefc [cph] (Hash implementation based on Mike's xxhashlite),
+Yann Collet [cph] (Author of the embedded xxHash library),
+Posit, PBC [cph, fnd]"
+"rmarkdown","2.32","MIT + file LICENSE","JJ Allaire [aut],
+Yihui Xie [aut, cre] (ORCID: <https://orcid.org/0000-0003-0645-5666>),
+Christophe Dervieux [aut] (ORCID:
+<https://orcid.org/0000-0003-4474-2498>),
+Jonathan McPherson [aut],
+Javier Luraschi [aut],
+Kevin Ushey [aut],
+Aron Atkins [aut],
+Hadley Wickham [aut],
+Joe Cheng [aut],
+Winston Chang [aut],
+Richard Iannone [aut] (ORCID: <https://orcid.org/0000-0003-3925-190X>),
+Andrew Dunning [ctb] (ORCID: <https://orcid.org/0000-0003-0464-5036>),
+Atsushi Yasumoto [ctb, cph] (ORCID:
+<https://orcid.org/0000-0002-8335-495X>, cph: Number sections Lua
+filter),
+Barret Schloerke [ctb],
+Carson Sievert [ctb] (ORCID: <https://orcid.org/0000-0002-4958-2844>),
+Devon Ryan [ctb] (ORCID: <https://orcid.org/0000-0002-8549-0971>),
+Frederik Aust [ctb] (ORCID: <https://orcid.org/0000-0003-4900-788X>),
+Jeff Allen [ctb],
+JooYoung Seo [ctb] (ORCID: <https://orcid.org/0000-0002-4064-6012>),
+Malcolm Barrett [ctb],
+Rob Hyndman [ctb],
+Romain Lesur [ctb],
+Roy Storey [ctb],
+Ruben Arslan [ctb],
+Sergio Oller [ctb],
+Posit Software, PBC [cph, fnd],
+jQuery UI contributors [ctb, cph] (jQuery UI library; authors listed in
+inst/rmd/h/jqueryui/AUTHORS.txt),
+Mark Otto [ctb] (Bootstrap library),
+Jacob Thornton [ctb] (Bootstrap library),
+Bootstrap contributors [ctb] (Bootstrap library),
+Twitter, Inc [cph] (Bootstrap library),
+Alexander Farkas [ctb, cph] (html5shiv library),
+Scott Jehl [ctb, cph] (Respond.js library),
+Ivan Sagalaev [ctb, cph] (highlight.js library),
+Greg Franko [ctb, cph] (tocify library),
+John MacFarlane [ctb, cph] (Pandoc templates),
+Google, Inc. [ctb, cph] (ioslides library),
+Dave Raggett [ctb] (slidy library),
+W3C [cph] (slidy library),
+Dave Gandy [ctb, cph] (Font-Awesome),
+Ben Sperry [ctb] (Ionicons),
+Drifty [cph] (Ionicons),
+Aidan Lister [ctb, cph] (jQuery StickyTabs),
+Benct Philip Jonsson [ctb, cph] (pagebreak Lua filter),
+Albert Krewinkel [ctb, cph] (pagebreak Lua filter)"
+"S7","0.2.2","MIT + file LICENSE","Object-Oriented Programming Working Group [cph],
+Davis Vaughan [aut],
+Jim Hester [aut] (ORCID: <https://orcid.org/0000-0002-2739-7082>),
+Tomasz Kalinowski [aut],
+Will Landau [aut],
+Michael Lawrence [aut],
+Martin Maechler [aut] (ORCID: <https://orcid.org/0000-0002-8685-9910>),
+Luke Tierney [aut],
+Hadley Wickham [aut, cre] (ORCID:
+<https://orcid.org/0000-0003-4757-117X>)"
+"sass","0.4.10","MIT + file LICENSE","Joe Cheng [aut],
+Timothy Mastny [aut],
+Richard Iannone [aut] (<https://orcid.org/0000-0003-3925-190X>),
+Barret Schloerke [aut] (<https://orcid.org/0000-0001-9986-114X>),
+Carson Sievert [aut, cre] (<https://orcid.org/0000-0002-4958-2844>),
+Christophe Dervieux [ctb] (<https://orcid.org/0000-0003-4474-2498>),
+RStudio [cph, fnd],
+Sass Open Source Foundation [ctb, cph] (LibSass library),
+Greter Marcel [ctb, cph] (LibSass library),
+Mifsud Michael [ctb, cph] (LibSass library),
+Hampton Catlin [ctb, cph] (LibSass library),
+Natalie Weizenbaum [ctb, cph] (LibSass library),
+Chris Eppstein [ctb, cph] (LibSass library),
+Adams Joseph [ctb, cph] (json.cpp),
+Trifunovic Nemanja [ctb, cph] (utf8.h)"
+"scales","1.4.0","MIT + file LICENSE","Hadley Wickham [aut],
+Thomas Lin Pedersen [cre, aut]
+(<https://orcid.org/0000-0002-5147-4711>),
+Dana Seidel [aut],
+Posit Software, PBC [cph, fnd] (03wc8by49)"
+"shiny","1.14.0","MIT + file LICENSE","Winston Chang [aut] (ORCID: <https://orcid.org/0000-0002-1576-2126>),
+Joe Cheng [aut],
+JJ Allaire [aut],
+Carson Sievert [aut, cre] (ORCID:
+<https://orcid.org/0000-0002-4958-2844>),
+Barret Schloerke [aut] (ORCID: <https://orcid.org/0000-0001-9986-114X>),
+Garrick Aden-Buie [aut] (ORCID:
+<https://orcid.org/0000-0002-7111-0077>),
+Yihui Xie [aut],
+Jeff Allen [aut],
+Jonathan McPherson [aut],
+Alan Dipert [aut],
+Barbara Borges [aut],
+Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>),
+jQuery Foundation [cph] (jQuery library and jQuery UI library),
+jQuery contributors [ctb, cph] (jQuery library; authors listed in
+inst/www/shared/jquery-AUTHORS.txt),
+jQuery UI contributors [ctb, cph] (jQuery UI library; authors listed in
+inst/www/shared/jqueryui/AUTHORS.txt),
+Mark Otto [ctb] (Bootstrap library),
+Jacob Thornton [ctb] (Bootstrap library),
+Bootstrap contributors [ctb] (Bootstrap library),
+Twitter, Inc [cph] (Bootstrap library),
+Prem Nawaz Khan [ctb] (Bootstrap accessibility plugin),
+Victor Tsaran [ctb] (Bootstrap accessibility plugin),
+Dennis Lembree [ctb] (Bootstrap accessibility plugin),
+Srinivasu Chakravarthula [ctb] (Bootstrap accessibility plugin),
+Cathy O'Connor [ctb] (Bootstrap accessibility plugin),
+PayPal, Inc [cph] (Bootstrap accessibility plugin),
+Stefan Petre [ctb, cph] (Bootstrap-datepicker library),
+Andrew Rowls [ctb, cph] (Bootstrap-datepicker library),
+Brian Reavis [ctb, cph] (selectize.js library),
+Salmen Bejaoui [ctb, cph] (selectize-plugin-a11y library),
+Denis Ineshin [ctb, cph] (ion.rangeSlider library),
+Sami Samhuri [ctb, cph] (Javascript strftime library),
+SpryMedia Limited [ctb, cph] (DataTables library),
+Ivan Sagalaev [ctb, cph] (highlight.js library),
+R Core Team [ctb, cph] (tar implementation from R)"
+"sourcetools","0.1.7-2","MIT + file LICENSE","Kevin Ushey [aut, cre]"
+"stringi","1.8.9","file LICENSE","Marek Gagolewski [aut, cre, cph] (ORCID:
+<https://orcid.org/0000-0003-0637-6028>),
+Bartek Tartanus [ctb],
+Unicode, Inc. and others [ctb] (ICU4C source code, Unicode Character
+Database)"
+"svglite","2.2.2","GPL (>= 2)","Hadley Wickham [aut],
+Lionel Henry [aut],
+Thomas Lin Pedersen [cre, aut] (ORCID:
+<https://orcid.org/0000-0002-5147-4711>),
+T Jake Luciani [aut],
+Matthieu Decorde [aut],
+Vaudor Lise [aut],
+Tony Plate [ctb] (Early line dashing code),
+David Gohel [ctb] (Line dashing code and early raster code),
+Yixuan Qiu [ctb] (Improved styles; polypath implementation),
+Håkon Malmedal [ctb] (Opacity code),
+Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)"
+"systemfonts","1.3.2","MIT + file LICENSE","Thomas Lin Pedersen [aut, cre] (ORCID:
+<https://orcid.org/0000-0002-5147-4711>),
+Jeroen Ooms [aut] (ORCID: <https://orcid.org/0000-0002-4035-0289>),
+Devon Govett [aut] (Author of font-manager),
+Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)"
+"textshaping","1.0.5","MIT + file LICENSE","Thomas Lin Pedersen [cre, aut] (ORCID:
+<https://orcid.org/0000-0002-5147-4711>),
+Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)"
+"tibble","3.3.1","MIT + file LICENSE","Kirill Müller [aut, cre] (ORCID:
+<https://orcid.org/0000-0002-1416-3412>),
+Hadley Wickham [aut],
+Romain Francois [ctb],
+Jennifer Bryan [ctb],
+Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)"
+"tinytex","0.61","MIT + file LICENSE","Yihui Xie [aut, cre, cph] (ORCID:
+<https://orcid.org/0000-0003-0645-5666>),
+Posit Software, PBC [cph, fnd],
+Christophe Dervieux [ctb] (ORCID:
+<https://orcid.org/0000-0003-4474-2498>),
+Devon Ryan [ctb] (ORCID: <https://orcid.org/0000-0002-8549-0971>),
+Ethan Heinzen [ctb],
+Fernando Cagua [ctb]"
+"utf8","1.2.6","Apache License (== 2.0) | file LICENSE","Patrick O. Perry [aut, cph],
+Kirill Müller [cre] (ORCID: <https://orcid.org/0000-0002-1416-3412>),
+Unicode, Inc. [cph, dtc] (Unicode Character Database)"
+"vctrs","0.7.3","MIT + file LICENSE","Hadley Wickham [aut],
+Lionel Henry [aut],
+Davis Vaughan [aut, cre],
+data.table team [cph] (Radix sort based on data.table's forder() and
+their contribution to R's order()),
+Posit Software, PBC [cph, fnd]"
+"viridisLite","0.4.3","MIT + file LICENSE","Simon Garnier [aut, cre],
+Noam Ross [ctb, cph],
+Bob Rudis [ctb, cph],
+Marco Sciaini [ctb, cph],
+Antônio Pedro Camargo [ctb, cph],
+Cédric Scherer [ctb, cph]"
+"withr","3.0.3","MIT + file LICENSE","Jim Hester [aut],
+Lionel Henry [aut, cre],
+Kirill Müller [aut],
+Kevin Ushey [aut],
+Hadley Wickham [aut],
+Winston Chang [aut],
+Jennifer Bryan [ctb],
+Richard Cotton [ctb],
+Posit Software, PBC [cph, fnd]"
+"xfun","0.62","MIT + file LICENSE","Yihui Xie [aut, cre, cph] (ORCID:
+<https://orcid.org/0000-0003-0645-5666>, URL: https://yihui.org),
+Wush Wu [ctb],
+Daijiang Li [ctb],
+Xianying Tan [ctb],
+Salim Brüggemann [ctb] (ORCID: <https://orcid.org/0000-0002-5329-5987>),
+Christophe Dervieux [ctb]"
+"xml2","1.6.0","MIT + file LICENSE","Hadley Wickham [aut],
+Jim Hester [aut],
+Jeroen Ooms [aut, cre],
+Posit Software, PBC [cph, fnd],
+R Foundation [ctb] (Copy of R-project homepage cached as example)"
+"xtable","1.8-8","GPL (>= 2)","David B. Dahl [aut],
+David Scott [aut, cre],
+Charles Roosen [aut],
+Arni Magnusson [aut],
+Jonathan Swinton [aut],
+Ajay Shah [ctb],
+Arne Henningsen [ctb],
+Benno Puetz [ctb],
+Bernhard Pfaff [ctb],
+Claudio Agostinelli [ctb],
+Claudius Loehnert [ctb],
+David Mitchell [ctb],
+David Whiting [ctb],
+Fernando da Rosa [ctb],
+Guido Gay [ctb],
+Guido Schulz [ctb],
+Ian Fellows [ctb],
+Jeff Laake [ctb],
+John Walker [ctb],
+Jun Yan [ctb],
+Liviu Andronic [ctb],
+Markus Loecher [ctb],
+Martin Gubri [ctb],
+Matthieu Stigler [ctb],
+Robert Castelo [ctb],
+Seth Falcon [ctb],
+Stefan Edwards [ctb],
+Sven Garbade [ctb],
+Uwe Ligges [ctb]"
+"yaml","2.3.12","BSD_3_clause + file LICENSE","Hadley Wickham [cre] (ORCID: <https://orcid.org/0000-0003-4757-117X>),
+Shawn Garbett [ctb] (ORCID: <https://orcid.org/0000-0003-4079-5621>),
+Jeremy Stephens [aut, ctb],
+Kirill Simonov [aut],
+Yihui Xie [ctb] (ORCID: <https://orcid.org/0000-0003-0645-5666>),
+Zhuoer Dong [ctb],
+Jeffrey Horner [ctb],
+reikoch [ctb],
+Will Beasley [ctb] (ORCID: <https://orcid.org/0000-0002-5613-5006>),
+Brendan O'Connor [ctb],
+Michael Quinn [ctb],
+Charlie Gao [ctb],
+Gregory R. Warnes [ctb],
+Zhian N. Kamvar [ctb]"
+"boot","1.3-32","Unlimited","Angelo Canty [aut] (author of original code for S),
+Brian Ripley [aut, trl] (conversion to R, maintainer 1999--2022, author
+of parallel support),
+Alessandra R. Brazzale [ctb, cre] (minor bug fixes)"
+"class","7.3-23","GPL-2 | GPL-3","Brian Ripley [aut, cre, cph],
+William Venables [cph]"
+"cluster","2.1.8.2","GPL (>= 2)","Martin Maechler [aut, cre] (ORCID:
+<https://orcid.org/0000-0002-8685-9910>),
+Peter Rousseeuw [aut] (Fortran original, ORCID:
+<https://orcid.org/0000-0002-3807-5353>),
+Anja Struyf [aut] (S original),
+Mia Hubert [aut] (S original, ORCID:
+<https://orcid.org/0000-0001-6398-4850>),
+Kurt Hornik [trl, ctb] (port to R; maintenance(1999-2000), ORCID:
+<https://orcid.org/0000-0003-4198-9911>),
+Matthias Studer [ctb],
+Pierre Roudier [ctb],
+Juan Gonzalez [ctb],
+Kamil Kozlowski [ctb],
+Erich Schubert [ctb] (fastpam options for pam(), ORCID:
+<https://orcid.org/0000-0001-9143-4880>),
+Keefe Murphy [ctb] (volume.ellipsoid({d >= 3}))"
+"codetools","0.2-20","GPL","Luke Tierney <luke-tierney@uiowa.edu>"
+"foreign","0.8-91","GPL (>= 2)","R Core Team [aut, cph, cre] (ROR: <https://ror.org/02zz1nj61>),
+Roger Bivand [ctb, cph],
+Vincent J. Carey [ctb, cph],
+Saikat DebRoy [ctb, cph],
+Stephen Eglen [ctb, cph],
+Rajarshi Guha [ctb, cph],
+Swetlana Herbrandt [ctb],
+Nicholas Lewin-Koh [ctb, cph],
+Mark Myatt [ctb, cph],
+Michael Nelson [ctb],
+Ben Pfaff [ctb],
+Brian Quistorff [ctb],
+Frank Warmerdam [ctb, cph],
+Stephen Weigand [ctb, cph],
+Free Software Foundation, Inc. [cph]"
+"KernSmooth","2.23-26","Unlimited","Matt Wand [aut],
+Cleve Moler [ctb] (LINPACK routines in src/d*),
+Brian Ripley [trl, cre, ctb] (R port and updates)"
+"lattice","0.22-9","GPL (>= 2)","Deepayan Sarkar [aut, cre] (ORCID:
+<https://orcid.org/0000-0003-4107-1553>),
+Felix Andrews [ctb],
+Kevin Wright [ctb] (documentation),
+Neil Klepeis [ctb],
+Johan Larsson [ctb] (miscellaneous improvements),
+Zhijian (Jason) Wen [cph] (filled contour code),
+Paul Murrell [ctb],
+Stefan Eng [ctb] (violin plot improvements),
+Achim Zeileis [ctb] (modern colors),
+Alexandre Courtiol [ctb] (generics for larrows, lpolygon, lrect and
+lsegments)"
+"MASS","7.3-65","GPL-2 | GPL-3","Brian Ripley [aut, cre, cph],
+Bill Venables [aut, cph],
+Douglas M. Bates [ctb],
+Kurt Hornik [trl] (partial port ca 1998),
+Albrecht Gebhardt [trl] (partial port ca 1998),
+David Firth [ctb] (support functions for polr)"
+"Matrix","1.7-5","GPL (>= 2) | file LICENCE","Douglas Bates [aut] (ORCID: <https://orcid.org/0000-0001-8316-9503>),
+Martin Maechler [aut, cre] (ORCID:
+<https://orcid.org/0000-0002-8685-9910>),
+Mikael Jagan [aut] (ORCID: <https://orcid.org/0000-0002-3542-2938>),
+Timothy A. Davis [ctb] (ORCID: <https://orcid.org/0000-0001-7614-6899>,
+SuiteSparse libraries, collaborators listed in
+dir(system.file(""doc"", ""SuiteSparse"", package=""Matrix""),
+pattern=""License"", full.names=TRUE, recursive=TRUE)),
+George Karypis [ctb] (ORCID: <https://orcid.org/0000-0003-2753-1437>,
+METIS library, Copyright: Regents of the University of Minnesota),
+Jason Riedy [ctb] (ORCID: <https://orcid.org/0000-0002-4345-4200>, GNU
+Octave's condest() and onenormest(), Copyright: Regents of the
+University of California),
+Jens Oehlschlägel [ctb] (initial nearPD()),
+R Core Team [ctb] (ROR: <https://ror.org/02zz1nj61>, base R's matrix
+implementation)"
+"mgcv","1.9-4","GPL (>= 2)","Simon Wood [aut, cre]"
+"nlme","3.1-169","GPL (>= 2)","José Pinheiro [aut] (S version),
+Douglas Bates [aut] (up to 2007),
+Saikat DebRoy [ctb] (up to 2002),
+Deepayan Sarkar [ctb] (up to 2005),
+EISPACK authors [ctb] (src/rs.f),
+Siem Heisterkamp [ctb] (Author fixed sigma),
+Bert Van Willigen [ctb] (Programmer fixed sigma),
+Johannes Ranke [ctb] (varConstProp()),
+R Core Team [aut, cre] (ROR: <https://ror.org/02zz1nj61>)"
+"nnet","7.3-20","GPL-2 | GPL-3","Brian Ripley [aut, cre, cph],
+William Venables [cph]"
+"rpart","4.1.27","GPL-2 | GPL-3","Terry Therneau [aut],
+Beth Atkinson [aut, cre],
+Brian Ripley [trl] (producer of the initial R port, maintainer
+1999-2017)"
+"spatial","7.3-18","GPL-2 | GPL-3","Brian Ripley [aut, cre, cph],
+Roger Bivand [ctb],
+William Venables [cph]"
+"survival","3.8-6","LGPL (>= 2)","Terry M Therneau [aut, cre],
+Thomas Lumley [ctb, trl] (original S->R port and R maintainer until
+2009),
+Atkinson Elizabeth [ctb],
+Crowson Cynthia [ctb]"

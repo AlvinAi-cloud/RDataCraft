@@ -1,0 +1,35 @@
+{
+  "status": "partial; public binary release pending",
+  "archives": [
+    {
+      "archive": "openmp-14.0.6.src.tar.xz",
+      "source": "https://mac.r-project.org/openmp/src/openmp-14.0.6.src.tar.xz",
+      "sha256": "4f731ff202add030d9d68d4c6daabd91d3aeed9812e6a5b4968815cfdff0eb1f",
+      "coverage": "upstream source/build material; verify binary association in native audit"
+    },
+    {
+      "archive": "openmp-19.1.5.src.tar.xz",
+      "source": "https://mac.r-project.org/openmp/src/openmp-19.1.5.src.tar.xz",
+      "sha256": "ce22e4ff876021071b7eee3fc1be759269a120ac77247265e4bb5150909a36e9",
+      "coverage": "upstream source/build material; verify binary association in native audit"
+    },
+    {
+      "archive": "cmake-19.1.5.src.tar.xz",
+      "source": "https://mac.r-project.org/openmp/src/cmake-19.1.5.src.tar.xz",
+      "sha256": "a08ae477571fd5e929c27d3d0d28c6168d58dd00b6354c2de3266ae0d86ad44f",
+      "coverage": "upstream source/build material; verify binary association in native audit"
+    },
+    {
+      "archive": "openmp-build.sh",
+      "source": "https://mac.r-project.org/openmp/src/bld",
+      "sha256": "6e0ecf3737875e1fa5fa699dcc804c8b58427adb87c192f0fcf091315677563e",
+      "coverage": "upstream source/build material; verify binary association in native audit"
+    },
+    {
+      "archive": "openmp-cmake-fix.patch",
+      "source": "https://mac.r-project.org/openmp/src/cmake-fix.patch",
+      "sha256": "46756f22a4cf92120e5772bd6a134c188120bf2755f708332950a8498e4d336b",
+      "coverage": "upstream source/build material; verify binary association in native audit"
+    }
+  ]
+}

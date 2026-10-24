@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<style>body{background-color:white;}</style>
+
+  <title>RDataCraft v0.3 — Advanced R analysis guide</title>
+  <meta charset="utf-8"/>
+  <style>body{font:16px system-ui;line-height:1.65;max-width:880px;margin:40px auto;padding:0 24px;color:#263b32}h1,h2,h3{color:#247763}.inline-note{background:#f1f5f2;padding:16px}li{margin-bottom:12px}</style>
+</head>
+<html>
+  <body>
+    <h1>RDataCraft v0.3</h1>
+    <h3>Advanced R analysis: beyond the presets</h3>
+    <p>Write an R script or ask the AI Assistant to draft one. Review the code, data selection and scientific assumptions, then choose Run reviewed script. Drafting, loading and opening a study never execute its code.</p>
+    <ol>
+      <li>Open a data table, then Analysis → Advanced R analysis. Load a template or write your script. data is a copied data frame with automatic numeric conversion; data_raw retains the original cell text. Column names stay unchanged.</li>
+      <li>List any required packages, separated by commas. The app checks your bundled and personal R libraries. Choose Check / install packages to review missing packages and required dependencies from CRAN; installation starts only after Approve &amp; install. The script does not run automatically afterward. stats supports GLMs and many methods beyond the presets. Compatible Mac/Windows binaries install into a library for your user account; bundled app packages and system R are unchanged. Source builds and non-CRAN repositories are not installed by this workflow.</li>
+      <li>Assign result &lt;- list(tables=list(Name=data.frame(...)), plot=my_plot, text="Interpretation"). plot can be a ggplot object or a function drawing a base R plot. Return up to ten nonempty tables, each within the 10,000-row / 50-column table limit. Large combined outputs are rejected.</li>
+      <li>Run in a separate R process; Stop cancels it. The selected time limit is at most five minutes. Figures export as 3 × 3 inch SVG/PDF; use ggplot theme text size 7 for matching typography. Scripts can override their plot appearance.</li>
+      <li>Save draft keeps code and an input snapshot in this study. Runs save code, the exact input copy, package versions, console, tables and figures. Save the study to retain these records. Loading a saved analysis lets you rerun its saved input or the active table; results are historical snapshots, not live linked analyses.</li>
+      <li>Choose a returned table and Add result as data table to use normal graph/analysis tools. Importing results does not establish independence or validate the selected model. Review warnings, missing values, convergence and uncertainty.</li>
+    </ol>
+    <p class="inline-note">Review code before running: custom R runs locally with your account permissions. The separate process protects the app session from ordinary errors; it is not an operating-system security sandbox. Do not run untrusted code.</p>
+    <p>Open examples/Advanced R teaching example.rdatacraft for original count and independent-group data with three saved drafts. No script runs when you open it.</p>
+    <p>Examples: the summary template returns means and SD; custom rank comparison returns a rank test and interval; the GLM template fits count responses while accounting for treatment and batch. Edit its formula and verify dispersion/design assumptions. Mixed-effects or other package methods become available after you approve installation of compatible packages. Stop can cancel downloading or staging; incomplete app-managed changes are rolled back. Approvals apply only to the displayed list and are never saved as blanket permission.</p>
+    <p>AI workflow: request an Advanced R script, review the proposed script in the assistant, choose Open in Advanced R, then review and run. The AI never executes the proposed script automatically.</p>
+    <h3>Numeric P labels and significance stars</h3>
+    <p>Graph settings offers numeric P labels (four significant digits, with P &lt; 10⁻⁶ below one millionth) or significance stars: ns for P &gt; 0.05; * for P ≤ 0.05; ** for P ≤ 0.01; *** for P ≤ 0.001; **** for P ≤ 0.0001. Multiple-comparison labels use adjusted P values. These are display choices and do not change the analysis.</p>
+  </body>
+</html>
+</html>

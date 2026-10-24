@@ -1,0 +1,24 @@
+.DS_Store
+__pycache__/
+*.pyc
+.Rhistory
+.RData
+Rplots.pdf
+/runtime*/
+/downloads/
+/dist/
+/artifacts/
+/Codex handoff/
+*.app/
+*.dmg
+*.exe
+*.zip
+.env
+.env.*
+*.rdatacraft
+!examples/*.rdatacraft
+*.prism
+*.pzfx
+*.pzf
+!tests/fixtures/*.prism
+!tests/fixtures/*.pzfx

@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <body>
+    <h1>RDataCraft help · v0.3</h1>
+    <p>Offline instructions for data entry, analysis and figures. In the app, Help provides search and access to the teaching examples.</p>
+    <nav>
+      <ul>
+        <li>
+          <a href="#start">Getting started</a>
+        </li>
+        <li>
+          <a href="#tables">Paste data &amp; choose a table type</a>
+        </li>
+        <li>
+          <a href="#analysis">Choose an analysis &amp; interpret P values</a>
+        </li>
+        <li>
+          <a href="#regression">Regression &amp; curve fitting</a>
+        </li>
+        <li>
+          <a href="#pca">Principal component analysis (PCA)</a>
+        </li>
+        <li>
+          <a href="#figures">Edit graphs, figure size &amp; vector export</a>
+        </li>
+        <li>
+          <a href="#prism">Import Prism files &amp; review conversion</a>
+        </li>
+        <li>
+          <a href="#advanced">Advanced R: scripts, packages &amp; results</a>
+        </li>
+        <li>
+          <a href="#recovery">Package installation recovery</a>
+        </li>
+        <li>
+          <a href="#assistant">AI Assistant &amp; data privacy</a>
+        </li>
+        <li>
+          <a href="#saving">Save, reopen &amp; work in several windows</a>
+        </li>
+        <li>
+          <a href="#troubleshooting">Troubleshooting &amp; platform limits</a>
+        </li>
+      </ul>
+    </nav>
+    <section id="start">
+      <h3>Getting started</h3>
+      <p>Start with Create… → Data table, choose the table type, then paste measurements directly into the grid. Each study holds data tables, linked graph views, analyses and a figure layout.</p>
+      <ol>
+        <li>Name the study by clicking its title. Click a data table name in the navigator to rename it.</li>
+        <li>Enter observations in Data table. Choose Analyze and select a method appropriate for your experimental design.</li>
+        <li>Review the results and assumptions. Open Graph to format a figure, then export SVG, PDF or PNG.</li>
+        <li>Save a .rdatacraft study to keep the data and settings. A figure export does not save the study.</li>
+      </ol>
+      <p>Examples &amp; analysis guide adds original teaching data as a separate table; your existing observations stay in place.</p>
+    </section>
+    <section id="tables">
+      <h3>Paste data &amp; choose a table type</h3>
+      <p>Select the top-left destination cell and paste with Command-V on Mac or Ctrl-V on Windows. The grid expands within its 10,000-row / 50-column limit. Use the paste-with-headers option when the first copied row contains column names; otherwise paste measurements only. Undo reverses the paste. Click a column header to rename it.</p>
+      <ul>
+        <li>Column: one group per column. For paired data, the same subject occupies the same row across columns.</li>
+        <li>XY: numeric X first, followed by Y series. Set the number of Y replicates when creating the table; replicate subcolumns belong to their series.</li>
+        <li>Grouped: two factor-label columns, then replicate measurement columns.</li>
+        <li>Contingency: category labels first, then nonnegative integer counts; enter observed zeros as 0.</li>
+        <li>Survival: Time, Status (1 = event, 0 = right-censored), Group.</li>
+        <li>Multiple variables: one sample per row, one variable per column; useful for PCA and custom R.</li>
+      </ul>
+      <p>Blank measurements represent missing values. Their treatment depends on the analysis. Do not use a blank to represent a measured zero. Import also accepts CSV, TSV and supported Excel workbooks.</p>
+    </section>
+    <section id="analysis">
+      <h3>Choose an analysis &amp; interpret P values</h3>
+      <p>Choose the scientific question and experimental unit before selecting a test. Two independent groups can use Welch’s t test; matched subjects require a paired method. Ordinary one-way or two-way ANOVA assumes independent observations. Repeated-measures ANOVA and mixed-effects designs require a suitable Advanced R script.</p>
+      <p>Inspect sample counts, effect estimates, confidence intervals, warnings and residuals alongside P values. A small P value does not measure effect size or establish the suitability of the model. Follow-up comparisons must account for multiplicity.</p>
+      <p>Graph formatting offers numeric P labels or significance stars. Numeric labels use four significant digits; values below 0.000001 display as P &lt; 10⁻⁶. Stars use * for P ≤ 0.05, ** for P ≤ 0.01, *** for P ≤ 0.001 and **** for P ≤ 0.0001; ns indicates larger P values. Display choices do not change stored statistics.</p>
+      <p>Use Examples &amp; analysis guide for a worked example and its assumptions.</p>
+    </section>
+    <section id="regression">
+      <h3>Regression &amp; curve fitting</h3>
+      <p>Use an XY table, then choose a regression method in Analyze. Inspect the model equation and choose how replicates enter the fit. Fitting all observations and fitting means answer different weighting questions; do not treat repeated measurements as independent replicates.</p>
+      <p>Review convergence, parameter intervals and a residuals view before interpreting a curve. A four-parameter dose-response fit needs positive concentrations and adequate coverage of both plateaus. Poorly identified parameters can be misleading even when a curve looks smooth.</p>
+      <p>For a formula, model family or dependency outside the presets, use Advanced R analysis and return coefficients, diagnostics and a figure. The app does not automatically establish that a selected model is scientifically appropriate.</p>
+    </section>
+    <section id="pca">
+      <h3>Principal component analysis (PCA)</h3>
+      <p>Use Multiple variables: rows are samples and numeric measurement columns are variables. In PCA settings, select measurements explicitly and keep sample IDs and group labels as metadata. Choose centering/scaling and a missing-value policy deliberately.</p>
+      <p>Review explained variance, scores and loadings together. Group labels color points but do not enter the calculation. PCA is exploratory; apparent group separation is not a significance test.</p>
+      <p>Open Examples &amp; analysis guide and select Principal component analysis (PCA) for the 12-sample walkthrough, three linked views and scaling/missing-data exercises.</p>
+    </section>
+    <section id="figures">
+      <h3>Edit graphs, figure size &amp; vector export</h3>
+      <p>Click a graph title or axis label to edit its text. Click or double-click an axis or data series to open the corresponding formatting controls; the format toolbar provides the same options. Each linked view keeps its own settings. Delete unwanted views from the navigator after reviewing the confirmation.</p>
+      <p>New figures start at 3 × 3 inches with 7-point text and 200% screen zoom. Width and height control the exported canvas; zoom and Fit window change only its screen display. Physical screen inches depend on monitor scaling. Existing saved figure dimensions remain in effect.</p>
+      <p>Export SVG or PDF for editable vector artwork. The native Mac app also provides Copy vector for Illustrator or Affinity Designer; Windows uses file export. Fonts must be available in the receiving application.</p>
+      <p>Figure layout arranges linked graph views into panels. Moving or resizing a panel changes the layout without changing source observations.</p>
+    </section>
+    <section id="prism">
+      <h3>Import Prism files &amp; review conversion</h3>
+      <p>Choose Import and select .prism or .pzfx. Review the preview, selected source tables and conversion report before confirming. Supported multi-input analyses create separate editable result tables for each supported input.</p>
+      <p>Source observations, explicitly converted analyses and saved-result snapshots have different meanings. A saved result is a historical table; editing its source will not recompute a snapshot. Read each import report before using the imported analysis.</p>
+      <p>Unsupported binary graph formatting, analysis types and legacy .pzf files are not fully converted. Save .pzf as .pzfx or .prism in Prism first. Recreate unsupported graphs from imported observations and verify settings against the original.</p>
+      <p>Keep original Prism file preserves a byte-for-byte attachment within the study when size limits allow. It does not make all original content editable. Save original Prism file exports the preserved attachment.</p>
+    </section>
+    <section id="advanced">
+      <h3>Advanced R: scripts, packages &amp; results</h3>
+      <h3>Advanced R analysis: beyond the presets</h3>
+      <p>Write an R script or ask the AI Assistant to draft one. Review the code, data selection and scientific assumptions, then choose Run reviewed script. Drafting, loading and opening a study never execute its code.</p>
+      <ol>
+        <li>Open a data table, then Analysis → Advanced R analysis. Load a template or write your script. data is a copied data frame with automatic numeric conversion; data_raw retains the original cell text. Column names stay unchanged.</li>
+        <li>List any required packages, separated by commas. The app checks your bundled and personal R libraries. Choose Check / install packages to review missing packages and required dependencies from CRAN; installation starts only after Approve &amp; install. The script does not run automatically afterward. stats supports GLMs and many methods beyond the presets. Compatible Mac/Windows binaries install into a library for your user account; bundled app packages and system R are unchanged. Source builds and non-CRAN repositories are not installed by this workflow.</li>
+        <li>Assign result &lt;- list(tables=list(Name=data.frame(...)), plot=my_plot, text="Interpretation"). plot can be a ggplot object or a function drawing a base R plot. Return up to ten nonempty tables, each within the 10,000-row / 50-column table limit. Large combined outputs are rejected.</li>
+        <li>Run in a separate R process; Stop cancels it. The selected time limit is at most five minutes. Figures export as 3 × 3 inch SVG/PDF; use ggplot theme text size 7 for matching typography. Scripts can override their plot appearance.</li>
+        <li>Save draft keeps code and an input snapshot in this study. Runs save code, the exact input copy, package versions, console, tables and figures. Save the study to retain these records. Loading a saved analysis lets you rerun its saved input or the active table; results are historical snapshots, not live linked analyses.</li>
+        <li>Choose a returned table and Add result as data table to use normal graph/analysis tools. Importing results does not establish independence or validate the selected model. Review warnings, missing values, convergence and uncertainty.</li>
+      </ol>
+      <p class="inline-note">Review code before running: custom R runs locally with your account permissions. The separate process protects the app session from ordinary errors; it is not an operating-system security sandbox. Do not run untrusted code.</p>
+      <p>Open examples/Advanced R teaching example.rdatacraft for original count and independent-group data with three saved drafts. No script runs when you open it.</p>
+      <p>Examples: the summary template returns means and SD; custom rank comparison returns a rank test and interval; the GLM template fits count responses while accounting for treatment and batch. Edit its formula and verify dispersion/design assumptions. Mixed-effects or other package methods become available after you approve installation of compatible packages. Stop can cancel downloading or staging; incomplete app-managed changes are rolled back. Approvals apply only to the displayed list and are never saved as blanket permission.</p>
+      <p>AI workflow: request an Advanced R script, review the proposed script in the assistant, choose Open in Advanced R, then review and run. The AI never executes the proposed script automatically.</p>
+    </section>
+    <section id="recovery">
+      <h3>Package installation recovery</h3>
+      <p>Choose Check / install packages in Advanced R. Review the exact package list and destination, then Approve &amp; install. Package installation and script execution are separate actions.</p>
+      <p>Stop cancels an app-managed installation and restores incomplete changes. After an app or computer crash, the next approved installation recovers a recorded transaction only when its owning process has ended. A live installer in another window is left alone.</p>
+      <p>If the app reports an unrecognized lock or an interrupted recovery, close all RDataCraft windows. Back up the personal library and any adjacent .rdatacraft-install-* folders before making changes. Do not delete backup folders during an unfinished promotion. Keep the installation log and request support or inspect the transaction before removing its lock.</p>
+      <p>Network failures: check your connection, retry Check / install packages and approve the fresh list. No compatible binary: the in-app workflow cannot build source packages or install from GitHub/Bioconductor. Use a suitable separately managed R environment for those methods.</p>
+      <p>The package library is per user, R version and platform. Installing an add-on does not update the packages used by the main app. Logs are available under Package installation log.</p>
+    </section>
+    <section id="assistant">
+      <h3>AI Assistant &amp; data privacy</h3>
+      <p>The assistant’s local tools work without a model. Connected requests use your signed-in Codex CLI. Send shares your message, column names, graph settings and recent conversation. Table values and computed results are included only when Share active table values and computed results is checked. Review your data-sharing requirements before sending.</p>
+      <p>A model response is a proposal. Review the preview before applying supported changes to a new table copy. Advanced R proposals open as drafts; only Run reviewed script executes code. Missing packages require a separate Approve &amp; install action.</p>
+      <p>Custom R and downloaded packages run with your account permissions. Process separation handles ordinary errors and Stop/time limits; it is not an operating-system security sandbox. Review code and its scientific assumptions before execution.</p>
+      <p>If connection fails, confirm that Codex is installed and signed in. Offline graph and statistical workflows remain available.</p>
+    </section>
+    <section id="saving">
+      <h3>Save, reopen &amp; work in several windows</h3>
+      <p>Save a .rdatacraft study to preserve tables, settings, linked views, layouts, imported-file reports and saved Advanced R records. Keep a separate backup before major edits. New study opens a separate native Mac window; the browser interface opens a separate workspace.</p>
+      <p>The native Mac app uses file dialogs. The Windows browser interface saves through browser downloads; reopen the downloaded study through Open. Repeated downloads may create numbered files, so check the filename and location.</p>
+      <p>Advanced R results retain an input snapshot, code and package versions. Opening a study or loading a saved script never executes it. Use the saved snapshot to reproduce a run, or select the active table to run on current observations.</p>
+      <p>SVG/PDF/PNG exports contain the figure. CSV exports contain a table. These exports do not replace saving the complete study.</p>
+    </section>
+    <section id="troubleshooting">
+      <h3>Troubleshooting &amp; platform limits</h3>
+      <p>Use the installer matching your computer: Intel Mac, Apple Silicon Mac or Windows x64. R and the required packages are bundled. The Windows edition currently opens its local interface in a browser; the Mac edition has a native window host.</p>
+      <p>If startup fails on Mac, Help → Show engine log opens the current window’s log. For Windows, retain the launcher console message. The local engine must stay running while the workspace is open.</p>
+      <p>Before reporting a problem, note the app version, operating system, action taken and full error. Prefer a small synthetic example. Review logs and studies for private observations or personal paths before sharing them publicly.</p>
+      <p>Development builds are not Apple-notarized or Windows code-signed. Platform validation and release status are documented with the download.</p>
+    </section>
+  </body>
+</html>

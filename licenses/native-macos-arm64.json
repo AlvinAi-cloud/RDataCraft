@@ -1,0 +1,1558 @@
+{
+  "architecture": "arm64",
+  "binaries": [
+    {
+      "path": "R.framework/Versions/4.6/Resources/Rscript",
+      "sha256": "47a67e9096963b30ce039da02f358ccea36504863da6a1a2f1f22480114e85f8",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/bin/Rscript",
+      "sha256": "e985928bd58bee1f2454916e59a97338288b2eeec3610caa9d1135ae04e3b393",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/bin/exec/R",
+      "sha256": "3a64ef371bfadd5be2839300761e7bce1a59f05b9ea8f0c8c5ef37a540d33c9e",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/bin/fc-cache",
+      "sha256": "cd4574c218f25fc93db65c01f9f080bfb41943d2e6c352ab7e4ba6487f7e8538",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "/usr/lib/libSystem.B.dylib",
+        "/usr/lib/libbz2.1.0.dylib",
+        "/usr/lib/libz.1.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/bin/qpdf",
+      "sha256": "c4c53edd48dc2d54195255bf1c1ed6178caccbafb7343af8cdc841b9e3d50311",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "/usr/lib/libz.1.dylib",
+        "/usr/lib/libc++.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/lib/libR.dylib",
+      "sha256": "9ed638d6cefd8a07b30c6bee1452bba5658b5903c477d272e293ef8ea3a33517",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libgfortran.5.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libquadmath.0.dylib",
+        "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation",
+        "/usr/lib/libncurses.5.4.dylib",
+        "/usr/lib/libbz2.1.0.dylib",
+        "/usr/lib/libz.1.dylib",
+        "/usr/lib/libicucore.A.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/lib/libR.dylib.dSYM/Contents/Resources/DWARF/libR.dylib",
+      "sha256": "b0b9321f776daf0ccdfa91f091dfcf01cc0f764c92136cc573ad7c402cc79872",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/lib/libRblas.0.dylib",
+      "sha256": "5e81850ad663fe7072628e33ac064409f32a63e7b2424605ffbfcf6f2a83d172",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libgfortran.5.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libquadmath.0.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/lib/libRblas.0.dylib.dSYM/Contents/Resources/DWARF/libRblas.0.dylib",
+      "sha256": "553190c0d91e2484f7991455516ce8290ba53c6921603a72186d22f9bd3c8cd8",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/lib/libRblas.dylib.dSYM/Contents/Resources/DWARF/libRblas.dylib",
+      "sha256": "553190c0d91e2484f7991455516ce8290ba53c6921603a72186d22f9bd3c8cd8",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/lib/libRblas.vecLib.dylib",
+      "sha256": "3478fa3b332225fd966d53b9f8bf7494bcac738d1704787badd08a67d974bd06",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ],
+      "linked_libraries": [
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.dylib",
+        "/System/Library/Frameworks/Accelerate.framework/Versions/A/Accelerate",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/lib/libRblas.vecLib.dylib.dSYM/Contents/Resources/DWARF/libRblas.vecLib.dylib",
+      "sha256": "b490e13548c6b9002f7fda99e1709a8d62d3651d0a9a15426af15302e2d11389",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/lib/libRlapack.dylib",
+      "sha256": "8d8d8f6e3da80c8c9fa71367ad67a9780d48e1c8f35b34d8d01abccdf24ef925",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRlapack.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libgfortran.5.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libquadmath.0.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/lib/libRlapack.dylib.dSYM/Contents/Resources/DWARF/libRlapack.dylib",
+      "sha256": "d226eb6b4094150b90daf350dc44aff4057cf275697192aff2919808b8a7ef85",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/lib/libgcc_s.1.1.dylib",
+      "sha256": "789a25f4e43c84f75d00aab34f44c0f974b2e79a9f8286cdfdc1350f1fecda21",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libgcc_s.1.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/lib/libgfortran.5.dylib",
+      "sha256": "692e27e65bb07137d029e412cc1ad1a1a9a687857d79993d50a7218f67c0a3e5",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libgfortran.5.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libquadmath.0.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libgcc_s.1.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/lib/libomp.dylib",
+      "sha256": "e696d6875ba87a5e804d57fee07e9a5548b3bd4ce5339d926a539a94f7bf858e",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ],
+      "linked_libraries": [
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libomp.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/lib/libquadmath.0.dylib",
+      "sha256": "c32e5d2225a1452ffb568c4ae6457dc01526e15cdfa440dbaee766ffb5e4d072",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libquadmath.0.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/KernSmooth/libs/KernSmooth.so",
+      "sha256": "6580ee16a131bea1159cb5884ed507861fbff8bd31bcd50b618939fd260457f9",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "KernSmooth.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libgfortran.5.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libquadmath.0.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/MASS/libs/MASS.so",
+      "sha256": "1956afb6d2ba691927b3156c1952f8e1445bed27366836a5ec2849490fdd232f",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "MASS.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/Matrix/libs/Matrix.so",
+      "sha256": "8b3db62a4338c39c2d6a529261eaaea331dc7d250f0743187eeeab36c1d43725",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "Matrix.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRlapack.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libgfortran.5.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libquadmath.0.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/class/libs/class.so",
+      "sha256": "2af7faafe5c0274aa1ab054261ca3a7c6c53cab78d8d03eda9124b0934ba03e1",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "class.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/cluster/libs/cluster.so",
+      "sha256": "43c99ae726134b5e2259549bf9e37808a1a632d07e1531fd4395af4768dfa482",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "cluster.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/foreign/libs/foreign.so",
+      "sha256": "8d8296ee06a8969970add480946fce25a3b524bb21986917638e5b1fb401d59b",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "foreign.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/grDevices/libs/cairo.so",
+      "sha256": "676c894bfc8e39aa981bc9e602cbd0e83a8545e7c1720bed0c478b6dc178e3d2",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "cairo.so",
+        "/usr/lib/libz.1.dylib",
+        "/usr/lib/libSystem.B.dylib",
+        "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation",
+        "/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices",
+        "/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation",
+        "/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit",
+        "/usr/lib/libresolv.9.dylib",
+        "/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon",
+        "/opt/X11/lib/libXrender.1.dylib",
+        "/opt/X11/lib/libSM.6.dylib",
+        "/opt/X11/lib/libICE.6.dylib",
+        "/opt/X11/lib/libX11.6.dylib",
+        "/opt/X11/lib/libXext.6.dylib",
+        "/usr/lib/libbz2.1.0.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libobjc.A.dylib"
+      ],
+      "external_optional_libraries": [
+        "/opt/X11/lib/libXrender.1.dylib",
+        "/opt/X11/lib/libSM.6.dylib",
+        "/opt/X11/lib/libICE.6.dylib",
+        "/opt/X11/lib/libX11.6.dylib",
+        "/opt/X11/lib/libXext.6.dylib"
+      ]
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/grDevices/libs/grDevices.so",
+      "sha256": "bedd11320a86d6d29158ea2f106fffcd93a40ef3c46c8de8a919234fcd8ebfed",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "grDevices.so",
+        "/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit",
+        "/usr/lib/libz.1.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib",
+        "/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices",
+        "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation",
+        "/System/Library/Frameworks/CoreGraphics.framework/Versions/A/CoreGraphics",
+        "/System/Library/Frameworks/CoreText.framework/Versions/A/CoreText",
+        "/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation",
+        "/System/Library/Frameworks/ImageIO.framework/Versions/A/ImageIO",
+        "/usr/lib/libobjc.A.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/graphics/libs/graphics.so",
+      "sha256": "d80467e0d35cfa17b54b1153061dad08621803504c0294aa2ae0f96593f4c5de",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "graphics.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/grid/libs/grid.so",
+      "sha256": "78f08c2bcbba2d3b05da07ee24b62db57522d28513bb7b2f70409181dfb0e054",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "grid.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/lattice/libs/lattice.so",
+      "sha256": "da6d4c42a5aa87cf5b321d76bdd9ab58736fe798a76fd613c72fd4a808f51dbf",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "lattice.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/methods/libs/methods.so",
+      "sha256": "89e57dbbc7835a89b5fee606da733b9f226a7023f48d292e78002f36c748b77d",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "methods.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/mgcv/libs/mgcv.so",
+      "sha256": "ad819562846239e7c0b087d40e6b450101a06dc6a1c0623455676338e1ae6128",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "mgcv.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRlapack.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libgfortran.5.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libquadmath.0.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/nlme/libs/nlme.so",
+      "sha256": "0bbabd79d0cc6e38bf45826d30f50c02fe964abfabd382ef26d43271dd47fefb",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "nlme.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libgfortran.5.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libquadmath.0.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/nnet/libs/nnet.so",
+      "sha256": "7e12cee4d8f357a41735fdfcded096d6bf8d8d0b259e5f8c78b2e9007da63b23",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "nnet.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/parallel/libs/parallel.so",
+      "sha256": "489961432f78e4243c4fe5e7aaa7f712b649ad86fbb5a71dd99cbeb0b46ccdd1",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "parallel.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/rpart/libs/rpart.so",
+      "sha256": "1520725bdc75c939dff088d1f157698a1eaff82979629e089da2588b5a73fa3f",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "rpart.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/spatial/libs/spatial.so",
+      "sha256": "51aac4796780eaf88233e516928c38568fa20ab3189fe12b62aacc32732eba42",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "spatial.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/splines/libs/splines.so",
+      "sha256": "7b359d829186dec5389d5fd4a893d88a4dfb737d8317c04af4d1e9b8c0707cb2",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "splines.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/stats/libs/stats.so",
+      "sha256": "91da877e5da1211c8fb8bbce0ff12b57c63efb3dfd43daffeb0cf5010164b669",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "stats.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRlapack.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libgfortran.5.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libquadmath.0.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/survival/libs/survival.so",
+      "sha256": "b49f5f7fd03aaa4a525f3b6bc06fb0921e09262f0cab4c2fb0587c70f2db2bc0",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "survival.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/tcltk/libs/tcltk.so",
+      "sha256": "46e5fe8a9be7b3044860b027ac6d2f9c568ef441a44d68a318886f4f3d2f5cf5",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "tcltk.so",
+        "/opt/R/arm64/lib/libtcl8.6.dylib",
+        "/opt/R/arm64/lib/libtk8.6.dylib",
+        "/opt/X11/lib/libX11.6.dylib",
+        "/opt/X11/lib/libXss.1.dylib",
+        "/opt/X11/lib/libXext.6.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": [
+        "/opt/R/arm64/lib/libtcl8.6.dylib",
+        "/opt/R/arm64/lib/libtk8.6.dylib",
+        "/opt/X11/lib/libX11.6.dylib",
+        "/opt/X11/lib/libXss.1.dylib",
+        "/opt/X11/lib/libXext.6.dylib"
+      ]
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/tools/libs/tools.so",
+      "sha256": "e7ca8ca4a4f6afeb6f150b358cd98e92911b7a896036bd73ee4ba2e3b6d2f385",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "tools.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/library/utils/libs/utils.so",
+      "sha256": "d9fbc4efb4d963691b44e73cb3a914471b2aa3a38487a5b0647191d260ff7905",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "utils.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/modules/R_X11.so",
+      "sha256": "dc0c862edd30d70d50e9d4bb5028ccb048416cf856baa97867333ebe94b07f40",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "R_X11.so",
+        "/usr/lib/libz.1.dylib",
+        "/usr/lib/libSystem.B.dylib",
+        "/opt/X11/lib/libSM.6.dylib",
+        "/opt/X11/lib/libICE.6.dylib",
+        "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation",
+        "/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices",
+        "/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation",
+        "/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit",
+        "/usr/lib/libresolv.9.dylib",
+        "/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon",
+        "/opt/X11/lib/libX11.6.dylib",
+        "/opt/X11/lib/libXext.6.dylib",
+        "/opt/X11/lib/libXrender.1.dylib",
+        "/usr/lib/libbz2.1.0.dylib",
+        "/opt/X11/lib/libXt.6.dylib",
+        "/opt/X11/lib/libXmu.6.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libobjc.A.dylib"
+      ],
+      "external_optional_libraries": [
+        "/opt/X11/lib/libSM.6.dylib",
+        "/opt/X11/lib/libICE.6.dylib",
+        "/opt/X11/lib/libX11.6.dylib",
+        "/opt/X11/lib/libXext.6.dylib",
+        "/opt/X11/lib/libXrender.1.dylib",
+        "/opt/X11/lib/libXt.6.dylib",
+        "/opt/X11/lib/libXmu.6.dylib"
+      ]
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/modules/R_de.so",
+      "sha256": "2ca403d6048318f273525ae611b3d30e599cedafc380355084bec93b9e933a4e",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "R_de.so",
+        "/opt/X11/lib/libSM.6.dylib",
+        "/opt/X11/lib/libICE.6.dylib",
+        "/usr/lib/libSystem.B.dylib",
+        "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation",
+        "/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices",
+        "/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation",
+        "/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit",
+        "/usr/lib/libresolv.9.dylib",
+        "/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon",
+        "/usr/lib/libz.1.dylib",
+        "/opt/X11/lib/libX11.6.dylib",
+        "/opt/X11/lib/libXext.6.dylib",
+        "/opt/X11/lib/libXrender.1.dylib",
+        "/usr/lib/libbz2.1.0.dylib",
+        "/opt/X11/lib/libXt.6.dylib",
+        "/opt/X11/lib/libXmu.6.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib"
+      ],
+      "external_optional_libraries": [
+        "/opt/X11/lib/libSM.6.dylib",
+        "/opt/X11/lib/libICE.6.dylib",
+        "/opt/X11/lib/libX11.6.dylib",
+        "/opt/X11/lib/libXext.6.dylib",
+        "/opt/X11/lib/libXrender.1.dylib",
+        "/opt/X11/lib/libXt.6.dylib",
+        "/opt/X11/lib/libXmu.6.dylib"
+      ]
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/modules/internet.so",
+      "sha256": "e0e48a8c339e965db94d1f6bc0e14f87f36fcbfaa6108e658a7b6f611acb5385",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "internet.so",
+        "/usr/lib/libcurl.4.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "R.framework/Versions/4.6/Resources/modules/lapack.so",
+      "sha256": "b14a809f2e0a76941caaa56da7761b30b78c645456a3216838a639b6a2172136",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "lapack.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRlapack.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libgfortran.5.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libquadmath.0.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/Rcpp/libs/Rcpp.so",
+      "sha256": "44d45331f2c44fb079f506f4b059819c86a2722a5a0ee16a477e9a297d207c36",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "Rcpp.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libc++.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/Rcpp/libs/Rcpp.so.dSYM/Contents/Resources/DWARF/Rcpp.so",
+      "sha256": "7aeb459b6c18338467f1cffedca7754e4948cd389f84111541684c8f29d604be",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/S7/libs/S7.so",
+      "sha256": "31915496dda5381d89ab516832853d68a6d6938f007309c5cef2174d334508c1",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "S7.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/S7/libs/S7.so.dSYM/Contents/Resources/DWARF/S7.so",
+      "sha256": "18718a366dedbff73eab63dfe823a2acae6ccc0b5eaa34129615242d304d97dd",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/base64enc/libs/base64enc.so",
+      "sha256": "ea6a5c116ebeb7e877d339089370efb7bcaa3197d25ab989c9ef9d93b887f93f",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "base64enc.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/base64enc/libs/base64enc.so.dSYM/Contents/Resources/DWARF/base64enc.so",
+      "sha256": "e466b4edfb7e57bd0caec34925c04dbdfd0f7d0f9c06de274196b30ec6cebdf8",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/cachem/libs/cachem.so",
+      "sha256": "ae0738ead04ffda93ff05bf380553d0f08507b1e65eb235b285a01f76f1d099d",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "cachem.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/cachem/libs/cachem.so.dSYM/Contents/Resources/DWARF/cachem.so",
+      "sha256": "a28eb48b67d23776c20225d95f39e775bf0616b8dd1167e995a1f79867d74861",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/cli/libs/cli.so",
+      "sha256": "c93ed996dacb900ada9899215546065ed4cb0c5b6651a886f7838747c2a8ae0b",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "cli.so",
+        "/usr/lib/libSystem.B.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/cli/libs/cli.so.dSYM/Contents/Resources/DWARF/cli.so",
+      "sha256": "ce0bddb71b440b25c74d6788e9aa344ec1f726a236e8584cb6cf78852842eebb",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/commonmark/libs/commonmark.so",
+      "sha256": "851304d56f42955aaefd20fe0515178e22e5f445980b633cd2b5b67e69ad14f7",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "commonmark.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/commonmark/libs/commonmark.so.dSYM/Contents/Resources/DWARF/commonmark.so",
+      "sha256": "eb8f12a6815e69e473a9e21f954587ff4c11196feadff5fe043653ca398ead60",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/digest/libs/digest.so",
+      "sha256": "dc152e89b5cc9b55109fa9f04d59133f397e80e81c10384b9a9914e0c304806d",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "digest.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libc++.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/digest/libs/digest.so.dSYM/Contents/Resources/DWARF/digest.so",
+      "sha256": "9ae2453952bbc8cbd04fe3b6746e63289e8573c915551b30cbd9038c57aae53a",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/farver/libs/farver.so",
+      "sha256": "88be134b22de50bb9a6e346943f36f3fd8caf9fb8d9734012293c527a8fff085",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "farver.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libc++.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/farver/libs/farver.so.dSYM/Contents/Resources/DWARF/farver.so",
+      "sha256": "8f3787c38955c7202ba37cdb169d2f8ba93901e58e2147776ac12cd3d56652f6",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/fastmap/libs/fastmap.so",
+      "sha256": "2fcdd6991ba36d62dd8bb83dba416754800b40c0a9d9488c24dd356c51fe826d",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "fastmap.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libc++.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/fastmap/libs/fastmap.so.dSYM/Contents/Resources/DWARF/fastmap.so",
+      "sha256": "79529db69a54b9a00c768aa2456dcd630162fc1b2c328bd458e813e23efd31b3",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/fs/libs/fs.so",
+      "sha256": "02fb3e9a8c51a76466506c51df1491d48cc7f68cdfff8d8025a93ed061679473",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "fs.so",
+        "/usr/lib/libSystem.B.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libc++.1.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/fs/libs/fs.so.dSYM/Contents/Resources/DWARF/fs.so",
+      "sha256": "bddc8ffe3caba9084321eafbc92bf93c7af8a02b75c172e727d4798ed04db433",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/glue/libs/glue.so",
+      "sha256": "cf51fb5724c9f2192251e7a9a2578ac786f3fa701482082ff27bb62776a520e2",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "glue.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/glue/libs/glue.so.dSYM/Contents/Resources/DWARF/glue.so",
+      "sha256": "c21acbe498c7649000f8ba84b72b18b0df1f1b1bb77a001b29136ea544f271f5",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/htmltools/libs/htmltools.so",
+      "sha256": "1cf2c9a9c7e186e486651134bc84f2d3afb2811c370295de45d710664f600757",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "htmltools.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/htmltools/libs/htmltools.so.dSYM/Contents/Resources/DWARF/htmltools.so",
+      "sha256": "0f96231d328eab14c05a5716b471af23f149fd6e8c0911ff3b6f6634ec8701e6",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/httpuv/libs/httpuv.so",
+      "sha256": "f5c1c46ed4418af538afefb6c7791a5b2e14248e061f2769493e99c04fe14673",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "httpuv.so",
+        "/usr/lib/libz.1.dylib",
+        "/System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libc++.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/httpuv/libs/httpuv.so.dSYM/Contents/Resources/DWARF/httpuv.so",
+      "sha256": "1e3a93b7670078c5120e29decc415350d6052c4cf9be59472823982236113afd",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/isoband/libs/isoband.so",
+      "sha256": "b49ad08bd57778b22dd5f2baacdaee884df254d3019a30f19d749af5416e5c2c",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "isoband.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libc++.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/isoband/libs/isoband.so.dSYM/Contents/Resources/DWARF/isoband.so",
+      "sha256": "32d887ff3792f6df8fb921a1be5ca6fb9de346523bee0e234ff137953416502d",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/jsonlite/libs/jsonlite.so",
+      "sha256": "09efa84a649d3b3d2d4d3af838e80e73f6f03773454b165abcc241a53d4701bc",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "jsonlite.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/jsonlite/libs/jsonlite.so.dSYM/Contents/Resources/DWARF/jsonlite.so",
+      "sha256": "d590cceb61987b67ac30ffcbaac3242dcf7bc5b4159cfcf8855d2069bb78830a",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/later/libs/later.so",
+      "sha256": "1c0b4c4bce44c1c609298b48dc470a745a5aeaeb7c6ac90d4c1f605186e11571",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "later.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libc++.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/later/libs/later.so.dSYM/Contents/Resources/DWARF/later.so",
+      "sha256": "3973f073b2f5e6340a549a7824e6233d1915fa50983202763c6292f4ca45251c",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/lazyeval/libs/lazyeval.so",
+      "sha256": "1af3f122cd8eed8e2a273362388c5d7b90e68d5a0d01a8f5fb9ae88f20557121",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "lazyeval.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/lazyeval/libs/lazyeval.so.dSYM/Contents/Resources/DWARF/lazyeval.so",
+      "sha256": "e53a4840cbc01df7364e6c3bf424ee8d6e8a28df9052b07eaec523a2be31e7a9",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/magrittr/libs/magrittr.so",
+      "sha256": "0572d9955bd0d0d90167638c015160853798a78b905bb052fd5eb33d8ce2c647",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "magrittr.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/magrittr/libs/magrittr.so.dSYM/Contents/Resources/DWARF/magrittr.so",
+      "sha256": "3d5e13b70d1cc30e42e661fbb22f6b37c0e4cd97a8d9dcc42ec53834b1bd9d82",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/mime/libs/mime.so",
+      "sha256": "edee314d24d57667815ea6fe089fdba6bf86becd97dbb244c13252b0c04e6edf",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "mime.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/mime/libs/mime.so.dSYM/Contents/Resources/DWARF/mime.so",
+      "sha256": "96c6a673764b52bbd9d31698a4d46adf4cdf66879856891ba55efe3e0232f78a",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/processx/bin/px",
+      "sha256": "af339c0b2a4e12b187aaf99cef172b9513732950ff0ed0bcde0c44cf678318b7",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/processx/bin/sock",
+      "sha256": "d3628042707c5031ea0dfffffd8a6d38c294801b6b4bf379d47b8a3a9c19a4e8",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/processx/bin/supervisor",
+      "sha256": "cbfe76810469c160187b6ca24366bea2ca44e6d07c0f9f8bca6bdd8d1e6e2d10",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/processx/libs/client.so",
+      "sha256": "b6238a18045fafab8e45a08aa95e3b4846815a79a2f6d920d56e4d78bed778d3",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "client.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/processx/libs/processx.so",
+      "sha256": "43b60c77ab3ac6b1a6757914caa436b2ecbfdf3bfdc9294c14eb7f638c512f11",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "processx.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/ps/bin/px",
+      "sha256": "d6f349e7248898a5b2d7390e0c16df2bb4539cf1c8fc859cee495e176b495407",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/ps/libs/ps.so",
+      "sha256": "115fffb19cd5059f4820b2f4edb898ab448b0cf77b9a9a973e4ae7b246d2a080",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "ps.so",
+        "/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib",
+        "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation",
+        "/usr/lib/libobjc.A.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/rappdirs/libs/rappdirs.so",
+      "sha256": "c0beb148bca15320239fadcae7c87d898469d3c83b6dadd7625cbc4de6d37a38",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "rappdirs.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/rappdirs/libs/rappdirs.so.dSYM/Contents/Resources/DWARF/rappdirs.so",
+      "sha256": "b84f3336908d338b20fedeb2bd32a4e66d31998d1c7ef966459a784499531f82",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/readxl/libs/readxl.so",
+      "sha256": "ba35635ea49ac2f9ec8fd2c432126c1e374446ca25bd95e03e36746122734a0e",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "readxl.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libc++.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/readxl/libs/readxl.so.dSYM/Contents/Resources/DWARF/readxl.so",
+      "sha256": "10dec0cf368f17fcfeb9b9e596be3847801b6b5b99edc0e2755a8c44ae8ee446",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/rlang/libs/rlang.so",
+      "sha256": "107ff2b86d6bc7c07c481ee1e7b5ed80be0e2e0147e428105f799728fb65141b",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "rlang.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/rlang/libs/rlang.so.dSYM/Contents/Resources/DWARF/rlang.so",
+      "sha256": "e60f1c88bff02a64ead1aa9fc1ee7d00aab14399e11a5e06dba4a0f0b08d56f1",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/sass/libs/sass.so",
+      "sha256": "3e8395eb15d2b3054398c4c8984dd8820e9918d952c016f83155d13579e70926",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "sass.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libc++.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/sass/libs/sass.so.dSYM/Contents/Resources/DWARF/sass.so",
+      "sha256": "cd992ded681a1934f0681f1bb5e03c4efbcf51e79b91b2d1fbeff4c95224fa29",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/sourcetools/libs/sourcetools.so",
+      "sha256": "9bd8e017e8643a1c196c4b0122daf5034e00960a20926d7c72d0bea118d8d4eb",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "sourcetools.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libc++.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/sourcetools/libs/sourcetools.so.dSYM/Contents/Resources/DWARF/sourcetools.so",
+      "sha256": "40371a3b0dd9e0df3219585835fc182437151c8aa03df18edc565523eb1f1470",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/stringi/libs/stringi.so",
+      "sha256": "7c1519cfa7e53049ba9831ba35a871c6e19e24897143e5918c5b2c076ce8210f",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "stringi.so",
+        "/usr/lib/libSystem.B.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libc++.1.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/svglite/libs/svglite.so",
+      "sha256": "93ad16244649de186016bd91cd061843eab4377356522fac1c4543e9949735ff",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "svglite.so",
+        "/usr/lib/libz.1.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libc++.1.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/svglite/libs/svglite.so.dSYM/Contents/Resources/DWARF/svglite.so",
+      "sha256": "baac7c1f8e6dd681234f9d335b112b4f092eabc872025ad4bf7905a7917d5bed",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/systemfonts/libs/systemfonts.so",
+      "sha256": "8628b603dfc39c98a07ad390895fa19f65704e935bcce92141762c6f5998f495",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "systemfonts.so",
+        "/usr/lib/libbz2.1.0.dylib",
+        "/usr/lib/libz.1.dylib",
+        "/usr/lib/libSystem.B.dylib",
+        "/System/Library/Frameworks/CoreText.framework/Versions/A/CoreText",
+        "/System/Library/Frameworks/Foundation.framework/Versions/C/Foundation",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libc++.1.dylib",
+        "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation",
+        "/usr/lib/libobjc.A.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/systemfonts/libs/systemfonts.so.dSYM/Contents/Resources/DWARF/systemfonts.so",
+      "sha256": "eb2182404c35693ec10e025439e4f6328249dec2ed0513dee7c7b4e275af9033",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/textshaping/libs/textshaping.so",
+      "sha256": "27a3a3e3c0f33a4008cddd919d22ef0f7817c7aa13eaf9927fc771e0a8802a01",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "textshaping.so",
+        "/usr/lib/libbz2.1.0.dylib",
+        "/usr/lib/libz.1.dylib",
+        "/usr/lib/libSystem.B.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libc++.1.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/textshaping/libs/textshaping.so.dSYM/Contents/Resources/DWARF/textshaping.so",
+      "sha256": "b53a79155b9a561b3301705601c0dd8d9a8c151101d36181c607e05416e37a5e",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/tibble/libs/tibble.so",
+      "sha256": "a3e296481177ad6c5012316dc3d521536cc5a7c246a7184cc43c40df70c1d02a",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "tibble.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/tibble/libs/tibble.so.dSYM/Contents/Resources/DWARF/tibble.so",
+      "sha256": "c3144e3aa1152b91fa14399c165f3231d99d204e31556e89225fe75653f34a3e",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/utf8/libs/utf8.so",
+      "sha256": "58f19f5097308c6a892a319db10564857cbca15c5e3b4e1593845cf4c653ec52",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "utf8.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/utf8/libs/utf8.so.dSYM/Contents/Resources/DWARF/utf8.so",
+      "sha256": "4eec73a4eca4f1447ae93cedad6f2af9eb5dd1a73f34b800589f1027ddb6b933",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/vctrs/libs/vctrs.so",
+      "sha256": "7af16ba230d416ec7dff591fe0aa1c8a4c12a7e9d325919cceb25307fbb8579b",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "vctrs.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/vctrs/libs/vctrs.so.dSYM/Contents/Resources/DWARF/vctrs.so",
+      "sha256": "3d79eeb8420ecc7c5d30a48aaca23e3763ca570422a0b6c249b0d83a67ece2f1",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/xfun/libs/xfun.so",
+      "sha256": "f7888c5893f1a297986c47e60c5479b5afad64adc5e20b0f2fdf2e91a3c150de",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "xfun.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/xfun/libs/xfun.so.dSYM/Contents/Resources/DWARF/xfun.so",
+      "sha256": "0a3e50eaf78769b822d877b09777825ecad4857be65c6849ced9e3179f6f1baa",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/xml2/libs/xml2.so",
+      "sha256": "d4a4bc53f4b83eef1b005b67ce32ba6ce311916de3518f0fc5414227719cc504",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "xml2.so",
+        "/usr/lib/libz.1.dylib",
+        "/usr/lib/libSystem.B.dylib",
+        "/usr/lib/libicucore.A.dylib",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libc++.1.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/xml2/libs/xml2.so.dSYM/Contents/Resources/DWARF/xml2.so",
+      "sha256": "72f5ba9c33d630536052ffdf6b3a84c10a56d1f706d3f233606fdd1b26b7192b",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/yaml/libs/yaml.so",
+      "sha256": "03e47e167a3f965d769dfc09d1c243c141fed8f93ed0555be23882527b5fd871",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [
+        "yaml.so",
+        "/Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libR.dylib",
+        "/usr/lib/libSystem.B.dylib"
+      ],
+      "external_optional_libraries": []
+    },
+    {
+      "path": "library/yaml/libs/yaml.so.dSYM/Contents/Resources/DWARF/yaml.so",
+      "sha256": "8040f67fe1c98a08adc835a240506c46a2226e5513683829a09f25b7e2eb76e1",
+      "architectures": [
+        "arm64"
+      ],
+      "linked_libraries": [],
+      "external_optional_libraries": []
+    }
+  ],
+  "source_coverage": "not certified",
+  "optional_modules": "Stock R Tcl/Tk and X11 modules depend on external installations. Main app graphics use Quartz/SVG."
+}

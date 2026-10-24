@@ -1,0 +1,631 @@
+{
+  "archives": [
+    {
+      "component": "base64enc",
+      "version": "0.1-6",
+      "archive": "base64enc_0.1-6.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/base64enc_0.1-6.tar.gz",
+      "sha256": "3c7e9d22f7409fa2989008fa6e980c3dd8e2693eb20676acf2470ae7addb0816"
+    },
+    {
+      "component": "boot",
+      "version": "1.3-32",
+      "archive": "boot_1.3-32.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/boot_1.3-32.tar.gz",
+      "sha256": "3a05aced6fea42a5c310c5c6ab7a2019f69f757f5e77c4961183977747136c97"
+    },
+    {
+      "component": "bslib",
+      "version": "0.12.0",
+      "archive": "bslib_0.12.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/bslib_0.12.0.tar.gz",
+      "sha256": "26fc11793dc1fdccd6d8d2fc1d638c29c47aa0c2e5cbadc6a35af3819f5446d1"
+    },
+    {
+      "component": "cachem",
+      "version": "1.1.0",
+      "archive": "cachem_1.1.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/cachem_1.1.0.tar.gz",
+      "sha256": "550839fc2ae5d865db475ba2c1714144f07fa0c052c72135b0e4a70287492e21"
+    },
+    {
+      "component": "cellranger",
+      "version": "1.1.0",
+      "archive": "cellranger_1.1.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/cellranger_1.1.0.tar.gz",
+      "sha256": "5d38f288c752bbb9cea6ff830b8388bdd65a8571fd82d8d96064586bd588cf99"
+    },
+    {
+      "component": "class",
+      "version": "7.3-23",
+      "archive": "class_7.3-23.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/Archive/class/class_7.3-23.tar.gz",
+      "sha256": "4d1adb12eae045f15641516d795177dd1d3074c0a86ac633000507c4822891f1"
+    },
+    {
+      "component": "cli",
+      "version": "3.6.6",
+      "archive": "cli_3.6.6.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/cli_3.6.6.tar.gz",
+      "sha256": "b2b58d6dd82f5798b335e39c00591686a01fd3e94399ef898e146173e36f18f9"
+    },
+    {
+      "component": "cluster",
+      "version": "2.1.8.2",
+      "archive": "cluster_2.1.8.2.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/Archive/cluster/cluster_2.1.8.2.tar.gz",
+      "sha256": "4cc898a58baade883bb33aa0ee9be1723f321bd85ad91562cbd1e43dfdb41585"
+    },
+    {
+      "component": "codetools",
+      "version": "0.2-20",
+      "archive": "codetools_0.2-20.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/codetools_0.2-20.tar.gz",
+      "sha256": "3be6f375ec178723ddfd559d1e8e85bfeee04a5fbaf9f53f2f844e1669fea863"
+    },
+    {
+      "component": "commonmark",
+      "version": "2.0.0",
+      "archive": "commonmark_2.0.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/commonmark_2.0.0.tar.gz",
+      "sha256": "7f47d7f9f4ff5d1e2a73a69f6e233d2ddbafae97944ddf664a6000aa94936904"
+    },
+    {
+      "component": "cpp11",
+      "version": "0.5.5",
+      "archive": "cpp11_0.5.5.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/cpp11_0.5.5.tar.gz",
+      "sha256": "72486beb0605c1229bf3d422cd536224af8dc09bd389a3116f62f4c7705c62f4"
+    },
+    {
+      "component": "crayon",
+      "version": "1.5.3",
+      "archive": "crayon_1.5.3.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/crayon_1.5.3.tar.gz",
+      "sha256": "3e74a0685541efb5ea763b92cfd5c859df71c46b0605967a0b5dbb7326e9da69"
+    },
+    {
+      "component": "crosstalk",
+      "version": "1.2.2",
+      "archive": "crosstalk_1.2.2.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/crosstalk_1.2.2.tar.gz",
+      "sha256": "804def71ea7508cada0eec7aa6d35b487db17a8f9e38dca34fffc236691e36fc"
+    },
+    {
+      "component": "digest",
+      "version": "0.6.39",
+      "archive": "digest_0.6.39.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/digest_0.6.39.tar.gz",
+      "sha256": "8bf048b49b2d17077138fae758bda56bbd53278d9437f2fdeaedf979c90a13c9"
+    },
+    {
+      "component": "DT",
+      "version": "0.34.0",
+      "archive": "DT_0.34.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/DT_0.34.0.tar.gz",
+      "sha256": "8862025ef26af65b53f072adb1d133c25c5f96a812e7ae0aa822baa71249f1f2"
+    },
+    {
+      "component": "evaluate",
+      "version": "1.0.5",
+      "archive": "evaluate_1.0.5.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/evaluate_1.0.5.tar.gz",
+      "sha256": "47aac79f889a828a5f8b4756cb972d7c2966bb984cbae17a4bd2389a73270794"
+    },
+    {
+      "component": "farver",
+      "version": "2.1.2",
+      "archive": "farver_2.1.2.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/farver_2.1.2.tar.gz",
+      "sha256": "528823b95daab4566137711f1c842027a952bea1b2ae6ff098e2ca512b17fe25"
+    },
+    {
+      "component": "fastmap",
+      "version": "1.2.0",
+      "archive": "fastmap_1.2.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/fastmap_1.2.0.tar.gz",
+      "sha256": "b1da04a2915d1d057f3c2525e295ef15016a64e6667eac83a14641bbd83b9246"
+    },
+    {
+      "component": "fontawesome",
+      "version": "0.5.3",
+      "archive": "fontawesome_0.5.3.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/fontawesome_0.5.3.tar.gz",
+      "sha256": "1b1909d0fad5ec4c658f5c628a195b9bd93d544afa957e68e897224cfb81fb4f"
+    },
+    {
+      "component": "foreign",
+      "version": "0.8-91",
+      "archive": "foreign_0.8-91.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/Archive/foreign/foreign_0.8-91.tar.gz",
+      "sha256": "fdf6c2c6077659a7dc069e58528d3c7cd93b6571c708d98994565386afce5298"
+    },
+    {
+      "component": "fs",
+      "version": "2.1.0",
+      "archive": "fs_2.1.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/fs_2.1.0.tar.gz",
+      "sha256": "7088af1117d65c4ceb144b532e323f197fc8243b1d704bf6edf40774789829cd"
+    },
+    {
+      "component": "ggplot2",
+      "version": "4.0.3",
+      "archive": "ggplot2_4.0.3.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/ggplot2_4.0.3.tar.gz",
+      "sha256": "690224bd61642b6222adb109470988e87f786e193cca77a15c0923cf9da73fa5"
+    },
+    {
+      "component": "glue",
+      "version": "1.8.1",
+      "archive": "glue_1.8.1.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/glue_1.8.1.tar.gz",
+      "sha256": "1c55905d3efc3d5c199ceb0bd12218e97f0d4c64df6038ff41ecef415478a122"
+    },
+    {
+      "component": "gtable",
+      "version": "0.3.6",
+      "archive": "gtable_0.3.6.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/gtable_0.3.6.tar.gz",
+      "sha256": "d305a5fa11278b649d2d8edc5288bf28009be888a42be58ff8714018e49de0ef"
+    },
+    {
+      "component": "highr",
+      "version": "0.12",
+      "archive": "highr_0.12.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/highr_0.12.tar.gz",
+      "sha256": "e8e1d6460022a9948799602d6b95dc78fbfa318ff6f0627e95c20b7190fc612b"
+    },
+    {
+      "component": "hms",
+      "version": "1.1.4",
+      "archive": "hms_1.1.4.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/hms_1.1.4.tar.gz",
+      "sha256": "efc525f797b62b3740d06c6fa8202593ab5aa4fc1edeefb76b6eb9be89e87b94"
+    },
+    {
+      "component": "htmltools",
+      "version": "0.5.9",
+      "archive": "htmltools_0.5.9.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/htmltools_0.5.9.tar.gz",
+      "sha256": "19308618da485818f69dcfeeadd2ddc81d43a736a74519df7b3fd98e13128afd"
+    },
+    {
+      "component": "htmlwidgets",
+      "version": "1.6.4",
+      "archive": "htmlwidgets_1.6.4.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/htmlwidgets_1.6.4.tar.gz",
+      "sha256": "7cb08f0b30485dac26f72e4056ec4ed8825d1398e8b9f25ed63db228fe3a0ed0"
+    },
+    {
+      "component": "httpuv",
+      "version": "1.6.17",
+      "archive": "httpuv_1.6.17.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/httpuv_1.6.17.tar.gz",
+      "sha256": "d18506e13546b8bcd022446bb8344434cc786c2bbe8b3152909e1da42c1d6273"
+    },
+    {
+      "component": "isoband",
+      "version": "0.3.0",
+      "archive": "isoband_0.3.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/isoband_0.3.0.tar.gz",
+      "sha256": "fe8d3d58ca75bbee32f389152ac0058818f3f76f09c9867949531de7abc424ac"
+    },
+    {
+      "component": "jquerylib",
+      "version": "0.1.4",
+      "archive": "jquerylib_0.1.4.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/jquerylib_0.1.4.tar.gz",
+      "sha256": "f0bcc11dcde3a6ff180277e45c24642d3da3c8690900e38f44495efbc9064411"
+    },
+    {
+      "component": "jsonlite",
+      "version": "2.0.0",
+      "archive": "jsonlite_2.0.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/jsonlite_2.0.0.tar.gz",
+      "sha256": "75eb910c82b350ec33f094779da0f87bff154c232e4ae39c9896a9b89f3ac82d"
+    },
+    {
+      "component": "KernSmooth",
+      "version": "2.23-26",
+      "archive": "KernSmooth_2.23-26.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/Archive/KernSmooth/KernSmooth_2.23-26.tar.gz",
+      "sha256": "b465bdac197f7faa787e625412ae03d1b7c2c134b1c924cfeb775faf9c4da73e"
+    },
+    {
+      "component": "knitr",
+      "version": "1.52",
+      "archive": "knitr_1.52.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/knitr_1.52.tar.gz",
+      "sha256": "bdd66a02dfba08a4c644b38a6ae08f6ba915c16d6b6ab6a188ec193c35905ff2"
+    },
+    {
+      "component": "labeling",
+      "version": "0.4.3",
+      "archive": "labeling_0.4.3.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/labeling_0.4.3.tar.gz",
+      "sha256": "c62f4fc2cc74377d7055903c5f1913b7295f7587456fe468592738a483e264f2"
+    },
+    {
+      "component": "later",
+      "version": "1.4.8",
+      "archive": "later_1.4.8.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/later_1.4.8.tar.gz",
+      "sha256": "ce5d88b3fd1df409eaa21aa53bf20b1a9331f75cd69e7e9b2a27b40d2290d219"
+    },
+    {
+      "component": "lattice",
+      "version": "0.22-9",
+      "archive": "lattice_0.22-9.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/Archive/lattice/lattice_0.22-9.tar.gz",
+      "sha256": "b72ad4ed2e5269fa7cf668e46f83a9b5d9d5f8fdcbc5b9886531ca19dffca4ba"
+    },
+    {
+      "component": "lattice",
+      "version": "0.23-1",
+      "archive": "lattice_0.23-1.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/lattice_0.23-1.tar.gz",
+      "sha256": "34e9b2fc023582c4246959b543c331233c62118efd922bcc1ba72b4888adc590"
+    },
+    {
+      "component": "lazyeval",
+      "version": "0.2.3",
+      "archive": "lazyeval_0.2.3.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/lazyeval_0.2.3.tar.gz",
+      "sha256": "c65db1997b195a7bb0ab3afbb834345ea277b428b2736eeded4242629e86adcb"
+    },
+    {
+      "component": "lifecycle",
+      "version": "1.0.5",
+      "archive": "lifecycle_1.0.5.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/lifecycle_1.0.5.tar.gz",
+      "sha256": "61841e3e6edba056a88355a3f1d6698ab8d5d9cb3c05f2af0ec5a44ab516f8ee"
+    },
+    {
+      "component": "magrittr",
+      "version": "2.0.5",
+      "archive": "magrittr_2.0.5.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/magrittr_2.0.5.tar.gz",
+      "sha256": "3f5b5b1d4e6d12807a95c50b6c88cb1d8af2c5eb5213f08bfe58f278eca2ed23"
+    },
+    {
+      "component": "MASS",
+      "version": "7.3-65",
+      "archive": "MASS_7.3-65.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/Archive/MASS/MASS_7.3-65.tar.gz",
+      "sha256": "b07ef1e3c364ce56269b4a8a7759cc9f87c876554f91293437bb578cfe38172f"
+    },
+    {
+      "component": "Matrix",
+      "version": "1.7-5",
+      "archive": "Matrix_1.7-5.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/Archive/Matrix/Matrix_1.7-5.tar.gz",
+      "sha256": "308b0edd7bcb023a8bb50cc5cec98e66b3658c94a5badfb1ce6024e595fa8a83"
+    },
+    {
+      "component": "Matrix",
+      "version": "1.7-6",
+      "archive": "Matrix_1.7-6.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/Matrix_1.7-6.tar.gz",
+      "sha256": "694239dbe47e659d6d39a49af95157f46bd94977c283df00c4e8a016601cf143"
+    },
+    {
+      "component": "memoise",
+      "version": "2.0.1",
+      "archive": "memoise_2.0.1.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/memoise_2.0.1.tar.gz",
+      "sha256": "f85034ee98c8ca07fb3cd826142c1cd1e1e5747075a94c75a45783bbc4fe2deb"
+    },
+    {
+      "component": "mgcv",
+      "version": "1.9-4",
+      "archive": "mgcv_1.9-4.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/mgcv_1.9-4.tar.gz",
+      "sha256": "a98159698afb269e06a46cac1f945bf2b3427a2dd587c6f2efd67ede90089372"
+    },
+    {
+      "component": "mime",
+      "version": "0.13",
+      "archive": "mime_0.13.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/mime_0.13.tar.gz",
+      "sha256": "7132834cf3c3388eff12bad376d69fbcf8275acc37d36c290e59174fe3c7f3eb"
+    },
+    {
+      "component": "nlme",
+      "version": "3.1-169",
+      "archive": "nlme_3.1-169.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/Archive/nlme/nlme_3.1-169.tar.gz",
+      "sha256": "51b92f1b543d2eb5915478965dab05a9094e1675a160138d49963eb3a0e7fdb8"
+    },
+    {
+      "component": "nnet",
+      "version": "7.3-20",
+      "archive": "nnet_7.3-20.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/Archive/nnet/nnet_7.3-20.tar.gz",
+      "sha256": "8f33e17e0eb161cfbc1bfee4875baa23c66fcdba8215a64a63402b099db2b555"
+    },
+    {
+      "component": "otel",
+      "version": "0.2.0",
+      "archive": "otel_0.2.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/otel_0.2.0.tar.gz",
+      "sha256": "ef8afe5a1bc8074bbeb8a84134699ef348a1f8ac629ffba25ee43ea7bcd8dd17"
+    },
+    {
+      "component": "pillar",
+      "version": "1.11.1",
+      "archive": "pillar_1.11.1.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/pillar_1.11.1.tar.gz",
+      "sha256": "056ce154238c9b5b8d5dcbcb52e1bc51d33870ce08c8a9ca9496478bd59f4653"
+    },
+    {
+      "component": "pkgconfig",
+      "version": "2.0.3",
+      "archive": "pkgconfig_2.0.3.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/pkgconfig_2.0.3.tar.gz",
+      "sha256": "330fef440ffeb842a7dcfffc8303743f1feae83e8d6131078b5a44ff11bc3850"
+    },
+    {
+      "component": "prettyunits",
+      "version": "1.2.0",
+      "archive": "prettyunits_1.2.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/prettyunits_1.2.0.tar.gz",
+      "sha256": "f059f27e2a5c82e351fe05b87ad712f7afc273c651450453f59d99af5deeacea"
+    },
+    {
+      "component": "processx",
+      "version": "3.9.0",
+      "archive": "processx_3.9.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/processx_3.9.0.tar.gz",
+      "sha256": "cdfef9035405891d8b104b258a40f62656f215aba7dcdc9f3226203c4c8fb354"
+    },
+    {
+      "component": "progress",
+      "version": "1.2.3",
+      "archive": "progress_1.2.3.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/progress_1.2.3.tar.gz",
+      "sha256": "ea2b079b894de85c3ab12088c9c52aec06432245047a961d5b4b8aa6889f9276"
+    },
+    {
+      "component": "promises",
+      "version": "1.5.0",
+      "archive": "promises_1.5.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/promises_1.5.0.tar.gz",
+      "sha256": "bb68fd4065cc072996aed416f0b2388f58738797a3a38024720c29d67164747d"
+    },
+    {
+      "component": "ps",
+      "version": "1.9.3",
+      "archive": "ps_1.9.3.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/ps_1.9.3.tar.gz",
+      "sha256": "7b227f0627709a2073daf960ac612a0b87d03e18f7dd5c1938048ed440ef2e68"
+    },
+    {
+      "component": "R",
+      "version": "4.6.1",
+      "archive": "R-4.6.1.tar.gz",
+      "source": "https://cran.r-project.org/src/base/R-4/R-4.6.1.tar.gz",
+      "sha256": "4da6e61d2c0aac5f14a2e7e432cb5fcc269efe83da4293050ba7f03dff4e2cf4"
+    },
+    {
+      "component": "R6",
+      "version": "2.6.1",
+      "archive": "R6_2.6.1.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/R6_2.6.1.tar.gz",
+      "sha256": "59c6eba8b1b912eb7e104f65053235604be853425ee67c152ac4e86a1f2073b4"
+    },
+    {
+      "component": "rappdirs",
+      "version": "0.3.4",
+      "archive": "rappdirs_0.3.4.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/rappdirs_0.3.4.tar.gz",
+      "sha256": "2320ebc9ef3b1a32a1e63f94a6ce2c1c34d66782221a6531e786804f681abc66"
+    },
+    {
+      "component": "RColorBrewer",
+      "version": "1.1-3",
+      "archive": "RColorBrewer_1.1-3.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/RColorBrewer_1.1-3.tar.gz",
+      "sha256": "4f42f5423c45688b39f492c7892d93f37b4541831c8ffb140364d2bd89031ac0"
+    },
+    {
+      "component": "Rcpp",
+      "version": "1.1.2",
+      "archive": "Rcpp_1.1.2.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/Rcpp_1.1.2.tar.gz",
+      "sha256": "2746cf2fb188e5f0a84dbf5c8f68915b54564ed33e5754572f174e7b32e7f4f3"
+    },
+    {
+      "component": "readxl",
+      "version": "1.6.0",
+      "archive": "readxl_1.6.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/readxl_1.6.0.tar.gz",
+      "sha256": "16077587d5188449819a465c7b2065934653f80e36710da911ae238f772b36d1"
+    },
+    {
+      "component": "rematch",
+      "version": "2.0.0",
+      "archive": "rematch_2.0.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/rematch_2.0.0.tar.gz",
+      "sha256": "15daf7bf2907aef8503635bc8631fce9fd75248a1fc2496825588c4bdf785c26"
+    },
+    {
+      "component": "rlang",
+      "version": "1.3.0",
+      "archive": "rlang_1.3.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/rlang_1.3.0.tar.gz",
+      "sha256": "80aa537d49e72265f443a15e8936128af583caa5e572086518b503cbf064279c"
+    },
+    {
+      "component": "rmarkdown",
+      "version": "2.32",
+      "archive": "rmarkdown_2.32.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/rmarkdown_2.32.tar.gz",
+      "sha256": "f7fab8ae670d18a4b91409d11e4275b565c4081d77c4522443d01f94a8c2acee"
+    },
+    {
+      "component": "rpart",
+      "version": "4.1.27",
+      "archive": "rpart_4.1.27.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/rpart_4.1.27.tar.gz",
+      "sha256": "3183552d74f02749a70e2b989591c561ca0f7c146034f415748acc8480ca4050"
+    },
+    {
+      "component": "S7",
+      "version": "0.2.2",
+      "archive": "S7_0.2.2.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/S7_0.2.2.tar.gz",
+      "sha256": "6f33245dde05b74265b1c4d379e034bc3a8923d41e7b52e6e75a75ce97d42af7"
+    },
+    {
+      "component": "sass",
+      "version": "0.4.10",
+      "archive": "sass_0.4.10.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/sass_0.4.10.tar.gz",
+      "sha256": "4adb4c243f74d811276529e346deaa064bce28dbfbb837208fc85f2c47b79b30"
+    },
+    {
+      "component": "scales",
+      "version": "1.4.0",
+      "archive": "scales_1.4.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/scales_1.4.0.tar.gz",
+      "sha256": "d55ef5f08c92652d7a95cfa27584024723ab17873f1b2577dd488cb7c883ceee"
+    },
+    {
+      "component": "shiny",
+      "version": "1.14.0",
+      "archive": "shiny_1.14.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/shiny_1.14.0.tar.gz",
+      "sha256": "4a6945ed450effdb90b44ca0439e241f13488af59508be1c2fdab3f4de9dad11"
+    },
+    {
+      "component": "sourcetools",
+      "version": "0.1.7-2",
+      "archive": "sourcetools_0.1.7-2.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/sourcetools_0.1.7-2.tar.gz",
+      "sha256": "07e584b780d7fcdfa5b527214361fface49350ab49cf901bd3d5c15950e4f1a7"
+    },
+    {
+      "component": "spatial",
+      "version": "7.3-18",
+      "archive": "spatial_7.3-18.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/Archive/spatial/spatial_7.3-18.tar.gz",
+      "sha256": "cc46693d69745af8ec95b557e7a8ee4e1865df69dc0d25723629fd8e9ea43055"
+    },
+    {
+      "component": "stringi",
+      "version": "1.8.9",
+      "archive": "stringi_1.8.9.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/stringi_1.8.9.tar.gz",
+      "sha256": "427fcebd281d7ea850becce75e0807576dd394a723a814b2d487419b93275a33"
+    },
+    {
+      "component": "survival",
+      "version": "3.8-12",
+      "archive": "survival_3.8-12.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/survival_3.8-12.tar.gz",
+      "sha256": "ebb70d9a4e7e8ad7f886a563184d6f079e64c0591a0bce219ae90967f0bdf994"
+    },
+    {
+      "component": "survival",
+      "version": "3.8-6",
+      "archive": "survival_3.8-6.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/Archive/survival/survival_3.8-6.tar.gz",
+      "sha256": "9a4c0a35d86c64ec5a6e6cf179ab22dcffb5ce1d313d2880a09f1e53422699d7"
+    },
+    {
+      "component": "svglite",
+      "version": "2.2.2",
+      "archive": "svglite_2.2.2.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/svglite_2.2.2.tar.gz",
+      "sha256": "5bf884ee031fbf3f5c60bcedc0532e4b77763e924a1508f584329aae9686187c"
+    },
+    {
+      "component": "systemfonts",
+      "version": "1.3.2",
+      "archive": "systemfonts_1.3.2.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/systemfonts_1.3.2.tar.gz",
+      "sha256": "828a1780e540bd05107cd0a1ddfac6727de8aef1d6d82b43591dabaf753dd135"
+    },
+    {
+      "component": "textshaping",
+      "version": "1.0.5",
+      "archive": "textshaping_1.0.5.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/textshaping_1.0.5.tar.gz",
+      "sha256": "12209d5535884b8b49bb56de10996cd797f806f44c691eefae2e8eb9786443dd"
+    },
+    {
+      "component": "tibble",
+      "version": "3.3.1",
+      "archive": "tibble_3.3.1.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/tibble_3.3.1.tar.gz",
+      "sha256": "fb309f8a1939021b237c7e85ff7ad6e8ff5acd57a6230d220a452094b492b28f"
+    },
+    {
+      "component": "tinytex",
+      "version": "0.61",
+      "archive": "tinytex_0.61.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/tinytex_0.61.tar.gz",
+      "sha256": "78300dc6163911c7de3efbe225c3bf455287c67886ed0e5a04fd347c6eaf2680"
+    },
+    {
+      "component": "utf8",
+      "version": "1.2.6",
+      "archive": "utf8_1.2.6.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/utf8_1.2.6.tar.gz",
+      "sha256": "4589f8b72291329e70b7f3a8c20f2feb4e7764eebad2e6976bc9a3eee7686ce9"
+    },
+    {
+      "component": "vctrs",
+      "version": "0.7.3",
+      "archive": "vctrs_0.7.3.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/vctrs_0.7.3.tar.gz",
+      "sha256": "b45078413e06ac624dddb7221a3a43908b405c8abec09822cb86638d30b0435b"
+    },
+    {
+      "component": "viridisLite",
+      "version": "0.4.3",
+      "archive": "viridisLite_0.4.3.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/viridisLite_0.4.3.tar.gz",
+      "sha256": "433be9bde66234dc76301fb4ffbbc9fc74bab5c14f4548d8ef2fc0065e121ef5"
+    },
+    {
+      "component": "withr",
+      "version": "3.0.3",
+      "archive": "withr_3.0.3.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/withr_3.0.3.tar.gz",
+      "sha256": "d86c6454164fc85678bfc85e2a6cce42f7461d45fa9a87de71f376e7956c991e"
+    },
+    {
+      "component": "xfun",
+      "version": "0.62",
+      "archive": "xfun_0.62.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/xfun_0.62.tar.gz",
+      "sha256": "56102222347f91ef0446dfb203016ff5935d6d6b0bff3b8776673c5e46a94baf"
+    },
+    {
+      "component": "xml2",
+      "version": "1.6.0",
+      "archive": "xml2_1.6.0.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/xml2_1.6.0.tar.gz",
+      "sha256": "b0660edab0a839866a0cccd44721c54d497000fd6577a25106a33280318bf579"
+    },
+    {
+      "component": "xtable",
+      "version": "1.8-8",
+      "archive": "xtable_1.8-8.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/xtable_1.8-8.tar.gz",
+      "sha256": "b999c031b91255fb92134b0e70e5f84c5609e9312c0518393b9d0a4aaf6b2510"
+    },
+    {
+      "component": "yaml",
+      "version": "2.3.12",
+      "archive": "yaml_2.3.12.tar.gz",
+      "source": "https://cran.r-project.org/src/contrib/yaml_2.3.12.tar.gz",
+      "sha256": "80ccf3dde851133ef3e333b818a817c296c6ccdacfc4709cd466995289cd556c"
+    }
+  ],
+  "expected_archives": 89,
+  "verified_archives": 89,
+  "missing": [],
+  "native_library_audit": "pending; see licenses/REDISTRIBUTION.md"
+}

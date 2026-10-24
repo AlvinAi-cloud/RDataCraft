@@ -1,0 +1,125 @@
+name: Native platform validation
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+    inputs:
+      upload_development_bundles:
+        description: 'Upload binary test bundles only after reviewing redistribution status'
+        required: false
+        default: false
+        type: boolean
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  mac:
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            arch: arm64
+          - runner: macos-15-intel
+            arch: x86_64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      - run: python3 scripts/bootstrap.py --arch ${{ matrix.arch }} --runtime-root runtime
+      - run: python3 scripts/test.py --require-node
+      - run: ./scripts/rscript.sh scripts/collect_licenses.R
+      - run: python3 scripts/fetch_sources.py
+      - run: python3 scripts/fetch_native_sources.py
+      - run: python3 scripts/build_desktop.py --arch ${{ matrix.arch }} --runtime-root runtime --zip
+      - name: Package and exercise the read-only Mac installer
+        run: |
+          version=$(python3 -c 'import json; print(json.load(open("config/release.json"))["version"])')
+          python3 scripts/package_installers.py --mac-app "dist/RDataCraft v${version}.app" --arch ${{ matrix.arch }}
+          python3 scripts/test_macos_bundle.py --dmg "dist/RDataCraft-${version}-macos-${{ matrix.arch }}.dmg" --output artifacts/installed-mac
+      - name: Upload validation reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: rdatacraft-validation-macos-${{ matrix.arch }}
+          path: |
+            artifacts/validation-*.json
+            artifacts/installed-mac/**/*.json
+            artifacts/installed-mac/*.log
+          if-no-files-found: warn
+      - name: Upload requested development bundle
+        if: github.event_name == 'workflow_dispatch' && inputs.upload_development_bundles
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: rdatacraft-macos-${{ matrix.arch }}
+          path: |
+            dist/*.zip
+            dist/*.sha256
+            dist/*.dmg
+  windows:
+    timeout-minutes: 45
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          r-version: '4.6.1'
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+      - run: Rscript --vanilla scripts/install.R
+      - run: python scripts/test.py --require-node
+      - run: Rscript --vanilla scripts/collect_licenses.R
+      - run: python scripts/fetch_sources.py
+      - run: python scripts/fetch_native_sources.py
+      - run: python scripts/package_portable.py
+      - name: Validate the packaged Windows runtime without Python or Node
+        shell: pwsh
+        run: |
+          $bundle = Get-ChildItem dist -Directory -Filter '*windows*portable' | Select-Object -First 1
+          if (!$bundle) { throw 'Windows bundle was not created.' }
+          & (Join-Path $bundle.FullName 'Validate RDataCraft.cmd') --no-pause
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Install the Windows packaging tool
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory artifacts/release-tools -Force | Out-Null
+          Invoke-WebRequest 'https://downloads.sourceforge.net/project/nsis/NSIS%203/3.13/nsis-3.13.zip' -OutFile artifacts/release-tools/nsis.zip
+          if ((Get-FileHash artifacts/release-tools/nsis.zip -Algorithm SHA256).Hash -ne 'ba63dffc4410ee89193e1cb5a41989991bd77c61068da17e3156d136b7b0b3d8') { throw 'NSIS download hash differs from the official release.' }
+          Expand-Archive artifacts/release-tools/nsis.zip artifacts/release-tools
+      - name: Build and exercise Windows setup and uninstall
+        shell: pwsh
+        run: |
+          $bundle = Get-ChildItem dist -Directory -Filter '*windows*portable' | Select-Object -First 1
+          $nsis = Join-Path $PWD 'artifacts/release-tools/nsis-3.13'
+          python scripts/package_installers.py --windows-bundle $bundle.FullName --makensis "$nsis/makensis.exe" --nsis-dir $nsis
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $version = (Get-Content config/release.json -Raw | ConvertFrom-Json).version
+          ./scripts/test_windows_installer.ps1 -Installer "dist/RDataCraft-$version-windows-x64-setup.exe"
+      - name: Upload validation reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: rdatacraft-validation-windows-x64
+          path: |
+            artifacts/validation-*.json
+            dist/*/artifacts/validation-native-*.json
+          if-no-files-found: warn
+      - name: Upload requested development bundle
+        if: github.event_name == 'workflow_dispatch' && inputs.upload_development_bundles
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: rdatacraft-windows-x64
+          path: |
+            dist/*.zip
+            dist/*.sha256
+            dist/*-setup.exe

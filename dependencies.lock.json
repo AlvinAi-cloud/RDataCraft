@@ -1,0 +1,431 @@
+{
+  "r_version": "4.6.1",
+  "platform": "x86_64-apple-darwin20",
+  "packages": [
+    {
+      "package": "base64enc",
+      "version": "0.1-6",
+      "license": "GPL-2 | GPL-3"
+    },
+    {
+      "package": "boot",
+      "version": "1.3-32",
+      "license": "Unlimited"
+    },
+    {
+      "package": "bslib",
+      "version": "0.12.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "cachem",
+      "version": "1.1.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "cellranger",
+      "version": "1.1.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "class",
+      "version": "7.3-23",
+      "license": "GPL-2 | GPL-3"
+    },
+    {
+      "package": "cli",
+      "version": "3.6.6",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "cluster",
+      "version": "2.1.8.2",
+      "license": "GPL (>= 2)"
+    },
+    {
+      "package": "codetools",
+      "version": "0.2-20",
+      "license": "GPL"
+    },
+    {
+      "package": "commonmark",
+      "version": "2.0.0",
+      "license": "BSD_2_clause + file LICENSE"
+    },
+    {
+      "package": "cpp11",
+      "version": "0.5.5",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "crayon",
+      "version": "1.5.3",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "crosstalk",
+      "version": "1.2.2",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "digest",
+      "version": "0.6.39",
+      "license": "GPL (>= 2)"
+    },
+    {
+      "package": "DT",
+      "version": "0.34.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "evaluate",
+      "version": "1.0.5",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "farver",
+      "version": "2.1.2",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "fastmap",
+      "version": "1.2.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "fontawesome",
+      "version": "0.5.3",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "foreign",
+      "version": "0.8-91",
+      "license": "GPL (>= 2)"
+    },
+    {
+      "package": "fs",
+      "version": "2.1.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "ggplot2",
+      "version": "4.0.3",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "glue",
+      "version": "1.8.1",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "gtable",
+      "version": "0.3.6",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "highr",
+      "version": "0.12",
+      "license": "GPL"
+    },
+    {
+      "package": "hms",
+      "version": "1.1.4",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "htmltools",
+      "version": "0.5.9",
+      "license": "GPL (>= 2)"
+    },
+    {
+      "package": "htmlwidgets",
+      "version": "1.6.4",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "httpuv",
+      "version": "1.6.17",
+      "license": "GPL (>= 2) | file LICENSE"
+    },
+    {
+      "package": "isoband",
+      "version": "0.3.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "jquerylib",
+      "version": "0.1.4",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "jsonlite",
+      "version": "2.0.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "KernSmooth",
+      "version": "2.23-26",
+      "license": "Unlimited"
+    },
+    {
+      "package": "knitr",
+      "version": "1.52",
+      "license": "GPL"
+    },
+    {
+      "package": "labeling",
+      "version": "0.4.3",
+      "license": "MIT + file LICENSE | Unlimited"
+    },
+    {
+      "package": "later",
+      "version": "1.4.8",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "lattice",
+      "version": "0.22-9",
+      "license": "GPL (>= 2)"
+    },
+    {
+      "package": "lazyeval",
+      "version": "0.2.3",
+      "license": "GPL-3"
+    },
+    {
+      "package": "lifecycle",
+      "version": "1.0.5",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "magrittr",
+      "version": "2.0.5",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "MASS",
+      "version": "7.3-65",
+      "license": "GPL-2 | GPL-3"
+    },
+    {
+      "package": "Matrix",
+      "version": "1.7-5",
+      "license": "GPL (>= 2) | file LICENCE"
+    },
+    {
+      "package": "memoise",
+      "version": "2.0.1",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "mgcv",
+      "version": "1.9-4",
+      "license": "GPL (>= 2)"
+    },
+    {
+      "package": "mime",
+      "version": "0.13",
+      "license": "GPL"
+    },
+    {
+      "package": "nlme",
+      "version": "3.1-169",
+      "license": "GPL (>= 2)"
+    },
+    {
+      "package": "nnet",
+      "version": "7.3-20",
+      "license": "GPL-2 | GPL-3"
+    },
+    {
+      "package": "otel",
+      "version": "0.2.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "pillar",
+      "version": "1.11.1",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "pkgconfig",
+      "version": "2.0.3",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "prettyunits",
+      "version": "1.2.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "processx",
+      "version": "3.9.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "progress",
+      "version": "1.2.3",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "promises",
+      "version": "1.5.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "ps",
+      "version": "1.9.3",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "R6",
+      "version": "2.6.1",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "rappdirs",
+      "version": "0.3.4",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "RColorBrewer",
+      "version": "1.1-3",
+      "license": "Apache License 2.0"
+    },
+    {
+      "package": "Rcpp",
+      "version": "1.1.2",
+      "license": "GPL (>= 2)"
+    },
+    {
+      "package": "readxl",
+      "version": "1.6.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "rematch",
+      "version": "2.0.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "rlang",
+      "version": "1.3.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "rmarkdown",
+      "version": "2.32",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "rpart",
+      "version": "4.1.27",
+      "license": "GPL-2 | GPL-3"
+    },
+    {
+      "package": "S7",
+      "version": "0.2.2",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "sass",
+      "version": "0.4.10",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "scales",
+      "version": "1.4.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "shiny",
+      "version": "1.14.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "sourcetools",
+      "version": "0.1.7-2",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "spatial",
+      "version": "7.3-18",
+      "license": "GPL-2 | GPL-3"
+    },
+    {
+      "package": "stringi",
+      "version": "1.8.9",
+      "license": "file LICENSE"
+    },
+    {
+      "package": "survival",
+      "version": "3.8-6",
+      "license": "LGPL (>= 2)"
+    },
+    {
+      "package": "svglite",
+      "version": "2.2.2",
+      "license": "GPL (>= 2)"
+    },
+    {
+      "package": "systemfonts",
+      "version": "1.3.2",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "textshaping",
+      "version": "1.0.5",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "tibble",
+      "version": "3.3.1",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "tinytex",
+      "version": "0.61",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "utf8",
+      "version": "1.2.6",
+      "license": "Apache License (== 2.0) | file LICENSE"
+    },
+    {
+      "package": "vctrs",
+      "version": "0.7.3",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "viridisLite",
+      "version": "0.4.3",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "withr",
+      "version": "3.0.3",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "xfun",
+      "version": "0.62",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "xml2",
+      "version": "1.6.0",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "package": "xtable",
+      "version": "1.8-8",
+      "license": "GPL (>= 2)"
+    },
+    {
+      "package": "yaml",
+      "version": "2.3.12",
+      "license": "BSD_3_clause + file LICENSE"
+    }
+  ]
+}

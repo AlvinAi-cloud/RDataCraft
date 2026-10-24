@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<style>body{background-color:white;}</style>
+
+  <title>RDataCraft PCA analysis guide</title>
+  <meta charset="utf-8"/>
+  <style>body{font:16px system-ui;line-height:1.65;max-width:880px;margin:40px auto;padding:0 24px;color:#263b32}h1,h2,h3,h4{color:#247763}li{margin-bottom:12px}.inline-note{background:#f1f5f2;padding:16px}</style>
+</head>
+<html>
+  <body>
+    <h1>RDataCraft 0.3 · PCA analysis guide</h1>
+    <div class="tutorial-guide">
+      <h3>Principal component analysis (PCA)</h3>
+      <p>
+        <strong>Which combinations of measurements explain variation among samples?</strong>
+      </p>
+      <p>PCA summarizes multiple numeric variables with orthogonal components. This example centers and SD-scales measurements and keeps sample labels and group labels as metadata.</p>
+      <p>
+        <strong>Try this: </strong>
+        Add this example to open Analysis with 12 synthetic cell profiles and five selected measurements. Sample, Group and the numeric SampleID are metadata, not PCA variables. Three linked views show scores, loadings and explained variance.
+      </p>
+      <h4>Step-by-step analysis</h4>
+      <ol>
+        <li>Inspect Data table: each row is one synthetic sample; CellArea, Intensity, Texture, Roundness and Signal are measurements on different scales. Do not transpose the table or include SampleID.</li>
+        <li>In Analysis → PCA settings, confirm the five measurements, Sample as the label column, Group as the color column, and unit-SD scaling enabled. All 12 rows are complete; no imputation is performed.</li>
+        <li>Read Explained variance first. PC1 accounts for the largest share of total centered/scaled variation; PC2 accounts for the largest remaining orthogonal share. The cumulative column shows how much the chosen components retain.</li>
+        <li>Open the Scores linked graph: one point represents one sample. Nearby points have similar coordinates in the displayed components. Check axis percentages before assuming two components summarize the whole dataset. Enable sample labels to identify individual points.</li>
+        <li>Open Loadings: arrow coordinates are eigenvector coefficients for each variable. Variables with similar directions contribute similarly to these components; opposite directions indicate opposite contributions. These coefficients are not variable–component correlations.</li>
+        <li>Open Explained variance: bars show the individual component percentages and the line shows their cumulative sum. Select other component pairs in PCA settings if more structure needs inspection. Each linked view retains its own settings.</li>
+        <li>Export Variance, Scores, Loadings and Preprocessing CSVs from Analysis. Export editable SVG/PDF from Graph, or add the three views to Figure layout. Save the study to retain the selected columns and preprocessing.</li>
+      </ol>
+      <h4>Try changing the analysis</h4>
+      <ul>
+        <li>Scaling exercise: in the Scores view, switch unit-SD scaling off and compare explained variance and loadings. Large-variance measurements can dominate an unscaled PCA. Restore scaling before comparing with the other linked views.</li>
+        <li>Missing-data exercise: clear one measurement in Data table. The default policy stops the analysis. Explicitly choose Exclude incomplete rows to use 11 samples; review the excluded-row note. Undo the cell edit and restore the default policy.</li>
+        <li>Metadata exercise: rename group labels or change their colors. Scores and explained variance should stay the same because groups do not enter the calculation. Editing a selected measurement should recompute them.</li>
+      </ul>
+      <p class="inline-note">This dataset is invented for teaching, not biological evidence. PCA is exploratory and sensitive to scaling, outliers, batch effects and variable choice. Group separation is not a significance test or a validated classifier; do not report a PCA P value. Component signs are arbitrary, so mirrored plots from other software can represent the same solution.</p>
+      <p>
+        <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/prcomp.html" target="_blank" rel="noopener">R PCA method reference</a>
+      </p>
+    </div>
+    <h3>Reference values for the supplied synthetic data</h3>
+    <p>With all five measurements centered and SD-scaled, PC1 explains 89.7394% and PC2 8.7294% of variation; together they explain 98.4688%. All 12 samples are included. These percentages describe this invented dataset, not general biological expectations.</p>
+  </body>
+</html>
+</html>
