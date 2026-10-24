@@ -18,9 +18,11 @@ Apple Silicon uses ARM R and ARM packages (no Rosetta requirement) and requires 
 
 ## Windows x64
 
-Windows uses the same local app UI in the default browser, with file-upload controls and browser downloads in place of macOS native dialogs. Unzip a Windows portable bundle into a user-owned folder and launch **Launch RDataCraft.cmd**. Keep its console open; closing it stops the local engine. The workspace binds only to `127.0.0.1`, chooses an available port, and opens no study automatically. Browser tabs warn before closing unsaved work. Save projects through the app's Save button and reopen the downloaded `.rdatacraft` file to continue later.
+Install the Windows x64 setup and open **RDataCraft** from the Start menu, or unzip a portable bundle and open **RDataCraft.exe**. The app has a native WinForms window, menus and Open/Save dialogs. Microsoft WebView2 renders the shared interface inside that window; no external browser or console is opened. R and Windows packages are bundled, and .NET is self-contained. The installer supplies the official Evergreen WebView2 runtime when missing; that shared Microsoft component receives its own security updates.
 
-A Windows portable bundle contains Windows R and compiled Windows packages. If using a source folder instead, install official x64 R, run `Rscript --vanilla scripts/install.R` from this folder, then launch the CMD file. PowerShell execution follows the user's normal execution policy; the launcher does not bypass or weaken it. If local policy blocks PS1 files, run `Rscript --vanilla scripts/portable.R` from an R-enabled terminal.
+Each New study opens another window with its own R engine. Closing an edited study offers Save, Don’t save or Cancel. Closing a window stops its R engine and analysis workers. Help → Show engine log displays startup errors. The internal engine binds only to `127.0.0.1`; the native bridge accepts messages only from that window’s endpoint.
+
+For source development, install official x64 R and the .NET 10 SDK, then run `Rscript --vanilla scripts/install.R`. The CMD launcher uses the native executable when packaged. Without it, the source launcher retains the optional local browser workflow. PowerShell execution follows the user's normal execution policy; the launcher does not bypass it.
 
 Double-click **Validate RDataCraft.cmd** to run the R regression suites with the bundled Windows engine, without installing Python or Node. It uses synthetic fixtures and writes logs plus `artifacts/validation-native-0.3.json`; it does not open or change user studies. This utility requires a Windows run to provide Windows execution evidence. The Python runner adds the JavaScript checks when Node is available.
 
@@ -28,13 +30,14 @@ Build the portable bundle on Windows after installing matching dependencies:
 
 ```
 python scripts/test.py
-python scripts/package_portable.py
+python scripts/build_windows.py
+python scripts/package_portable.py --native-host artifacts/windows-host
 ```
 
-The assistant's offline tools run on all three targets. The connected model uses the existing signed-in Codex CLI when its executable is installed. Prompts go through input files and an argument-array process API; shell execution is disabled for model requests. Model plans still pass the same local validators and require Apply to new table copy. Native macOS vector clipboard support is specific to the Mac host; Windows provides SVG/PDF/PNG exports.
+The assistant's offline tools run on all three targets. The connected model uses the existing signed-in Codex CLI when its executable is installed. Prompts go through input files and an argument-array process API; shell execution is disabled for model requests. Model plans still pass the same local validators and require Apply to new table copy. Both desktop hosts expose PDF/SVG clipboard data. Direct paste depends on the receiving application; SVG/PDF/PNG file exports are also available.
 
 ## Verification and delivery
 
 `.github/workflows/platform-builds.yml` defines separate Apple Silicon, Intel and Windows build/test jobs. Each job installs native packages, runs the complete numerical/workflow suite and packages its own artifact. It is a build recipe until it has actually run; a workflow file alone does not certify Windows or Intel hardware. Check the accompanying examination report for the platforms actually exercised in this session. Public distribution would additionally require Apple notarization and Windows code signing, which are not performed without the developer's signing credentials.
 
-The current Windows deliverable is a local-browser portable build target, not a native Windows window host or a cross-compiled Mac binary. Windows ARM is not included in the verified target set.
+Windows packages contain an x64 GUI executable and bundled Windows R. The host can be cross-compiled, but its embedded-window tests must run on Windows. Windows ARM is not included in the verified target set.

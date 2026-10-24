@@ -19,6 +19,8 @@ from sign_macos import binary_paths
 from unittest.mock import patch
 import package_installers
 from fetch_sources import download
+from package_portable import verify_windows_runtime
+import struct
 
 checks = 0
 def check(value, label):
@@ -65,6 +67,24 @@ with tempfile.TemporaryDirectory() as temporary:
     versions = {p["package"]: p["version"] for p in data["packages"]}
     check(set(versions) == {"MASS", "survival"}, "runtime inventory includes recommended packages and excludes R core components")
     check(versions["survival"] == "3.8-12", "runtime inventory records the package actually selected by the app library")
+
+    # The official R installer leaves a 32-bit maintenance utility beside its
+    # x64 runtime. Exclude that utility, while rejecting actual x86 engine code.
+    winhome, winlib = root/'win-R', root/'win-library'
+    engine=winhome/'bin/x64/Rscript.exe'; engine.parent.mkdir(parents=True)
+    def pe(machine):
+        data=bytearray(128);data[:2]=b'MZ';struct.pack_into('<I',data,0x3c,64)
+        data[64:68]=b'PE\0\0';struct.pack_into('<H',data,68,machine);return data
+    engine.write_bytes(pe(0x8664))
+    (winhome/'unins000.exe').write_bytes(pe(0x14c))
+    desc=winlib/'Fixture/DESCRIPTION';desc.parent.mkdir(parents=True)
+    desc.write_text('Package: Fixture\nBuilt: R 4.6.1; x86_64-w64-mingw32; 2026-10-01; windows\n')
+    check(verify_windows_runtime(winhome,winlib)['x64_pe_files']==1,
+          'R installer maintenance utilities do not invalidate the x64 engine audit')
+    engine.write_bytes(pe(0x14c))
+    try:verify_windows_runtime(winhome,winlib)
+    except ValueError:check(True,'Windows packaging still rejects a 32-bit R engine')
+    else:raise AssertionError('A 32-bit R engine passed the x64 audit')
 
     # Bad signing configuration must fail before any installer mutation.
     for certificate, timestamp in [("not-a-thumbprint", "https://timestamp.example.com"),

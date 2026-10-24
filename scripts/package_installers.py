@@ -61,7 +61,7 @@ def nsis_quote(value):
     return str(value).replace('$', '$$').replace('"', '$\\"')
 
 
-def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signtool='signtool.exe'):
+def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signtool='signtool.exe', webview_installer=None):
     bundle = bundle.resolve()
     metadata = json.loads((bundle / 'build-platform.json').read_text())
     if metadata['platform'] != 'Windows' or metadata['architecture'] != 'x86_64' or metadata['version'] != VERSION:
@@ -69,6 +69,11 @@ def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signto
     # Reuse the PE/package audit immediately before embedding the runtime.
     from package_portable import verify_windows_runtime
     audit = verify_windows_runtime(bundle / 'runtime/R', bundle / 'runtime/library')
+    native = (bundle/'RDataCraft.exe').is_file()
+    if native:
+        from fetch_windows_components import verify
+        if not webview_installer:raise SystemExit('The native Windows installer requires --webview-installer for offline setup.')
+        verify(webview_installer)
     output = ROOT / 'dist' / f'RDataCraft-{VERSION}-windows-x64-setup.exe'
     script = ROOT / 'artifacts/installer-staging/windows.nsi'
     script.parent.mkdir(parents=True, exist_ok=True)
@@ -78,9 +83,9 @@ def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signto
         f'Name "RDataCraft {VERSION}"', f'OutFile "{nsis_quote(output)}"',
         f'InstallDir "$LOCALAPPDATA\\Programs\\RDataCraft-{VERSION}"',
         'RequestExecutionLevel user', 'SetCompressor /FINAL zlib',
-        'VIProductVersion "0.3.0.1"', 'VIAddVersionKey "ProductName" "RDataCraft"',
+        'VIProductVersion "0.3.0.2"', 'VIAddVersionKey "ProductName" "RDataCraft"',
         'VIAddVersionKey "FileDescription" "RDataCraft 0.3 development setup"',
-        'VIAddVersionKey "FileVersion" "0.3.0.1"', 'VIAddVersionKey "LegalCopyright" "RDataCraft contributors; GPL-3.0"',
+        'VIAddVersionKey "FileVersion" "0.3.0.2"', 'VIAddVersionKey "LegalCopyright" "RDataCraft contributors; GPL-3.0"',
         '!insertmacro MUI_PAGE_WELCOME', f'!insertmacro MUI_PAGE_LICENSE "{nsis_quote(ROOT / "LICENSE")}"',
         '!insertmacro MUI_PAGE_DIRECTORY', '!insertmacro MUI_PAGE_INSTFILES', '!insertmacro MUI_PAGE_FINISH',
         '!insertmacro MUI_UNPAGE_CONFIRM', '!insertmacro MUI_UNPAGE_INSTFILES', '!insertmacro MUI_LANGUAGE "English"',
@@ -90,7 +95,7 @@ def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signto
         'Section "RDataCraft"', '  SetShellVarContext current', '  SetOutPath "$INSTDIR"',
         f'  File /r "{nsis_quote(bundle)}/*"', '  WriteUninstaller "$INSTDIR\\Uninstall.exe"',
         f'  CreateDirectory "$SMPROGRAMS\\RDataCraft {VERSION}"',
-        f'  CreateShortCut "$SMPROGRAMS\\RDataCraft {VERSION}\\RDataCraft.lnk" "$INSTDIR\\Launch RDataCraft.cmd"',
+        f'  CreateShortCut "$SMPROGRAMS\\RDataCraft {VERSION}\\RDataCraft.lnk" "$INSTDIR\\' + ('RDataCraft.exe"' if native else 'Launch RDataCraft.cmd"'),
         f'  CreateShortCut "$SMPROGRAMS\\RDataCraft {VERSION}\\RDataCraft help.lnk" "$INSTDIR\\examples\\RDataCraft help.html"',
         f'  CreateShortCut "$SMPROGRAMS\\RDataCraft {VERSION}\\Uninstall.lnk" "$INSTDIR\\Uninstall.exe"',
         f'  WriteRegStr HKCU "{key}" "DisplayName" "RDataCraft {VERSION}"',
@@ -101,6 +106,30 @@ def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signto
         f'  WriteRegDWORD HKCU "{key}" "NoRepair" 1', 'SectionEnd',
         'Section "Uninstall"', '  SetShellVarContext current',
     ]
+    if native:
+        # Install Microsoft's separately licensed, signed Evergreen component only
+        # when absent. It remains shared after RDataCraft is uninstalled.
+        section = lines.index('Section "RDataCraft"')
+        lines[section:section] = [
+            'Section "Microsoft WebView2 (if required)"',
+            '  ReadRegStr $0 HKCU "Software\\Microsoft\\EdgeUpdate\\Clients\\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}" "pv"',
+            '  StrCmp $0 "" 0 webview_done',
+            '  SetRegView 32',
+            '  ReadRegStr $0 HKLM "Software\\Microsoft\\EdgeUpdate\\Clients\\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}" "pv"',
+            '  StrCmp $0 "" 0 webview_done',
+            '  InitPluginsDir', '  SetOutPath "$PLUGINSDIR"',
+            f'  File /oname=WebView2Setup.exe "{nsis_quote(webview_installer.resolve())}"',
+            '  DetailPrint "Installing Microsoft WebView2 Runtime…"',
+            '  ExecWait \'"$PLUGINSDIR\\WebView2Setup.exe" /silent /install\' $0',
+            '  StrCmp $0 "0" webview_done',
+            '  IfSilent +2',
+            '  MessageBox MB_OK|MB_ICONSTOP "Microsoft WebView2 could not be installed. Restart Windows and run setup again."',
+            '  SetErrorLevel 1', '  Abort',
+            '  webview_done:', '  SetRegView 64', 'SectionEnd']
+        # The setup itself uses the same app icon and exposes a finish-page launch.
+        lines[1:1] = [f'Icon "{nsis_quote(ROOT/"desktop/windows/RDataCraft.ico")}"',
+                      '!define MUI_FINISHPAGE_RUN "$INSTDIR\\RDataCraft.exe"',
+                      '!define MUI_FINISHPAGE_RUN_TEXT "Open RDataCraft"']
     if certificate or timestamp:
         if os.name != 'nt' or not certificate or not timestamp:
             raise SystemExit('Windows signing needs a Windows host, --sign-certificate and --timestamp-url.')
@@ -151,6 +180,7 @@ if __name__ == '__main__':
     parser.add_argument('--sign-certificate', help='Existing Windows certificate-store SHA-1 thumbprint.')
     parser.add_argument('--timestamp-url', help='HTTPS RFC 3161 endpoint from your signing provider.')
     parser.add_argument('--signtool', default='signtool.exe')
+    parser.add_argument('--webview-installer', type=Path, help='Pinned official offline WebView2 x64 runtime installer.')
     args = parser.parse_args()
     if args.mac_app and args.arch:
         print(mac(args.mac_app, args.arch, args.distribution))
@@ -158,6 +188,6 @@ if __name__ == '__main__':
         if args.distribution and not args.sign_certificate:
             parser.error('Distribution packaging on Windows requires --sign-certificate and --timestamp-url.')
         print(windows(args.windows_bundle, args.makensis, args.nsis_dir,
-                      args.sign_certificate, args.timestamp_url, args.signtool))
+                      args.sign_certificate, args.timestamp_url, args.signtool, args.webview_installer))
     else:
         parser.error('Choose --mac-app/--arch or --windows-bundle/--makensis/--nsis-dir.')

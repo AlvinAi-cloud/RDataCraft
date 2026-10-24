@@ -1,4 +1,6 @@
 $ErrorActionPreference = 'Stop'
+$native = Join-Path $PSScriptRoot 'RDataCraft.exe'
+if (Test-Path -LiteralPath $native) { Start-Process -FilePath $native -ArgumentList $args; return }
 Set-Location -LiteralPath $PSScriptRoot
 $bundled = Join-Path $PSScriptRoot 'runtime\R\bin\x64\Rscript.exe'
 if (!(Test-Path -LiteralPath $bundled)) { $bundled = Join-Path $PSScriptRoot 'runtime\R\bin\Rscript.exe' }

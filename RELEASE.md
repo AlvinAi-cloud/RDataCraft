@@ -14,8 +14,8 @@ application. Advanced R analysis supports methods beyond the presets, with
 reviewed scripts, optional AI assistance and approval before installing missing
 packages. Studies retain data, settings, analysis code and saved results.
 
-The Mac editions use native desktop windows. The Windows x64 edition runs its
-local interface in a browser. Packaged editions include R and required packages.
+Mac and Windows x64 editions use dedicated desktop windows with native menus
+and file dialogs. The Windows installer includes Microsoft WebView2. Packaged editions include R and required packages.
 Connected AI requests use an external service when the user chooses to send them.
 
 ## GitHub Desktop
@@ -84,7 +84,7 @@ signing. [Microsoft SignTool documentation](https://learn.microsoft.com/en-us/wi
 ## Final binary release gates
 
 - Passing reports for the exact final packages on all target systems, including
-  clean machines without system R and a Windows browser workflow check.
+  clean machines without system R and a Windows embedded-window workflow check.
 - Native corresponding-source/build coverage completed; see
   [the source review](licenses/NATIVE_SOURCE_REVIEW.md) and
   [redistribution status](licenses/REDISTRIBUTION.md).

@@ -14,10 +14,15 @@ def portable_arch(system, arch):
         raise ValueError('Choose Darwin arm64/x86_64 or Windows x86_64; Windows ARM is not packaged.')
     return arch
 
+def r_installer_file(path, home):
+    """R's own installer maintenance program is not part of its x64 engine."""
+    return path.parent == home and bool(re.fullmatch(r'unins\d+\.(exe|dat|msg|log)', path.name, re.I))
+
 def verify_windows_runtime(home, library):
     count=0
     for root in [home,library]:
         for f in root.rglob('*'):
+            if r_installer_file(f, home):continue
             if f.suffix.lower() not in ['.exe','.dll']:continue
             data=f.read_bytes()
             try:
@@ -43,6 +48,7 @@ def main():
     ap.add_argument('--runtime-root',type=Path,default=ROOT/'runtime')
     ap.add_argument('--r-home',type=Path,help='Windows R installation to bundle; otherwise query Rscript.')
     ap.add_argument('--output',type=Path)
+    ap.add_argument('--native-host',type=Path,help='Published self-contained Windows desktop host folder.')
     args=ap.parse_args();runtime=args.runtime_root.resolve()
     system=args.target
     try:arch=portable_arch(system,args.arch)
@@ -70,7 +76,7 @@ def main():
     if (ROOT/'.github').exists():shutil.copytree(ROOT/'.github',destination/'.github')
     (destination/'runtime').mkdir()
     if system=='Windows':
-        shutil.copytree(home,destination/'runtime/R')
+        shutil.copytree(home,destination/'runtime/R',ignore=lambda folder,names:[n for n in names if r_installer_file(Path(folder)/n,home)])
         shutil.copytree(runtime/'library',destination/'runtime/library')
         (destination/'Launch RDataCraft portable.command').unlink()
         for name in ['dependencies.csv','dependencies.lock.json','windows-packages.json']:
@@ -93,7 +99,10 @@ def main():
         (destination/'Launch RDataCraft.cmd').unlink();(destination/'Launch RDataCraft.ps1').unlink();(destination/'Validate RDataCraft.cmd').unlink()
     else:
         raise SystemExit('Bundle packaging is configured for macOS and Windows; source can use an existing R elsewhere.')
-    manifest={'version':VERSION,'platform':system,'architecture':arch,'interface':'local browser','engine':'bundled R',
+    if args.native_host:
+        if system != 'Windows' or not (args.native_host/'RDataCraft.exe').is_file():raise SystemExit('Choose a published Windows host containing RDataCraft.exe.')
+        shutil.copytree(args.native_host,destination,dirs_exist_ok=True)
+    manifest={'version':VERSION,'platform':system,'architecture':arch,'interface':'native Windows window (WebView2)' if args.native_host else 'local browser','engine':'bundled R',
               'status':'cross-assembled; Windows execution not tested on this host' if cross else 'built on target; consult validation report for tested workflows','binary_audit':audit}
     (destination/'build-platform.json').write_text(json.dumps(manifest,indent=2)+'\n')
     if (ROOT/'downloads/sources').is_dir():shutil.copytree(ROOT/'downloads/sources',destination/'downloads/sources')

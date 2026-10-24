@@ -30,11 +30,11 @@ def main():
         shutil.copy2(ROOT / name, destination / name)
     for name in ["R", "www", "config", "desktop", "scripts", "tests", "examples", "licenses", ".github"]:
         shutil.copytree(ROOT / name, destination / name, symlinks=True,
-                        ignore=shutil.ignore_patterns(".DS_Store", "__pycache__", "*.pyc", "cache"))
+                        ignore=shutil.ignore_patterns(".DS_Store", "__pycache__", "*.pyc", "cache", "bin", "obj"))
     (destination / ".gitignore").write_text(
         ".DS_Store\n__pycache__/\n*.pyc\n.Rhistory\n.RData\nRplots.pdf\n"
         "/runtime*/\n/downloads/\n/dist/\n/artifacts/\n/Codex handoff/\n"
-        "*.app/\n*.dmg\n*.exe\n*.zip\n.env\n.env.*\n"
+        "*.app/\n*.dmg\n*.exe\n*.zip\n.env\n.env.*\n/desktop/windows/bin/\n/desktop/windows/obj/\n"
         "*.rdatacraft\n!examples/*.rdatacraft\n*.prism\n*.pzfx\n*.pzf\n!tests/fixtures/*.prism\n!tests/fixtures/*.pzfx\n")
     (destination / "GITHUB_UPLOAD.md").write_text(f"""# RDataCraft v{VERSION}: GitHub upload
 
@@ -68,7 +68,8 @@ No repository or release has been created by this preparation script.
 On Mac, use `python3 scripts/bootstrap.py` to prepare a matching local R runtime,
 then `python3 scripts/test.py` and `python3 scripts/build_desktop.py --zip`.
 On Windows, install R, run `Rscript --vanilla scripts/install.R`, then
-`python scripts/test.py` and `python scripts/package_portable.py`.
+`python scripts/test.py`, `python scripts/build_windows.py` and
+`python scripts/package_portable.py --native-host artifacts/windows-host`.
 Python and Node are build/test tools; the installed application uses bundled R.
 See `PLATFORM_SUPPORT.md` for architecture flags, packaging and validation limits.
 `source-manifest.json` records dependency source provenance; run

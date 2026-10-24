@@ -1,6 +1,10 @@
 @echo off
 setlocal
 cd /d "%~dp0"
+if exist "%~dp0RDataCraft.exe" (
+  start "" "%~dp0RDataCraft.exe" %*
+  exit /b 0
+)
 set "R_LIBS_USER=%~dp0runtime\library"
 set "RDATACRAFT_RUNTIME=%~dp0runtime"
 set "RDATACRAFT_PORTABLE=1"

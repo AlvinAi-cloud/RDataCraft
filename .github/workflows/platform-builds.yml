@@ -84,7 +84,17 @@ jobs:
       - run: Rscript --vanilla scripts/collect_licenses.R
       - run: python scripts/fetch_sources.py
       - run: python scripts/fetch_native_sources.py
-      - run: python scripts/package_portable.py
+      - name: Build the self-contained Windows desktop host
+        shell: pwsh
+        run: |
+          $sdk = (Get-Content config/windows-components.json -Raw | ConvertFrom-Json).dotnet_sdk
+          Invoke-WebRequest 'https://dot.net/v1/dotnet-install.ps1' -OutFile artifacts/dotnet-install.ps1
+          ./artifacts/dotnet-install.ps1 -Version $sdk -InstallDir "$PWD/artifacts/release-tools/dotnet" -NoPath
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/build_windows.py --dotnet "$PWD/artifacts/release-tools/dotnet/dotnet.exe"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/fetch_windows_components.py
+      - run: python scripts/package_portable.py --native-host artifacts/windows-host
       - name: Validate the packaged Windows runtime without Python or Node
         shell: pwsh
         run: |
@@ -104,7 +114,7 @@ jobs:
         run: |
           $bundle = Get-ChildItem dist -Directory -Filter '*windows*portable' | Select-Object -First 1
           $nsis = Join-Path $PWD 'artifacts/release-tools/nsis-3.13'
-          python scripts/package_installers.py --windows-bundle $bundle.FullName --makensis "$nsis/makensis.exe" --nsis-dir $nsis
+          python scripts/package_installers.py --windows-bundle $bundle.FullName --makensis "$nsis/makensis.exe" --nsis-dir $nsis --webview-installer artifacts/release-tools/webview2/MicrosoftEdgeWebView2RuntimeInstallerX64.exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $version = (Get-Content config/release.json -Raw | ConvertFrom-Json).version
           ./scripts/test_windows_installer.ps1 -Installer "dist/RDataCraft-$version-windows-x64-setup.exe"
@@ -119,6 +129,8 @@ jobs:
             dependencies.lock.json
             source-manifest.json
             dist/*/artifacts/validation-native-*.json
+            artifacts/installed-windows-native/*
+            artifacts/windows-installer-audit-*.json
           if-no-files-found: warn
       - name: Upload requested development bundle
         if: github.event_name == 'workflow_dispatch' && inputs.upload_development_bundles

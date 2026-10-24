@@ -5,8 +5,9 @@ publication-quality figures. It combines editable tables, linked graphs,
 statistical workflows, curve fitting, PCA, multi-panel layouts and reviewed custom
 R scripts with optional AI assistance.
 
-**v0.3 is a development preview.** The Mac editions use a native desktop window;
-the Windows x64 edition opens its local interface in a browser. R and the required
+**v0.3 is a development preview.** Mac and Windows x64 editions open in dedicated desktop windows, with native
+menus and file dialogs. The Windows installer includes Microsoft WebView2; no
+external browser or separate R installation is needed. R and the required
 packages are included in packaged builds. Scientific calculations run locally.
 The optional connected AI Assistant uses your signed-in Codex CLI.
 
@@ -46,9 +47,10 @@ units, pairing, exclusions and model assumptions before interpreting an analysis
 New figures default to **3 × 3 inches, 7-point text and 200% display**. Screen zoom
 and Fit window do not change export dimensions. Existing saved figure settings
 are retained. Titles and axis labels are editable in the graph; axis and series
-formatting are available through direct interaction and the toolbar. The native
-Mac app also supplies a PDF/SVG vector clipboard; Windows supports vector file
-export. Test editing and fonts in your destination design application.
+formatting are available through direct interaction and the toolbar. The desktop
+apps also supply a PDF/SVG vector clipboard. Clipboard support varies by receiving
+application; SVG/PDF file export is the reliable fallback. Test editing and fonts
+in your destination design application.
 
 P labels offer numeric values with four significant digits, displaying
 **P < 10⁻⁶** below one millionth, or <code>ns / * / ** / *** / ****</code> using the
@@ -122,7 +124,8 @@ On Windows x64, install R 4.6.1 and make Rscript available, then:
 ```text
 Rscript --vanilla scripts/install.R
 python scripts/test.py --require-node
-python scripts/package_portable.py
+python scripts/build_windows.py
+python scripts/package_portable.py --native-host artifacts/windows-host
 ```
 
 The dependency lock files describe the audited runtime versions. The development
