@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 from pathlib import Path
 import subprocess
 import urllib.request
@@ -17,8 +18,12 @@ def verify(path):
     if os.name=='nt':
         # Verify Authenticode trust as well as the reviewed content hash.
         environment=dict(os.environ,RDATACRAFT_VERIFY_FILE=str(path.resolve()))
+        # Do not make Windows PowerShell 5 load PowerShell 7's module binaries.
+        environment.pop('PSModulePath',None)
         script="$s=Get-AuthenticodeSignature -LiteralPath $env:RDATACRAFT_VERIFY_FILE; if($s.Status -ne 'Valid' -or $s.SignerCertificate.Subject -notmatch '(?:^|, )O=Microsoft Corporation(?:,|$)'){throw 'Microsoft signature verification failed'}"
-        subprocess.run(['powershell.exe','-NoProfile','-NonInteractive','-Command',script],env=environment,check=True)
+        shell=shutil.which('pwsh.exe') or shutil.which('powershell.exe')
+        if not shell:raise RuntimeError('PowerShell is required to verify the Microsoft runtime signature.')
+        subprocess.run([shell,'-NoProfile','-NonInteractive','-Command',script],env=environment,check=True)
     return path
 
 def main():

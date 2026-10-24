@@ -10,6 +10,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--require-node", action="store_true", help="Fail rather than skip JavaScript checks when Node is missing.")
+parser.add_argument("--source-tools-only", action="store_true", help="Run JS/Python checks; the installer job must run the full R suite separately.")
 args = parser.parse_args()
 node = shutil.which("node")
 if args.require_node and not node:
@@ -26,10 +27,11 @@ def r_command(script):
     return [str(runner),script]
 if os.name == 'nt':os.environ['R_LIBS_USER']=str(root/'runtime/library')
 (root / "artifacts").mkdir(exist_ok=True)
-subprocess.run([sys.executable, str(root / "tests/make_prism_fixtures.py")], cwd=root, check=True)
-subprocess.run(r_command("tests/setup.R"), cwd=root, check=True)
+if not args.source_tools_only:
+    subprocess.run([sys.executable, str(root / "tests/make_prism_fixtures.py")], cwd=root, check=True)
+    subprocess.run(r_command("tests/setup.R"), cwd=root, check=True)
 results = []
-for name in json.loads((root / 'config/validation-suites.json').read_text(encoding='utf-8')):
+for name in ([] if args.source_tools_only else json.loads((root / 'config/validation-suites.json').read_text(encoding='utf-8'))):
     log = root / "artifacts" / f"v0.3-{name}.log"
     with log.open("w") as output:
         run = subprocess.run(r_command(f"tests/{name}.R"), cwd=root, stdout=output, stderr=subprocess.STDOUT)
@@ -54,7 +56,7 @@ results.append(dict(test="release_tools", exit_code=run.returncode, checks=log.r
 print(f"release_tools: {'PASS' if run.returncode == 0 else 'FAIL'} ({results[-1]['checks']} checks)", flush=True)
 if run.returncode:
     print(log.read_text(encoding='utf-8', errors='replace')[-4000:], flush=True)
-report = dict(version="0.3", status="passed" if all(r["exit_code"] == 0 for r in results) else "failed",
+report = dict(version="0.3", scope='source tools; full R validation required in installed bundle' if args.source_tools_only else 'full source suite', status="passed" if all(r["exit_code"] == 0 for r in results) else "failed",
               javascript_executed=bool(node), skipped=[] if node else ["assistant_js", "windows_js"], tests=results)
-(root / "artifacts/validation-0.3.json").write_text(json.dumps(report, indent=2) + "\n")
+(root / ("artifacts/validation-source-tools-0.3.json" if args.source_tools_only else "artifacts/validation-0.3.json")).write_text(json.dumps(report, indent=2) + "\n")
 sys.exit(report["status"] != "passed")

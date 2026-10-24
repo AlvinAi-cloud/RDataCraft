@@ -82,7 +82,8 @@ jobs:
         with:
           node-version: '24'
       - run: Rscript --vanilla scripts/install.R
-      - run: python scripts/test.py --require-node
+      - name: Check source tools (full R suite runs after installation)
+        run: python scripts/test.py --require-node --source-tools-only
       - run: Rscript --vanilla scripts/collect_licenses.R
       - run: python scripts/fetch_sources.py
       - run: python scripts/fetch_native_sources.py
@@ -91,18 +92,23 @@ jobs:
         run: |
           $sdk = (Get-Content config/windows-components.json -Raw | ConvertFrom-Json).dotnet_sdk
           Invoke-WebRequest 'https://dot.net/v1/dotnet-install.ps1' -OutFile artifacts/dotnet-install.ps1
-          & powershell.exe -NoProfile -NonInteractive -File artifacts/dotnet-install.ps1 -Version $sdk -InstallDir "$PWD/artifacts/release-tools/dotnet" -NoPath
+          & pwsh.exe -NoProfile -NonInteractive -File artifacts/dotnet-install.ps1 -Version $sdk -InstallDir "$PWD/artifacts/release-tools/dotnet" -NoPath
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python scripts/build_windows.py --dotnet "$PWD/artifacts/release-tools/dotnet/dotnet.exe"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python scripts/fetch_windows_components.py
       - run: python scripts/package_portable.py --native-host artifacts/windows-host
-      - name: Validate the packaged Windows runtime without Python or Node
+      - name: Probe the packaged Windows runtime
         shell: pwsh
         run: |
           $bundle = Get-ChildItem dist -Directory -Filter '*windows*portable' | Select-Object -First 1
           if (!$bundle) { throw 'Windows bundle was not created.' }
-          & (Join-Path $bundle.FullName 'Validate RDataCraft.cmd') --no-pause
+          $env:R_HOME = Join-Path $bundle.FullName 'runtime/R'
+          $env:RHOME = $env:R_HOME
+          $env:R_LIBS_USER = Join-Path $bundle.FullName 'runtime/library'
+          $engine = Join-Path $bundle.FullName 'runtime/R/bin/x64/Rscript.exe'
+          if (!(Test-Path $engine)) { $engine = Join-Path $bundle.FullName 'runtime/R/bin/Rscript.exe' }
+          & $engine --vanilla -e "stopifnot(grepl('x86_64', R.version[['platform']]), requireNamespace('shiny'), requireNamespace('svglite'), requireNamespace('processx')); cat('Bundled Windows R is ready')"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Install the Windows packaging tool
         shell: pwsh

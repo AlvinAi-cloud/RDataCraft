@@ -22,7 +22,7 @@ try {
     $env:RHOME = $env:R_HOME
     $env:R_LIBS_SITE = ''
     $env:R_LIBS = ''
-    & $engine --vanilla scripts/validate.R
+    & (Join-Path $installPath 'Validate RDataCraft.cmd') --no-pause
     if ($LASTEXITCODE -ne 0) { throw 'Installed R workflow tests failed.' }
   } finally { Pop-Location }
   Copy-Item (Join-Path $installPath "artifacts/validation-native-$version.json") (Join-Path $reportDirectory "validation-installed-windows-$version.json")
