@@ -20,10 +20,10 @@
     Shiny.addCustomMessageHandler('rdatacraft-review-r',message=>{if(document.body.classList.contains('assistant-open'))window.RDataCraftAssistant.toggle();});
     Shiny.addCustomMessageHandler('rdatacraft-ai-delivery',message=>window.RDataCraftAssistant.receive(message));
     Shiny.addCustomMessageHandler('rdatacraft-ai-request',message=>{
-      if(!native({type:'ai-request',...message})) emit('assistant_response',{id:message.id,ok:false,message:'Start the native Mac app or the portable launcher to use a signed-in Codex CLI. Local tools are available here.'});
+      if(!native({type:'ai-request',...message})) emit('assistant_response',{id:message.id,ok:false,message:'Start the desktop app or the portable launcher to use a signed-in Codex CLI. Local tools are available here.'});
     });
     Shiny.addCustomMessageHandler('rdatacraft-ai-status',message=>{
-      if(!native({type:'ai-status'})) emit('assistant_native_status',{message:'Use the portable launcher or native Mac app for the connected assistant; local tools remain available.'});
+      if(!native({type:'ai-status'})) emit('assistant_native_status',{message:'Use the portable launcher or desktop app for the connected assistant; local tools remain available.'});
     });
     Shiny.addCustomMessageHandler('rdatacraft-ai-cancel',message=>native({type:'ai-cancel',...message}));
     Shiny.addCustomMessageHandler('rdatacraft-ai-state',state=>{

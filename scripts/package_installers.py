@@ -79,7 +79,7 @@ def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signto
     script.parent.mkdir(parents=True, exist_ok=True)
     key = f'Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\RDataCraft-{VERSION}'
     lines = [
-        'Unicode true', '!include "MUI2.nsh"', '!include "x64.nsh"',
+        'Unicode true', '!include "MUI2.nsh"', '!include "x64.nsh"', '!include "WinVer.nsh"',
         f'Name "RDataCraft {VERSION}"', f'OutFile "{nsis_quote(output)}"',
         f'InstallDir "$LOCALAPPDATA\\Programs\\RDataCraft-{VERSION}"',
         'RequestExecutionLevel user', 'SetCompressor /FINAL zlib',
@@ -91,6 +91,9 @@ def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signto
         '!insertmacro MUI_UNPAGE_CONFIRM', '!insertmacro MUI_UNPAGE_INSTFILES', '!insertmacro MUI_LANGUAGE "English"',
         'Function .onInit', '  ${IfNot} ${IsNativeAMD64}',
         '    MessageBox MB_OK|MB_ICONSTOP "This package requires x64 Windows. Windows ARM is not supported by this build."',
+        '    Abort', '  ${EndIf}',
+        '  ${IfNot} ${AtLeastWin10}',
+        '    MessageBox MB_OK|MB_ICONSTOP "RDataCraft requires Windows 10 or later (x64)."',
         '    Abort', '  ${EndIf}', 'FunctionEnd',
         'Section "RDataCraft"', '  SetShellVarContext current', '  SetOutPath "$INSTDIR"',
         f'  File /r "{nsis_quote(bundle)}/*"', '  WriteUninstaller "$INSTDIR\\Uninstall.exe"',

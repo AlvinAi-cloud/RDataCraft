@@ -20,7 +20,7 @@ def build(dotnet, output):
                        DOTNET_SKIP_FIRST_TIME_EXPERIENCE='1', DOTNET_GENERATE_ASPNET_CERTIFICATE='false')
     project = ROOT/'desktop/windows/RDataCraft.csproj'
     subprocess.run([str(dotnet), 'publish', str(project), '-c', 'Release', '-r', 'win-x64',
-                    '--self-contained', 'true', '-o', str(output),
+                    '--self-contained', 'true', '-p:RestoreLockedMode=true', '-o', str(output),
                     '-p:BaseIntermediateOutputPath='+str(tools/'windows-obj')+os.sep],
                    env=environment, check=True)
     # Preserve the Microsoft runtime and SDK notices in every native bundle.

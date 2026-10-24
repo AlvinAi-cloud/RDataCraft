@@ -14,6 +14,8 @@ on:
     branches: [main]
 jobs:
   mac:
+    # A deliberate Windows-package request does not need another Mac rebuild.
+    if: ${{ !contains(github.event.head_commit.message, '[windows-package]') }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
@@ -89,7 +91,7 @@ jobs:
         run: |
           $sdk = (Get-Content config/windows-components.json -Raw | ConvertFrom-Json).dotnet_sdk
           Invoke-WebRequest 'https://dot.net/v1/dotnet-install.ps1' -OutFile artifacts/dotnet-install.ps1
-          ./artifacts/dotnet-install.ps1 -Version $sdk -InstallDir "$PWD/artifacts/release-tools/dotnet" -NoPath
+          & powershell.exe -NoProfile -NonInteractive -File artifacts/dotnet-install.ps1 -Version $sdk -InstallDir "$PWD/artifacts/release-tools/dotnet" -NoPath
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python scripts/build_windows.py --dotnet "$PWD/artifacts/release-tools/dotnet/dotnet.exe"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -141,3 +143,13 @@ jobs:
             dist/*.zip
             dist/*.sha256
             dist/*-setup.exe
+      - name: Return the requested Windows development installer
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[windows-package]')
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: rdatacraft-windows-x64-native-development
+          path: |
+            dist/*-setup.exe
+            dist/*-setup.exe.sha256
+          retention-days: 1
+          if-no-files-found: error

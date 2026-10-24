@@ -51,6 +51,8 @@ def main():
     ap.add_argument('--native-host',type=Path,help='Published self-contained Windows desktop host folder.')
     args=ap.parse_args();runtime=args.runtime_root.resolve()
     system=args.target
+    if args.native_host and (system != 'Windows' or not (args.native_host/'RDataCraft.exe').is_file()):
+        raise SystemExit('Choose a published Windows host containing RDataCraft.exe.')
     try:arch=portable_arch(system,args.arch)
     except ValueError as error:raise SystemExit(str(error))
     cross=system!=platform.system()
@@ -100,7 +102,6 @@ def main():
     else:
         raise SystemExit('Bundle packaging is configured for macOS and Windows; source can use an existing R elsewhere.')
     if args.native_host:
-        if system != 'Windows' or not (args.native_host/'RDataCraft.exe').is_file():raise SystemExit('Choose a published Windows host containing RDataCraft.exe.')
         shutil.copytree(args.native_host,destination,dirs_exist_ok=True)
     manifest={'version':VERSION,'platform':system,'architecture':arch,'interface':'native Windows window (WebView2)' if args.native_host else 'local browser','engine':'bundled R',
               'status':'cross-assembled; Windows execution not tested on this host' if cross else 'built on target; consult validation report for tested workflows','binary_audit':audit}

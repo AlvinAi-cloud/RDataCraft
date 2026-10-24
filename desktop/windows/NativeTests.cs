@@ -71,6 +71,14 @@ internal static class NativeTests
             await Until(window, "document.getElementById('help_search')!==null", "Help did not open");
             Checks.Add("Offline examples and analysis help opens");
             await JS(window, "document.querySelector('.modal.show [data-bs-dismiss=modal],.modal.show [data-dismiss=modal]')?.click()");
+            await Until(window, "document.querySelector('.modal.show')===null", "Help did not close");
+            await JS(window, "Shiny.setInputValue('advanced_open',1,{priority:'event'})");
+            await Until(window, "document.getElementById('nav_advanced').classList.contains('active') && document.getElementById('r_run')!==null", "Advanced R did not open");
+            await JS(window, "document.getElementById('r_load_template').click()");
+            await Until(window, "document.getElementById('r_code').value.includes('summary_table')", "Advanced R template did not load");
+            await JS(window, "document.getElementById('r_run').click()");
+            await Until(window, "document.getElementById('r_status').textContent.includes('R success') && document.querySelector('#r_results img.r-result-figure')?.complete===true", "Reviewed Advanced R script did not finish");
+            Checks.Add("Advanced R worker returns results and a vector figure inside the native app");
             var second = Program.Open(newStudy: true); int secondPid = 0;
             await Wait(() => Task.FromResult(second.Ready && second.HasDocument), "Second native study did not start", 120);
             secondPid = second.EnginePid;
