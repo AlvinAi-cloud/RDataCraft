@@ -1,0 +1,57 @@
+name: Transfer tested Windows installer
+permissions:
+  contents: read
+  actions: read
+on:
+  push:
+    branches: [transfer/windows-v03-40125257516]
+jobs:
+  transfer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: rdatacraft-windows-x64-native-development
+          run-id: 40125257516
+          github-token: ${{ github.token }}
+          path: tested
+      - name: Verify and split the already tested installer
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          root=Path('tested')
+          setup=next(root.rglob('RDataCraft-0.3-windows-x64-setup.exe'))
+          expected=Path(str(setup)+'.sha256').read_text().split()[0]
+          data=setup.read_bytes()
+          assert hashlib.sha256(data).hexdigest()==expected
+          manifest={'file':setup.name,'bytes':len(data),'sha256':expected,'source_commit':'5ca02499f29f1915445ec1a93afeb5ae6e41a1f2','tested_run':40125257516,'parts':[]}
+          size=200*1024*1024
+          for index,start in enumerate(range(0,len(data),size)):
+              folder=Path('transfer')/str(index);folder.mkdir(parents=True)
+              part=data[start:start+size];name=setup.name+f'.part{index}'
+              (folder/name).write_bytes(part)
+              manifest['parts'].append({'file':name,'bytes':len(part),'sha256':hashlib.sha256(part).hexdigest()})
+          assert len(manifest['parts'])==3
+          for index in range(3):(Path('transfer')/str(index)/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          print(json.dumps(manifest))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tested-windows-installer-part0
+          path: transfer/0/*
+          retention-days: 1
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tested-windows-installer-part1
+          path: transfer/1/*
+          retention-days: 1
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tested-windows-installer-part2
+          path: transfer/2/*
+          retention-days: 1
+          if-no-files-found: error
