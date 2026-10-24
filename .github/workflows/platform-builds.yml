@@ -50,6 +50,9 @@ jobs:
           name: rdatacraft-validation-macos-${{ matrix.arch }}
           path: |
             artifacts/validation-*.json
+            artifacts/v*-*.log
+            dependencies.lock.json
+            source-manifest.json
             artifacts/installed-mac/**/*.json
             artifacts/installed-mac/*.log
           if-no-files-found: warn
@@ -112,6 +115,9 @@ jobs:
           name: rdatacraft-validation-windows-x64
           path: |
             artifacts/validation-*.json
+            artifacts/v*-*.log
+            dependencies.lock.json
+            source-manifest.json
             dist/*/artifacts/validation-native-*.json
           if-no-files-found: warn
       - name: Upload requested development bundle

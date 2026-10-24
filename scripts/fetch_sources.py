@@ -4,6 +4,7 @@ import argparse
 import concurrent.futures
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -18,12 +19,15 @@ def download(name, version, destination, pinned):
     filename = f'R-{version}.tar.gz' if name == 'R' else f'{name}_{version}.tar.gz'
     target = destination / filename
     previous = pinned.get(filename, {})
-    urls = ([f'https://cran.r-project.org/src/base/R-4/{filename}'] if name == 'R' else [
-        f'https://cran.r-project.org/src/contrib/{filename}',
-        f'https://cran.r-project.org/src/contrib/Archive/{name}/{filename}'])
+    # A mirror outage must not make an otherwise valid platform fail source
+    # collection. Every origin still gets the same pinned hash and metadata checks.
+    urls = [url for base in ['https://cran.r-project.org', 'https://cloud.r-project.org']
+            for url in ([f'{base}/src/base/R-4/{filename}'] if name == 'R' else [
+                f'{base}/src/contrib/{filename}', f'{base}/src/contrib/Archive/{name}/{filename}'])]
     source = previous.get('source', urls[0])
     if not target.exists():
         partial = target.with_name(target.name + '.part')
+        attempts = []
         for url in urls:
             run = subprocess.run(['curl', '--silent', '--show-error', '--fail', '--location',
                                   '--connect-timeout', '20', '--max-time', '180', '--retry', '2',
@@ -32,9 +36,10 @@ def download(name, version, destination, pinned):
                 partial.replace(target)
                 source = url
                 break
+            attempts.append(f'{url}: curl exit {run.returncode}; ' + run.stderr.decode('utf-8', 'replace').strip()[-500:])
         else:
             partial.unlink(missing_ok=True)
-            raise RuntimeError(f'No matching source archive available for {name} {version}')
+            raise RuntimeError(f'No matching source archive available for {name} {version}. ' + ' | '.join(attempts))
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
     if previous.get('sha256') and digest != previous['sha256']:
         raise RuntimeError(f'Pinned source checksum changed for {filename}; retained for investigation.')
@@ -78,6 +83,11 @@ def main():
             except Exception as exc:
                 failures.append(str(exc))
                 print('FAILED:', exc, flush=True)
+                if os.getenv('GITHUB_ACTIONS') == 'true':
+                    # Expose the exact component/failure in check annotations,
+                    # while preserving checksum validation and the failed run.
+                    message = str(exc).replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+                    print('::error title=Dependency source collection failed::' + message, flush=True)
     report = dict(archives=sorted(records, key=lambda x: (x['component'].lower(), x['version'])),
                   expected_archives=len(jobs), verified_archives=len(records), missing=failures,
                   native_library_audit='pending; see licenses/REDISTRIBUTION.md')

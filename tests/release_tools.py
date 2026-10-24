@@ -4,6 +4,10 @@ import json
 from pathlib import Path
 import sys
 import tempfile
+import hashlib
+import io
+import subprocess
+import tarfile
 import zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -14,6 +18,7 @@ from sign_windows import signing_command
 from sign_macos import binary_paths
 from unittest.mock import patch
 import package_installers
+from fetch_sources import download
 
 checks = 0
 def check(value, label):
@@ -88,10 +93,37 @@ with tempfile.TemporaryDirectory() as temporary:
         else:
             raise AssertionError('Ad-hoc signature passed the distribution gate')
 
-release = json.loads((ROOT/'config/release.json').read_text())
+    # Recover from a mirror outage without weakening corresponding-source pins.
+    archive = io.BytesIO()
+    description = b'Package: FixturePackage\nVersion: 1.0\n'
+    with tarfile.open(fileobj=archive, mode='w:gz') as tar:
+        entry = tarfile.TarInfo('FixturePackage/DESCRIPTION')
+        entry.size = len(description)
+        tar.addfile(entry, io.BytesIO(description))
+    data = archive.getvalue()
+    sources = root/'source-downloads'
+    sources.mkdir()
+    pin = {'FixturePackage_1.0.tar.gz': {'sha256': hashlib.sha256(data).hexdigest()}}
+    def mirror(command, **kwargs):
+        if 'https://cran.r-project.org/' in ' '.join(command):
+            return subprocess.CompletedProcess(command, 22, b'', b'fixture mirror unavailable')
+        Path(command[command.index('--output')+1]).write_bytes(data)
+        return subprocess.CompletedProcess(command, 0, b'', b'')
+    with patch('fetch_sources.subprocess.run', side_effect=mirror):
+        downloaded = download('FixturePackage', '1.0', sources, pin)
+    check(downloaded['source'].startswith('https://cloud.r-project.org/') and downloaded['sha256'] == pin[downloaded['archive']]['sha256'],
+          'source collection recovers through the CRAN mirror while retaining the pinned checksum')
+    try:
+        download('FixturePackage', '1.0', sources, {'FixturePackage_1.0.tar.gz': {'sha256': '0'*64}})
+    except RuntimeError:
+        check(True, 'source collection still rejects archives that differ from the pinned checksum')
+    else:
+        raise AssertionError('Source pin validation was bypassed')
+
+release = json.loads((ROOT/'config/release.json').read_text(encoding='utf-8'))
 version = release['version']
-check(all(f'v{version}' in (ROOT/name).read_text() for name in ['R/ui.R','desktop/RDataCraft.swift','app.R']) and
-      f'app_version = "{version}"' in (ROOT/'R/project.R').read_text(),
+check(all(f'v{version}' in (ROOT/name).read_text(encoding='utf-8') for name in ['R/ui.R','desktop/RDataCraft.swift','app.R']) and
+      f'app_version = "{version}"' in (ROOT/'R/project.R').read_text(encoding='utf-8'),
       "UI, native About and new study metadata agree with the release version")
 
 print(checks, "release-tool checks passed.")

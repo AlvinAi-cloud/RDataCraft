@@ -29,11 +29,11 @@ if os.name == 'nt':os.environ['R_LIBS_USER']=str(root/'runtime/library')
 subprocess.run([sys.executable, str(root / "tests/make_prism_fixtures.py")], cwd=root, check=True)
 subprocess.run(r_command("tests/setup.R"), cwd=root, check=True)
 results = []
-for name in json.loads((root / 'config/validation-suites.json').read_text()):
+for name in json.loads((root / 'config/validation-suites.json').read_text(encoding='utf-8')):
     log = root / "artifacts" / f"v0.3-{name}.log"
     with log.open("w") as output:
         run = subprocess.run(r_command(f"tests/{name}.R"), cwd=root, stdout=output, stderr=subprocess.STDOUT)
-    output = log.read_text()
+    output = log.read_text(encoding='utf-8', errors='replace')
     results.append(dict(test=name, exit_code=run.returncode, checks=output.count("PASS:"), log=str(log)))
     print(f"{name}: {'PASS' if run.returncode == 0 else 'FAIL'} ({results[-1]['checks']} checks)", flush=True)
     if run.returncode:
@@ -43,17 +43,17 @@ if node:
         log = root / f"artifacts/v0.3-{name}.log"
         with log.open("w") as output:
             run = subprocess.run([node, f"tests/{name}.cjs"], cwd=root, stdout=output, stderr=subprocess.STDOUT)
-        results.append(dict(test=name, exit_code=run.returncode, checks=log.read_text().count("PASS:"), log=str(log)))
+        results.append(dict(test=name, exit_code=run.returncode, checks=log.read_text(encoding='utf-8', errors='replace').count("PASS:"), log=str(log)))
         print(f"{name}: {'PASS' if run.returncode == 0 else 'FAIL'} ({results[-1]['checks']} checks)", flush=True)
 else:
     print("assistant_js: not run (Node.js not available)", flush=True)
 log = root / "artifacts/v0.3-release_tools.log"
 with log.open("w") as output:
     run = subprocess.run([sys.executable, "tests/release_tools.py"], cwd=root, stdout=output, stderr=subprocess.STDOUT)
-results.append(dict(test="release_tools", exit_code=run.returncode, checks=log.read_text().count("PASS:"), log=str(log)))
+results.append(dict(test="release_tools", exit_code=run.returncode, checks=log.read_text(encoding='utf-8', errors='replace').count("PASS:"), log=str(log)))
 print(f"release_tools: {'PASS' if run.returncode == 0 else 'FAIL'} ({results[-1]['checks']} checks)", flush=True)
 if run.returncode:
-    print(log.read_text()[-4000:], flush=True)
+    print(log.read_text(encoding='utf-8', errors='replace')[-4000:], flush=True)
 report = dict(version="0.3", status="passed" if all(r["exit_code"] == 0 for r in results) else "failed",
               javascript_executed=bool(node), skipped=[] if node else ["assistant_js", "windows_js"], tests=results)
 (root / "artifacts/validation-0.3.json").write_text(json.dumps(report, indent=2) + "\n")

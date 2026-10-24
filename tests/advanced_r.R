@@ -41,7 +41,10 @@ check(!fails(pc_r_svg('<svg xmlns="http://www.w3.org/2000/svg"><defs><clipPath i
 check(fails(pc_r_svg('<svg xmlns="http://www.w3.org/2000/svg"><set attributeName="href" to="https://example.invalid/"/></svg>')),'saved SVG rejects attribute-changing animation')
 bad<-z;bad$result$tables[[1]]$data_tsv<-'A\tB\n1';check(fails(pc_r_records(list(bad))),'corrupt stored output tables reject on project loading')
 marker<-normalizePath('artifacts',mustWork=TRUE);marker<-file.path(marker,'custom-ai-not-executed.txt');unlink(marker)
-code<-paste0('writeLines("unexpected",',dQuote(marker,q=FALSE),');result<-list(text="draft")')
+code<-paste0('writeLines("unexpected",',encodeString(marker,quote='"'),');result<-list(text="draft")')
+windows_marker<-'D:\\a\\RDataCraft\\RDataCraft\\artifacts\\custom-ai-not-executed.txt'
+windows_code<-paste0('writeLines("unexpected",',encodeString(windows_marker,quote='"'),');result<-list(text="draft")')
+check(identical(pc_r_script(windows_code),windows_code),'Windows backslash paths remain valid R strings in unexecuted AI drafts')
 op<-list(type='r_analysis',title='AI custom draft',parameters=list(list(key='code',value=code),list(key='packages',value='stats')))
 plan<-pc_ai_prepare(tab,s,'Data',list(answer='Review this draft.',operations=list(op)))
 check(!file.exists(marker) && identical(plan$r_draft$code,code),'AI drafting validates code without executing it')
