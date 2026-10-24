@@ -167,6 +167,7 @@ internal sealed class StudyWindow : Form
 
     private async Task StartAsync()
     {
+        CancellationToken token = closing.Token;
         try
         {
             string runtime = Path.Combine(Program.Backend, "runtime"), home = Path.Combine(runtime, "R");
@@ -191,16 +192,17 @@ internal sealed class StudyWindow : Form
             var deadline = DateTime.UtcNow.AddSeconds(100);
             while (true)
             {
-                closing.Token.ThrowIfCancellationRequested();
+                token.ThrowIfCancellationRequested();
                 if (engine.HasExited) throw new Exception("The R engine stopped during startup. See Help → Show engine log.");
-                try { using var response = await client.GetAsync(endpoint, closing.Token); if (response.IsSuccessStatusCode) break; }
-                catch (HttpRequestException) { } catch (TaskCanceledException) when (!closing.IsCancellationRequested) { }
+                try { using var response = await client.GetAsync(endpoint, token); if (response.IsSuccessStatusCode) break; }
+                catch (HttpRequestException) { } catch (TaskCanceledException) when (!token.IsCancellationRequested) { }
                 if (DateTime.UtcNow > deadline) throw new Exception("RDataCraft took too long to start. See Help → Show engine log.");
-                await Task.Delay(250, closing.Token);
+                await Task.Delay(250, token);
             }
             var options = new CoreWebView2EnvironmentOptions { AllowSingleSignOnUsingOSPrimaryAccount = false };
             var environment = await CoreWebView2Environment.CreateAsync(null, profile, options);
             await Web.EnsureCoreWebView2Async(environment);
+            token.ThrowIfCancellationRequested();
             var core = Web.CoreWebView2;
             core.Settings.AreDevToolsEnabled = Program.TestFolder != null;
             core.Settings.AreDefaultContextMenusEnabled = true;
@@ -221,7 +223,7 @@ internal sealed class StudyWindow : Form
             core.Navigate(endpoint.AbsoluteUri);
             if (Program.TestFolder != null && Program.Windows.Count == 1) _ = NativeTests.Run(this, Program.TestFolder);
         }
-        catch (OperationCanceledException) when (closing.IsCancellationRequested) { }
+        catch (Exception) when (token.IsCancellationRequested || IsDisposed) { }
         catch (Exception error)
         {
             Log(error.ToString());

@@ -87,6 +87,12 @@ internal static class NativeTests
             await Wait(() => Task.FromResult(!ProcessExists(secondPid)), "Second window left its R engine running");
             Checks.Add("Closing a window stops its own bundled R engine");
             Check(window.Ready && ProcessExists(window.EnginePid), "Closing a second window preserves the first engine");
+            var starting = Program.Open(newStudy: true);
+            await Wait(() => Task.FromResult(starting.EnginePid > 0), "New engine did not start");
+            int startingPid = starting.EnginePid;
+            starting.CloseForTest();
+            await Wait(() => Task.FromResult(!ProcessExists(startingPid)), "Closing during startup left an R engine running");
+            Checks.Add("Closing a starting window cancels initialization and stops its R engine");
             await window.OpenFile(Path.Combine(Program.Backend, "examples", "Prism workflow improvements.rdatacraft"));
             await Until(window, "document.getElementById('fit_scope').value==='all' && document.getElementById('title').value==='Independent fits for each series'", "Regression example did not load");
             window.Command("figure");
