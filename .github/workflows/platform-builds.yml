@@ -110,13 +110,8 @@ jobs:
           if (!(Test-Path $engine)) { $engine = Join-Path $bundle.FullName 'runtime/R/bin/Rscript.exe' }
           & $engine --vanilla -e "stopifnot(grepl('x86_64', R.version[['platform']]), requireNamespace('shiny'), requireNamespace('svglite'), requireNamespace('processx')); cat('Bundled Windows R is ready')"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Install the Windows packaging tool
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory artifacts/release-tools -Force | Out-Null
-          Invoke-WebRequest 'https://downloads.sourceforge.net/project/nsis/NSIS%203/3.13/nsis-3.13.zip' -OutFile artifacts/release-tools/nsis.zip
-          if ((Get-FileHash artifacts/release-tools/nsis.zip -Algorithm SHA256).Hash -ne 'ba63dffc4410ee89193e1cb5a41989991bd77c61068da17e3156d136b7b0b3d8') { throw 'NSIS download hash differs from the official release.' }
-          Expand-Archive artifacts/release-tools/nsis.zip artifacts/release-tools
+      - name: Install the verified Windows packaging tool
+        run: python scripts/fetch_nsis.py
       - name: Build and exercise Windows setup and uninstall
         shell: pwsh
         run: |
