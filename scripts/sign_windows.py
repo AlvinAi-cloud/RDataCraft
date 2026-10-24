@@ -12,6 +12,17 @@ import shutil
 import subprocess
 from urllib.parse import urlsplit
 
+def powershell_environment(**values):
+    # os.environ uses uppercase keys on Windows; copied dicts are case sensitive.
+    environment={key:value for key,value in os.environ.items() if key.upper()!='PSMODULEPATH'}
+    environment.update(values)
+    return environment
+
+def powershell_command(script):
+    shell=shutil.which('pwsh.exe') or shutil.which('powershell.exe')
+    if not shell:raise RuntimeError('PowerShell is required for Windows signature verification.')
+    return [shell,'-NoProfile','-NonInteractive','-Command',script]
+
 
 def signing_command(tool, certificate, timestamp, file):
     if not re.fullmatch(r"[0-9A-Fa-f]{40}", certificate):
@@ -48,15 +59,15 @@ def main():
     subprocess.run([tool, "verify", "/pa", "/all", "/tw", str(args.file)], check=True)
     # SignTool can warn on missing timestamps. Require a trusted, timestamped
     # signature from this exact signer, rather than accepting a warning as success.
-    environment = dict(os.environ, RDATACRAFT_SIGNED_FILE=str(args.file.resolve()),
-                       RDATACRAFT_CERTIFICATE=args.certificate)
+    environment = powershell_environment(RDATACRAFT_SIGNED_FILE=str(args.file.resolve()),
+                                         RDATACRAFT_CERTIFICATE=args.certificate)
     script = """$ErrorActionPreference='Stop';
     $s=Get-AuthenticodeSignature -LiteralPath $env:RDATACRAFT_SIGNED_FILE;
     if ($s.Status -ne 'Valid' -or !$s.TimeStamperCertificate -or
         $s.SignerCertificate.Thumbprint -ne $env:RDATACRAFT_CERTIFICATE) {
       throw 'A trusted, timestamped signature from the selected certificate is required.'
     }"""
-    subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script], env=environment, check=True)
+    subprocess.run(powershell_command(script), env=environment, check=True)
 
 
 if __name__ == "__main__":

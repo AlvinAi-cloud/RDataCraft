@@ -14,7 +14,8 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 from preflight import audit
 from runtime_inventory import manifest
-from sign_windows import signing_command
+from sign_windows import signing_command, powershell_environment
+import fetch_windows_components
 from sign_macos import binary_paths
 from unittest.mock import patch
 import package_installers
@@ -85,6 +86,21 @@ with tempfile.TemporaryDirectory() as temporary:
     try:verify_windows_runtime(winhome,winlib)
     except ValueError:check(True,'Windows packaging still rejects a 32-bit R engine')
     else:raise AssertionError('A 32-bit R engine passed the x64 audit')
+
+    with patch.dict('os.environ',{'PSMODULEPATH':'fixture-incompatible-modules'}):
+        check(not any(k.upper()=='PSMODULEPATH' for k in powershell_environment()),
+              'Windows signature checks do not inherit modules from a different PowerShell version')
+    component=root/'vendor-installer.exe';component.write_bytes(b'original synthetic component')
+    pin={'webview2':{'sha256':hashlib.sha256(component.read_bytes()).hexdigest()}}
+    with patch.object(fetch_windows_components,'PIN',pin), patch.object(fetch_windows_components.os,'name','nt'), patch('sign_windows.shutil.which',return_value='pwsh.exe'), patch.object(fetch_windows_components.subprocess,'run',side_effect=subprocess.CalledProcessError(1,['fixture'])):
+        try:fetch_windows_components.verify(component)
+        except subprocess.CalledProcessError:check(True,'a failed Microsoft signature check rejects the runtime')
+        else:raise AssertionError('A failed signature was accepted')
+    component.write_bytes(b'tampered component')
+    with patch.object(fetch_windows_components,'PIN',pin):
+        try:fetch_windows_components.verify(component)
+        except ValueError:check(True,'Windows component checksum rejects a changed installer before execution')
+        else:raise AssertionError('A changed component was accepted')
 
     # Bad signing configuration must fail before any installer mutation.
     for certificate, timestamp in [("not-a-thumbprint", "https://timestamp.example.com"),

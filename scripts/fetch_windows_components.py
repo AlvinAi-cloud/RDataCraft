@@ -4,10 +4,10 @@ import argparse
 import hashlib
 import json
 import os
-import shutil
 from pathlib import Path
 import subprocess
 import urllib.request
+from sign_windows import powershell_environment, powershell_command
 
 ROOT=Path(__file__).resolve().parent.parent
 PIN=json.loads((ROOT/'config/windows-components.json').read_text(encoding='utf-8'))
@@ -17,13 +17,9 @@ def verify(path):
         raise ValueError('The WebView2 runtime differs from the reviewed Microsoft download.')
     if os.name=='nt':
         # Verify Authenticode trust as well as the reviewed content hash.
-        environment=dict(os.environ,RDATACRAFT_VERIFY_FILE=str(path.resolve()))
-        # Do not make Windows PowerShell 5 load PowerShell 7's module binaries.
-        environment.pop('PSModulePath',None)
+        environment=powershell_environment(RDATACRAFT_VERIFY_FILE=str(path.resolve()))
         script="$s=Get-AuthenticodeSignature -LiteralPath $env:RDATACRAFT_VERIFY_FILE; if($s.Status -ne 'Valid' -or $s.SignerCertificate.Subject -notmatch '(?:^|, )O=Microsoft Corporation(?:,|$)'){throw 'Microsoft signature verification failed'}"
-        shell=shutil.which('pwsh.exe') or shutil.which('powershell.exe')
-        if not shell:raise RuntimeError('PowerShell is required to verify the Microsoft runtime signature.')
-        subprocess.run([shell,'-NoProfile','-NonInteractive','-Command',script],env=environment,check=True)
+        subprocess.run(powershell_command(script),env=environment,check=True)
     return path
 
 def main():
