@@ -6,10 +6,10 @@ statistical workflows, curve fitting, PCA, multi-panel layouts and reviewed cust
 R scripts with optional AI assistance.
 
 **v0.3 is a development preview.** Mac and Windows x64 editions open in dedicated desktop windows, with native
-menus and file dialogs. The Windows installer includes Microsoft WebView2; no
-external browser or separate R installation is needed. R and the required
-packages are included in packaged builds. Scientific calculations run locally.
-The optional connected AI Assistant uses your signed-in Codex CLI.
+menus and file dialogs. R and the required packages are included in packaged builds. 
+Scientific calculations run locally. The optional connected AI Assistant uses your signed-in Codex CLI.
+
+Installation: https://github.com/AlvinAi-cloud/RDataCraft/releases/tag/V0.3installer
 
 ## Start a study
 
