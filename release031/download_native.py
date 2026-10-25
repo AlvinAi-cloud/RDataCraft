@@ -1,6 +1,6 @@
 from pathlib import Path
 import json,hashlib,subprocess,concurrent.futures
-root=Path(__file__).parent;d=json.loads((root/'native-archives.json').read_text());out=root/'native-material/archives';out.mkdir(exist_ok=True)
+root=Path(__file__).parent;d=json.loads((root/'native-archives.json').read_text());out=root/'native-material/archives';out.mkdir(parents=True,exist_ok=True)
 d['archives']=[r for r in d['archives'] if not r['version'].endswith('-kernel')]
 def fetch(r):
  p=out/r['archive'];urls=[r['url']]
