@@ -29,7 +29,10 @@ def build(target=None,cargo=None,test=False,offline=False):
     out.mkdir(parents=True,exist_ok=True);shutil.copy2(binary,out/binary.name)
     if platform.system()=='Darwin' and not suffix:subprocess.run(['strip','-x',str(out/binary.name)],check=True)
     sources={p.relative_to(source).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in source.rglob('*') if p.is_file() and not any(part in ('target','bin') for part in p.relative_to(source).parts)}
-    metadata=json.loads(subprocess.check_output([str(cargo),'metadata','--locked','--offline','--format-version','1','--manifest-path',str(source/'Cargo.toml')],cwd=ROOT,text=True))
+    # A fresh build cache contains native dependencies only; metadata also resolves other targets.
+    metadata_args=[str(cargo),'metadata','--locked','--format-version','1','--manifest-path',str(source/'Cargo.toml')]
+    if offline:metadata_args.append('--offline')
+    metadata=json.loads(subprocess.check_output(metadata_args,cwd=ROOT,text=True))
     notice=out/'licenses/ai-service';notice.mkdir(parents=True,exist_ok=True)
     packages=[]
     for package in metadata['packages']:
