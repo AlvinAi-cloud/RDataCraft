@@ -619,6 +619,8 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         if let folder = coordinator?.testFolder {
             try? fm.createDirectory(at: folder, withIntermediateDirectories: true)
             try? message.write(to: folder.appendingPathComponent("FAILURE.txt"), atomically: true, encoding: .utf8)
+            try? logHandle?.synchronize()
+            try? fm.copyItem(at: logURL(), to: folder.appendingPathComponent("engine.log"))
             coordinator?.stopAll(); Darwin.exit(1)
         }
         let alert = NSAlert(); alert.messageText = "RDataCraft"; alert.informativeText = message
@@ -629,6 +631,9 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
     // No browser automation, user browser tabs, or Prism documents are accessed.
     func waitUntil(_ expression: String, timeout: TimeInterval = 25) async throws {
         logText("Checking: \(expression)\n")
+        if let folder = testFolder {
+            try? expression.write(to: folder.appendingPathComponent("current-check.txt"), atomically: true, encoding: .utf8)
+        }
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
             if let value = try? await webView.evaluateJavaScript(expression), let passed = value as? Bool, passed { return }

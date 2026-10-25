@@ -109,6 +109,9 @@ jobs:
             source-manifest.json
             artifacts/installed-mac/**/*.json
             artifacts/installed-mac/*.log
+            artifacts/installed-mac/**/*.log
+            artifacts/installed-mac/**/*.txt
+            artifacts/installed-mac/**/*.png
           if-no-files-found: warn
       - name: Upload requested development bundle
         if: github.event_name == 'workflow_dispatch' && inputs.upload_development_bundles

@@ -52,6 +52,9 @@ def main():
                     process.wait(timeout=20)
                     raise TimeoutError(f"Native {mode} workflow exceeded ten minutes.")
                 if process.returncode:
+                    for diagnostic in (directory / "FAILURE.txt", directory / "current-check.txt", directory / "engine.log"):
+                        if diagnostic.exists():
+                            print(f"{diagnostic.name}:\n{diagnostic.read_text(errors='replace')[-20000:]}", flush=True)
                     raise RuntimeError(f"Native {mode} workflow failed; see {log.name}.")
             report = json.loads((directory / "report.json").read_text())
             if report.get("status") != "passed" or not report.get("checks"):
