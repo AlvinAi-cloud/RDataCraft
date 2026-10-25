@@ -9,7 +9,7 @@ import zipfile
 from preflight import audit
 
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = "0.31"
+VERSION = "0.32"
 
 
 def main():
@@ -38,44 +38,19 @@ def main():
         "*.rdatacraft\n!examples/*.rdatacraft\n*.prism\n*.pzfx\n*.pzf\n!tests/fixtures/*.prism\n!tests/fixtures/*.pzfx\n")
     (destination / "GITHUB_UPLOAD.md").write_text(f"""# RDataCraft v{VERSION}: GitHub upload
 
-Upload the contents of this folder to your repository. This is the application
-source, examples, tests, build scripts and third-party notices. It excludes local
-R binaries, installers, caches, private studies, personal paths and chat handoffs.
-The original MIT attribution in the third-party notices must remain intact.
-See `RELEASE.md` for the app description, GitHub Desktop steps, signing setup and
-remaining release gates.
+This is the source-only upload folder. Use the existing RDataCraft repository and
+its single main branch in GitHub Desktop; do not create another repository.
+Review and commit the updated source, then Push origin.
 
-## Installers
+GitHub Actions builds and tests Intel Mac, Apple Silicon and Windows installers
+on their matching runners. After every required job passes, it assembles a draft
+v{VERSION} release with three installer downloads, validation, checksums and
+corresponding source/build material. Review that draft under Releases and publish
+it when ready. No local Windows packaging is needed. See RELEASE.md.
 
-Create a draft GitHub release tagged `v{VERSION}` and attach these files from the
-original project's `dist/` folder as **release assets**, rather than source commits:
-
-- `RDataCraft-{VERSION}-macos-x86_64.dmg`
-- `RDataCraft-{VERSION}-macos-arm64.dmg`
-- `RDataCraft-{VERSION}-windows-x64-setup.exe`
-- `RDataCraft-{VERSION}-SHA256SUMS.txt`
-- `RDataCraft-{VERSION}-validation.json`
-
-The installers are larger than GitHub's ordinary file-upload/commit limits.
-They contain bundled R and packages. Current packages are development builds:
-Mac apps are ad-hoc signed, not notarized. Review the GitHub Actions reports for
-execution on each target platform. Complete the corresponding-source and native
-library audit in `licenses/REDISTRIBUTION.md` before publicly distributing binaries.
-No repository or release has been created by this preparation script.
-
-## Build and check
-
-On Mac, use `python3 scripts/bootstrap.py` to prepare a matching local R runtime,
-then `python3 scripts/test.py` and `python3 scripts/build_desktop.py --zip`.
-On Windows, install R, run `Rscript --vanilla scripts/install.R`, then
-`python scripts/test.py`, `python scripts/build_windows.py` and
-`python scripts/package_portable.py --native-host artifacts/windows-host`.
-The Windows desktop build also needs the .NET 10 SDK; its output includes the
-.NET runtime. Python, Node and the SDK are build/test tools; users run the packaged
-desktop executable with bundled R.
-See `PLATFORM_SUPPORT.md` for architecture flags, packaging and validation limits.
-`source-manifest.json` records dependency source provenance; run
-`scripts/fetch_sources.py` to collect missing matching archives for a release.
+Mac builds are ad-hoc signed and not notarized; Windows setup is unsigned until
+you configure distribution signing credentials. GitHub does not add those.
+This preparation does not push source, run Actions or publish a release.
 """)
     files = [p for p in destination.rglob("*") if p.is_file()]
     privacy = audit(destination)

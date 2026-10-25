@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <body>
-    <h1>RDataCraft help · v0.31</h1>
+    <h1>RDataCraft help · v0.32</h1>
     <p>Offline instructions for data entry, analysis and figures. In the app, Help provides search and access to the teaching examples.</p>
     <nav>
       <ul>
@@ -77,6 +77,7 @@
     <section id="regression">
       <h3>Regression &amp; curve fitting</h3>
       <p>Use an XY table, then choose a regression method in Analyze. Inspect the model equation and choose how replicates enter the fit. Fitting all observations and fitting means answer different weighting questions; do not treat repeated measurements as independent replicates.</p>
+      <p>To fit several Y series, set Fit series to All Y series — separate fit per group in Analysis, or use Fit every Y series independently under Figure settings → XY lines &amp; fitted curves. Each group gets its own parameters and curve; these are not shared-parameter or global fits. Mean/error and shaded-band graphs can show the same fitted curves as scatter plots. Choose No connecting lines to hide point-to-point connections while retaining fitted curves. Show fitted curves and Show fitted mean 95% CI control those overlays separately. Error bars summarize observations at each X; a fitted confidence band describes uncertainty in the model mean.</p>
       <p>Review convergence, parameter intervals and a residuals view before interpreting a curve. A four-parameter dose-response fit needs positive concentrations and adequate coverage of both plateaus. Poorly identified parameters can be misleading even when a curve looks smooth.</p>
       <p>For a formula, model family or dependency outside the presets, use Advanced R analysis and return coefficients, diagnostics and a figure. The app does not automatically establish that a selected model is scientifically appropriate.</p>
     </section>

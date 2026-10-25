@@ -898,7 +898,7 @@ dependencies = [
 
 [[package]]
 name = "rdatacraft-ai"
-version = "0.31.0"
+version = "0.32.0"
 dependencies = [
  "aws-lc-rs",
  "base64 0.22.1",

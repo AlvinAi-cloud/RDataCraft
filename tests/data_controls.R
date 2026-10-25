@@ -16,7 +16,8 @@ s <- pc_defaults(); s$layout <- "xy"; s$graph <- "xymean"; s$method <- "linear";
 a <- pc_analyze(n, "linear", "Control", "Drug", s)
 check(abs(unname(coef(a$model)["x"]) - 2) < 1e-10 && a$n == 6, "linear regression fits all observed replicates in the selected series")
 p <- pc_plot(n, s, a); z <- p$data
-check(nrow(tail(p$layers,1)[[1]]$data) == 12, "mean/error graph can overlay each observed replicate")
+observed_layers <- Filter(function(layer) inherits(layer$geom,"GeomPoint") && is.data.frame(layer$data) && all(c("replicate","row_id","value") %in% names(layer$data)), p$layers)
+check(length(observed_layers) == 1 && identical(observed_layers[[1]]$data,n$data), "mean/error graph can overlay each observed replicate alongside fitted curves")
 s$show_points <- FALSE
 check(length(pc_plot(n,s,a)$layers) == length(p$layers)-1L, "individual replicate overlay follows the appearance control")
 s$show_points <- TRUE

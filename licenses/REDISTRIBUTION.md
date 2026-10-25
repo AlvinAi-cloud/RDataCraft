@@ -1,3 +1,15 @@
+# v0.32 release preparation
+
+The GitHub workflow now collects the pinned native source superset and immutable
+Rtools45 MXE r6768 recipes used for the v0.31 source review, together with vendored
+Rust dependencies and the current R/package source inventories from all three
+platform builds. It includes dependency notices in the apps before packaging and
+testing, then attaches the matching source bundle to the draft release.
+A prepared workflow is not evidence of a completed v0.32 build or source download.
+Consult the exact run’s combined validation and source records before publishing.
+Mac builds remain ad-hoc signed/not notarized; Windows setup remains unsigned.
+The historical inventory/build-provenance limitations below still apply.
+
 # Redistribution status · v0.3
 
 Application source is GPL-3.0. R is offered under GPL version 2 or 3; individual

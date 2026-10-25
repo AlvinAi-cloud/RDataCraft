@@ -7,7 +7,7 @@ pc_project <- function(tab, settings, worksheets = NULL, active = "D1", figure_l
   if (!is.null(worksheets)) uses_replicates <- uses_replicates || any(vapply(worksheets, function(sh)
     identical(sh$settings$layout, "xy") && pc_xy_structure(pc_read_text(sh$data_tsv, "\t"))$n > 1L, logical(1)))
   if (uses_replicates && is.null(worksheets)) {worksheets <- list(D1 = pc_sheet(tab, settings, "Observation table")); active <- "D1"}
-  p <- list(format = "rdatacraft", schema_version = if (is.null(worksheets)) 1L else 3L, app_version = "0.31",
+  p <- list(format = "rdatacraft", schema_version = if (is.null(worksheets)) 1L else 3L, app_version = "0.32",
        saved_at = format(Sys.time(), tz = "UTC", usetz = TRUE),
        data_tsv = pc_table_text(tab), settings = settings,
        environment = list(r_version = as.character(getRversion()),
@@ -41,6 +41,12 @@ pc_project <- function(tab, settings, worksheets = NULL, active = "D1", figure_l
     p$r_analyses<-pc_r_records(r_analyses);p$schema_version<-11L
     if(is.null(p$worksheets)) {p$worksheets<-list(D1=pc_sheet(tab,settings,'Observation table'));p$active<-'D1'}
   }
+  xy_custom <- function(s) any(vapply(c("xy_connections", "xy_show_fit", "xy_fit_band"), function(k) !is.null(s[[k]]) && !identical(s[[k]], pc_defaults()[[k]]), logical(1)))
+  if (xy_custom(settings) || (!is.null(worksheets) && any(vapply(worksheets, function(sh) any(vapply(sh$views, function(v) xy_custom(v$settings), logical(1))), logical(1))))) {
+    p$schema_version <- 12L
+    if (is.null(p$worksheets)) {p$worksheets <- list(D1=pc_sheet(tab,settings,"Observation table"));p$active <- "D1"}
+  }
+
   p
 }
 pc_import_reports <- function(reports=NULL) {
@@ -56,7 +62,7 @@ pc_load_project <- function(path) {
 }
 
 pc_decode_project <- function(p) {
-  if (!p$format %in% c("rdatacraft", "plotcraft") || !p$schema_version %in% c(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L)) stop("This is not a supported RDataCraft project.", call. = FALSE)
+  if (!p$format %in% c("rdatacraft", "plotcraft") || !p$schema_version %in% c(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L)) stop("This is not a supported RDataCraft project.", call. = FALSE)
   tab <- pc_read_text(p$data_tsv, "\t")
   defaults <- pc_defaults()
   settings <- defaults
@@ -65,7 +71,7 @@ pc_decode_project <- function(p) {
                   graph = unique(unlist(lapply(unname(pc_layouts()), function(x) unname(pc_graphs(x))))),
                   correction = c("holm", "bonferroni", "BH"), annotation = c("p", "stars"),
                   error = c("none", "sd", "sem", "ci"), palette = names(pc_palettes), legend_position = c("auto", "top", "bottom", "left", "right", "none"), pca_missing=c("error","complete"),
-                  fit_scope=c("selected","all"),fit_weight=c("none","inv_y2","replicate_sd"),fit_replicates=c("individual","mean"))
+                  xy_connections=c("auto","none","connect"),fit_scope=c("selected","all"),fit_weight=c("none","inv_y2","replicate_sd"),fit_replicates=c("individual","mean"))
   bounds <- list(null_mean = c(-1e12, 1e12), font_size = c(4, 24), point_size = c(1, 6), width = c(25.4, 400), height = c(25.4, 300), dpi = c(72, 600),
     title_size = c(0,48), axis_title_size = c(0,48), axis_tick_size = c(0,48), axis_line_width = c(0.1,3), point_shape = c(0,25), line_width = c(0,4), x_tick_angle = c(0,90), x_axis_length = c(0,350), y_axis_length = c(0,250), pca_x=c(1,50), pca_y=c(1,50))
   for (name in names(defaults)) {
@@ -93,7 +99,7 @@ pc_decode_project <- function(p) {
   pc_normalize(tab, settings$layout, allow_empty = TRUE, allow_incomplete = TRUE)
   if (!is.null(p$study_name)) p$study_name <- pc_study_name(p$study_name)
   out <- list(r_analyses=pc_r_records(p$r_analyses),import_reports=pc_import_reports(p$import_reports),prism_sources=pc_prism_archives(p$prism_sources),study_name = p$study_name, table = tab, settings = settings, environment = p$environment, figure_layout = pc_layout_settings(p$figure_layout))
-  if (p$schema_version %in% c(2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L)) {
+  if (p$schema_version %in% c(2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L)) {
     book <- p$worksheets
     if (!is.list(book) || !length(book) || length(book) > 100 || is.null(names(book)) || anyDuplicated(names(book)) || any(!grepl("^D[0-9]+$", names(book)))) stop("Invalid workbook worksheets.", call. = FALSE)
     for (id in names(book)) {

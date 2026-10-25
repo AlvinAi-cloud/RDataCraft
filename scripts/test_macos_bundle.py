@@ -34,7 +34,7 @@ def main():
         expected = json.loads((root / "config/release.json").read_text())["version"]
         if info.get("CFBundleShortVersionString") != expected:
             raise ValueError("Installer version differs from the source checkout.")
-        for mode in ("studio", "multiwindow", "graph"):
+        for mode in ("studio", "multiwindow", "graph", "paste"):
             directory = output / mode
             log = output / (mode + ".log")
             with log.open("w") as stream:

@@ -1,3 +1,15 @@
+# v0.32
+
+- Replaced paged data tables with a continuous worksheet, fixed headers, numbered rows and scrolling that stays in place after edits.
+- Removed redundant example buttons and the Analysis walkthrough; examples remain in Help.
+- Restored a compact analysis-method selector with a larger dropdown that stays within the window.
+- Added independent controls for XY observation connections, fitted curves and fitted confidence bands. Mean/error and shaded-band graphs can show fitted curves for every series.
+- Added a graph shortcut for fitting all Y series independently and updated regression help.
+- Corrected the Intel Mac Dock artwork and made Mac builds regenerate the icon from source.
+- Aligned the transform action with its selection fields.
+- Prepared native GitHub builds and installer tests for Intel Mac, Apple Silicon and Windows, with draft release assembly after all platforms pass.
+- Studies using the new XY line controls use schema 12; open them with v0.32 or later.
+
 # v0.31
 
 - Added Accounts and Models with direct ChatGPT browser sign-in, saved-account switching, renewal and sign-out. Plan inference depends on OpenAI eligibility and consent.

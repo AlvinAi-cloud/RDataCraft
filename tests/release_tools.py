@@ -162,4 +162,92 @@ check(all(f'v{version}' in (ROOT/name).read_text(encoding='utf-8') for name in [
       f'app_version = "{version}"' in (ROOT/'R/project.R').read_text(encoding='utf-8'),
       "UI, native About and new study metadata agree with the release version")
 
+import release_assets
+import publish_release
+import os
+
+with tempfile.TemporaryDirectory() as temporary:
+    root = Path(temporary)
+    inputs = root / 'inputs'
+    inputs.mkdir()
+    (root / 'artifacts').mkdir()
+    env = dict(GITHUB_SHA='a' * 40, GITHUB_RUN_ID='42', GITHUB_REF='refs/heads/main',
+               GITHUB_EVENT_NAME='push', GITHUB_REPOSITORY='example/RDataCraft')
+    base = dict(version=version, commit=env['GITHUB_SHA'], run_id='42')
+    installers = []
+    for platform in release_assets.PLATFORMS:
+        name = f'RDataCraft-{version}-{platform}' + ('-setup.exe' if platform == 'windows-x64' else '.dmg')
+        installer = inputs / name
+        installer.write_bytes(('synthetic installer ' + platform).encode())
+        installers.append(installer)
+        release_assets.write_json(inputs / (platform + '-validation.json'), dict(
+            **base, status='passed', platform=platform, installer=name, sha256=release_assets.digest(installer)))
+    for platform in (*release_assets.PLATFORMS, 'native'):
+        archive = inputs / f'RDataCraft-{version}-{platform}-sources.tar.gz'
+        with tarfile.open(archive, 'w:gz'):
+            pass
+        release_assets.write_json(inputs / (platform + '-source-record.json'), dict(
+            **base, archive=archive.name, sha256=release_assets.digest(archive)))
+    def application_archive(command, **kwargs):
+        destination = next(v.split('=', 1)[1] for v in command if v.startswith('--output='))
+        with tarfile.open(destination, 'w'):
+            pass
+    with patch.dict(os.environ, env), patch.object(release_assets, 'ROOT', root), patch.object(release_assets.subprocess, 'run', side_effect=application_archive):
+        output = root / 'release'
+        release_assets.assemble(inputs, output)
+        check(len(list(output.glob('*.dmg'))) == 2 and len(list(output.glob('*-setup.exe'))) == 1,
+              'release assembly retains precisely three tested platform installers')
+        report = json.loads((output / f'RDataCraft-{version}-validation.json').read_text())
+        check(report['commit'] == env['GITHUB_SHA'] and len(report['platforms']) == 3,
+              'release validation binds all three installers to one commit and Actions run')
+        with tarfile.open(output / f'RDataCraft-{version}-sources.tar.gz') as archive:
+            check(len([n for n in archive.getnames() if n.endswith('-sources.tar.gz')]) == 4 and 'application-source.tar' in archive.getnames(),
+                  'release source bundle includes the current application and four dependency source parts')
+        original = installers[0].read_bytes()
+        installers[0].write_bytes(b'tampered fixture')
+        try:
+            release_assets.assemble(inputs, root / 'tampered')
+        except ValueError:
+            check(True, 'release assembly rejects installer bytes changed after validation')
+        else:
+            raise AssertionError('Changed installer passed release assembly')
+        installers[0].write_bytes(original)
+        first = inputs / (release_assets.PLATFORMS[0] + '-validation.json')
+        record = json.loads(first.read_text())
+        record['commit'] = 'b' * 40
+        release_assets.write_json(first, record)
+        try:
+            release_assets.assemble(inputs, root / 'wrong-commit')
+        except ValueError:
+            check(True, 'release assembly rejects a passing report from a different commit')
+        else:
+            raise AssertionError('Wrong commit passed release assembly')
+        record['commit'] = env['GITHUB_SHA']
+        release_assets.write_json(first, record)
+        source_record = inputs / 'native-source-record.json'
+        source_record.unlink()
+        try:
+            release_assets.assemble(inputs, root / 'missing-source')
+        except ValueError:
+            check(True, 'release assembly refuses installers without matching native source material')
+        else:
+            raise AssertionError('Missing sources passed release assembly')
+
+    # A published release cannot be replaced by a later main-branch build.
+    previous = Path.cwd()
+    try:
+        os.chdir(root)
+        (root / 'dist').mkdir()
+        shutil = __import__('shutil')
+        shutil.copytree(output, root / 'dist/release')
+        with patch.dict(os.environ, env), patch.object(publish_release.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, '{"draft":false}', '')) as command:
+            try:
+                publish_release.main()
+            except ValueError:
+                check(command.call_count == 1, 'release publication refuses to modify an already published version')
+            else:
+                raise AssertionError('Published release was overwritten')
+    finally:
+        os.chdir(previous)
+
 print(checks, "release-tool checks passed.")

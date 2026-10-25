@@ -159,7 +159,10 @@ body[data-runtime="desktop"] .desktop-only { display: initial; }
 .analysis-controls .shiny-input-container {flex:1 1 210px;width:auto;min-width:180px;max-width:100%}
 .analysis-controls>p, .analysis-controls>.shiny-panel-conditional>p {flex:1 0 100%;margin-bottom:0}
 .transform-card{margin-top:20px;padding:22px}
-.transform-card .shiny-input-container{display:inline-block;vertical-align:top;margin-right:20px;max-width:320px}
+.transform-controls{display:flex;flex-wrap:wrap;gap:16px 20px;align-items:flex-end}
+.transform-controls .shiny-input-container{flex:1 1 240px;max-width:320px;width:auto;margin:0}
+.transform-action{display:flex;align-items:flex-end;padding-top:24px}
+.transform-action .btn{min-height:38px;margin:0}
 .card-surface{overflow-x:auto}
 .modal-dialog{max-width:620px;width:calc(100% - 32px);margin:16px auto}
 .modal-content{max-height:calc(100vh - 32px);display:flex;flex-direction:column}
@@ -382,3 +385,17 @@ body[data-runtime="desktop"] .welcome-prism {display:none}
 .help-actions {display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
 .r-package-review {max-height:38vh;overflow:auto;border:1px solid var(--line);margin:12px 0}
 .r-package-review td,.r-package-review th {padding:8px 12px;white-space:nowrap}
+
+/* Continuous worksheet: fixed header, numbered rows and one scrollable grid. */
+#data_grid .dataTables_scroll {border:1px solid #cbd7df;border-radius:4px;overflow:hidden}
+#data_grid .dataTables_scrollBody {min-height:180px;overscroll-behavior:contain;scrollbar-gutter:stable}
+#data_grid table.dataTable {border-collapse:separate!important;border-spacing:0;width:100%}
+#data_grid table.dataTable tbody td {position:relative;min-width:120px;padding:8px 12px!important;border-bottom:1px solid #dce5e9;border-right:1px solid #dce5e9;white-space:nowrap}
+#data_grid table.dataTable tbody td:first-child {padding-left:56px!important}
+#data_grid td[data-row-number]::before {content:attr(data-row-number);position:absolute;left:0;top:0;bottom:0;width:40px;display:flex;align-items:center;justify-content:center;background:#edf2f5;color:#647782;border-right:1px solid #cbd7df;font-size:11px;pointer-events:none}
+#data_grid td.grid-anchor {box-shadow:inset 0 0 0 2px var(--accent);outline:none;background:#eaf5ef}
+#data_grid .dataTables_scrollHead th:first-child {padding-left:56px!important}
+/* Compact method control; its menu escapes the card and uses available screen space. */
+.selectize-dropdown.analysis-method-menu {z-index:2100;box-shadow:0 8px 24px #203e3526}
+.selectize-dropdown.analysis-method-menu .selectize-dropdown-content {max-height:420px;overflow-y:auto;overscroll-behavior:contain}
+.selectize-dropdown.analysis-method-menu .option {white-space:normal;line-height:1.5;padding:9px 12px}

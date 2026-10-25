@@ -44,7 +44,7 @@ def build(target=None,cargo=None,test=False,offline=False):
                 folder=notice/(package['name']+'-'+package['version']);folder.mkdir(exist_ok=True);shutil.copy2(entry,folder/entry.name)
     shutil.copy2(ROOT/'licenses/PlasmidCraft-AI-MIT.txt',notice/'PlasmidCraft-AI-MIT.txt')
     (notice/'dependencies.json').write_text(json.dumps(packages,indent=2)+'\n')
-    (out/'build.json').write_text(json.dumps({'version':'0.31','target':target,'crt_static':windows_target,'binary':binary.name,'sha256':hashlib.sha256((out/binary.name).read_bytes()).hexdigest(),'source_files':sources},indent=2)+'\n')
+    (out/'build.json').write_text(json.dumps({'version':'0.32','target':target,'crt_static':windows_target,'binary':binary.name,'sha256':hashlib.sha256((out/binary.name).read_bytes()).hexdigest(),'source_files':sources},indent=2)+'\n')
     return out
 
 if __name__=='__main__':

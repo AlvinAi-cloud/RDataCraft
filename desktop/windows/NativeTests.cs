@@ -102,8 +102,25 @@ internal static class NativeTests
             window.Command("figure");
             await Until(window, "document.querySelector('#figure svg.graph-interactive')?.textContent.includes('Independent fits for each series')===true", "Regression figure missing");
             Checks.Add("Linked multi-series regression renders in the embedded window");
+            await window.OpenFile(Path.Combine(Program.Backend, "examples", "XY curve fitting review.rdatacraft"));
+            await Until(window, "document.getElementById('graph').value==='xymean' && document.getElementById('xy_connections').value==='none' && document.getElementById('fit_scope').value==='all'", "XY curve controls did not restore");
+            window.Command("figure");
+            const string curveCount = "Array.from(document.querySelectorAll('#figure svg.graph-interactive polyline')).filter(p=>p.getAttribute('points').trim().split(/\\s+/).length>100).length";
+            await Until(window, curveCount + "===2 && !document.documentElement.classList.contains('shiny-busy')", "Independent XY fits did not render on mean/error graph");
+            Checks.Add("Mean/error graph displays both independent fits without observation connections");
+            await JS(window, "document.getElementById('xy_show_fit').click()");
+            await Until(window, curveCount + "===0 && !document.getElementById('xy_show_fit').checked && !document.documentElement.classList.contains('shiny-busy')", "Hiding fitted curves failed");
+            await JS(window, "document.getElementById('xy_show_fit').click();document.getElementById('graph').selectize.setValue('scatter')");
+            await Until(window, curveCount + "===2 && document.getElementById('graph').value==='scatter' && !document.documentElement.classList.contains('shiny-busy')", "Scatter graph lost independent fits");
+            Checks.Add("Fitted curves toggle independently and remain visible for both scatter series");
+            await JS(window, "document.getElementById('nav_analysis').click()");
+            await Until(window, "document.querySelector('#nav_analysis.active')!==null && document.getElementById('method').selectize.$control[0].getBoundingClientRect().width>0", "Analysis method control is hidden");
+            await JS(window, "document.getElementById('method').selectize.open()");
+            await Until(window, "(()=>{const menu=document.querySelector('.analysis-method-menu')?.getBoundingClientRect(),control=document.getElementById('method').selectize.$control[0].getBoundingClientRect();return !!menu && control.height<60 && menu.height>200 && menu.top>=0 && menu.bottom<=window.innerHeight && Math.abs(menu.left-control.left)<2})()", "Analysis dropdown is clipped or incorrectly positioned");
+            Checks.Add("Compact method selector opens a large visible dropdown in the embedded Windows window");
+            await JS(window, "document.getElementById('method').selectize.close();document.getElementById('nav_figure').click()");
             await using (var file = File.Create(Path.Combine(folder, "figure.png"))) await window.Web.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, file);
-            File.WriteAllText(Path.Combine(folder, "validation-windows-desktop.json"), JsonSerializer.Serialize(new { version = "0.31", status = "passed", native_window = true, embedded_webview = true, bundled_R = true, external_browser_launched = false, engine_pid = window.EnginePid, checks = Checks }, new JsonSerializerOptions { WriteIndented = true }));
+            File.WriteAllText(Path.Combine(folder, "validation-windows-desktop.json"), JsonSerializer.Serialize(new { version = "0.32", status = "passed", native_window = true, embedded_webview = true, bundled_R = true, external_browser_launched = false, engine_pid = window.EnginePid, checks = Checks }, new JsonSerializerOptions { WriteIndented = true }));
             finished = true; Program.Result = 0;
             window.CloseForTest();
         }
@@ -116,7 +133,7 @@ internal static class NativeTests
         if (finished) return;
         finished = true; Program.Result = 1;
         Directory.CreateDirectory(folder);
-        File.WriteAllText(Path.Combine(folder, "validation-windows-desktop.json"), JsonSerializer.Serialize(new { version = "0.31", status = "failed", error = error.ToString(), checks = Checks }, new JsonSerializerOptions { WriteIndented = true }));
+        File.WriteAllText(Path.Combine(folder, "validation-windows-desktop.json"), JsonSerializer.Serialize(new { version = "0.32", status = "failed", error = error.ToString(), checks = Checks }, new JsonSerializerOptions { WriteIndented = true }));
         foreach (var window in Program.Windows.ToArray()) window.CloseForTest();
     }
 }

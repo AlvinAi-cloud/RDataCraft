@@ -604,7 +604,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         return ready
     }
     @objc func about() {
-        NSApp.orderFrontStandardAboutPanel(options: [.applicationName: "RDataCraft", .applicationVersion: "v0.31 · Development preview", .credits: NSAttributedString(string: "Scientific plotting and statistics\nR-powered data analysis and publication-ready figures.\nAvailable for Mac and Windows.")])
+        NSApp.orderFrontStandardAboutPanel(options: [.applicationName: "RDataCraft", .applicationVersion: "v0.32 · Development preview", .credits: NSAttributedString(string: "Scientific plotting and statistics\nR-powered data analysis and publication-ready figures.\nAvailable for Mac and Windows.")])
     }
     @objc func showExamples() { send(["type":"examples"]) }
     @objc func showHelp() {
@@ -691,12 +691,16 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         _ = try await webView.evaluateJavaScript("document.getElementById('grid_paste_headers').checked=true; document.querySelector('#data_grid tbody td').click()")
         try nativePaste("Vehicle\tDrug\n" + (1...30).map { "\($0)\t\($0 * 2)" }.joined(separator: "\n"))
         try await waitUntil("document.querySelector('#data_grid .dataTables_scrollHead th')?.textContent.trim() === 'Vehicle' && document.querySelector('#data_grid .dataTables_info')?.textContent.includes('30 entries') === true")
-        _ = try await webView.evaluateJavaScript("document.getElementById('grid_paste_headers').checked=false; $('#data_grid .dataTables_scrollBody table').DataTable().page(1).draw('page'); null")
-        try await waitUntil("document.querySelector('#data_grid tbody td')?.textContent === '13'")
-        _ = try await webView.evaluateJavaScript("document.querySelector('#data_grid tbody tr:nth-child(2) td:nth-child(2)').click()")
+        _ = try await webView.evaluateJavaScript("document.getElementById('grid_paste_headers').checked=false; document.querySelector('#data_grid tbody tr:nth-child(14) td:nth-child(2)').scrollIntoView({block:'nearest'}); null")
+        try await waitUntil("document.querySelectorAll('#data_grid tbody tr').length === 30 && document.querySelector('#data_grid .dataTables_paginate') === null")
+        _ = try await webView.evaluateJavaScript("document.querySelector('#data_grid tbody tr:nth-child(14) td:nth-child(2)').click()")
         try await waitUntil("document.getElementById('grid_selection').textContent.includes('Row 14 · Column 2')")
         try nativePaste("999")
-        try await waitUntil("document.querySelector('#data_grid tbody tr:nth-child(2) td:nth-child(2)')?.textContent === '999' && document.querySelector('#data_grid tbody td')?.textContent === '13'")
+        try await waitUntil("document.querySelector('#data_grid tbody tr:nth-child(14) td:nth-child(2)')?.textContent === '999' && document.querySelector('#data_grid tbody td')?.textContent === '1'")
+        try await waitUntil("document.querySelector('#data_grid .dataTables_scrollBody').scrollTop > 0")
+        // Arrow navigation follows observations across the former page boundary.
+        _ = try await webView.evaluateJavaScript("document.querySelector('#data_grid tbody tr:nth-child(12) td:nth-child(2)').click();document.activeElement.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true,cancelable:true}))")
+        try await waitUntil("document.getElementById('grid_selection').textContent.includes('Row 13 · Column 2') && document.activeElement === document.querySelector('#data_grid tbody tr:nth-child(13) td:nth-child(2)')")
         // Exercise the browser paste event as well as the native clipboard path.
         _ = try await webView.evaluateJavaScript("document.querySelector('#data_grid tbody td').click(); var clip=new DataTransfer(); clip.setData('text/plain','777\\t888\\n555\\t666'); document.activeElement.dispatchEvent(new ClipboardEvent('paste',{clipboardData:clip,bubbles:true,cancelable:true}))")
         try await waitUntil("document.querySelector('#data_grid tbody td')?.textContent === '777' && document.querySelector('#data_grid tbody tr:nth-child(2) td:nth-child(2)')?.textContent === '666'")
@@ -715,8 +719,22 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         try nativePaste("Vehicle")
         try await waitUntil("document.getElementById('navigator_search').value === 'Vehicle'")
         _ = try await webView.evaluateJavaScript("document.getElementById('navigator_search').value=''; document.getElementById('navigator_search').dispatchEvent(new Event('input',{bubbles:true})); document.activeElement.blur(); document.querySelector('#data_grid tbody td').click(); document.querySelectorAll('.shiny-notification').forEach(el=>el.remove()); document.querySelector('.data-card').scrollIntoView({block:'center'})")
+        try await waitUntil("document.querySelector('.example-buttons') === null && document.querySelector('#example_guide') === null")
         let capture = try await webView.takeSnapshot(configuration: nil)
         try imageData(capture).write(to: folder.appendingPathComponent("direct-grid-paste.png"))
+        _ = try await webView.evaluateJavaScript("document.querySelector('.transform-card').scrollIntoView({block:'center'})")
+        try await waitUntil("(()=>{const button=document.getElementById('apply_transform').getBoundingClientRect(),first=document.getElementById('transform_kind').selectize.$control[0].getBoundingClientRect(),second=document.getElementById('transform_control').selectize.$control[0].getBoundingClientRect();return Math.abs(button.bottom-first.bottom)<2 && Math.abs(button.bottom-second.bottom)<2 && button.left>second.right;})()")
+        let transformCapture = try await webView.takeSnapshot(configuration:nil)
+        try imageData(transformCapture).write(to:folder.appendingPathComponent("transform-controls.png"))
+        _ = try await webView.evaluateJavaScript("document.getElementById('nav_analysis').click()")
+        try await waitUntil("document.querySelector('#nav_analysis.active') !== null && document.getElementById('method').selectize.$control[0].getBoundingClientRect().width > 0")
+        _ = try await webView.evaluateJavaScript("document.getElementById('method').selectize.open()")
+        try await waitUntil("Math.abs(document.querySelector('.analysis-method-menu').getBoundingClientRect().left-document.getElementById('method').selectize.$control[0].getBoundingClientRect().left) < 2 && document.querySelector('.analysis-method-menu').getBoundingClientRect().top >= 0 && document.querySelector('.analysis-method-menu')?.getBoundingClientRect().height > 240 && document.querySelector('.analysis-method-menu').getBoundingClientRect().bottom <= window.innerHeight && document.getElementById('method').selectize.$control[0].getBoundingClientRect().height < 60")
+        let analysisCapture = try await webView.takeSnapshot(configuration: nil)
+        try imageData(analysisCapture).write(to: folder.appendingPathComponent("analysis-methods.png"))
+        _ = try await webView.evaluateJavaScript("document.getElementById('method').selectize.setValue('anova');document.getElementById('method').selectize.close()")
+        try await waitUntil("document.getElementById('analysis_status').textContent.includes('ANOVA') && !document.documentElement.classList.contains('shiny-busy')")
+        _ = try await webView.evaluateJavaScript("document.getElementById('nav_data').click()")
         let file = folder.appendingPathComponent("Pasted study.rdatacraft")
         nextTestDestination = file; saveAs(); try await waitForFile(file)
         let saved = try JSONSerialization.jsonObject(with: Data(contentsOf: file)) as? [String: Any]
@@ -763,7 +781,28 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         nextTestDestination = svg; exportSVG(); try await waitForFile(svg)
         let svgText = try String(contentsOf:svg)
         guard svgText.contains("width='720.00pt'"), svgText.contains("height='216.00pt'") else {throw HostError.failed("SVG export does not match the requested ten by three inch canvas.")}
-        return ["native Paste into selected grid cell", "rectangular paste CRLF", "whole-block undo and redo", "header paste and row expansion", "absolute anchor on second data page", "paste preserves current data page", "browser clipboard event", "bulk paste from inline editor", "inline bulk paste is one undo action", "atomic invalid paste rejection", "ordinary text-field paste", "pasted headers and observations saved", "inline table heading rename", "navigator rename cancellation", "navigator rename on blur", "XY triplicate creation and grouped headers", "clipboard entry into replicate subcolumns", "replicate mean/error graph", "inch canvas controls", "actual-size pixel dimensions", "fit to window scales without changing export size", "restore actual size", "table names and replicates saved", "exact inch SVG export"]
+        send(["type":"open", "path":backend.appendingPathComponent("examples/XY curve fitting review.rdatacraft").path])
+        try await waitUntil("document.getElementById('graph').value === 'xymean' && document.getElementById('fit_scope').value === 'all' && document.getElementById('xy_connections').value === 'none' && !document.documentElement.classList.contains('shiny-busy')")
+        showFigure()
+        let fitLineCount = "Array.from(document.querySelectorAll('#figure svg.graph-interactive polyline')).filter(p => p.getAttribute('points').trim().split(/\\s+/).length > 100).length"
+        try await waitUntil("\(fitLineCount) === 2 && document.getElementById('xy_fit_scope_note').textContent.includes('All Y series')")
+        _ = try await webView.evaluateJavaScript("document.getElementById('fit_scope').selectize.setValue('selected')")
+        try await waitUntil("\(fitLineCount) === 1 && !document.documentElement.classList.contains('shiny-busy')")
+        _ = try await webView.evaluateJavaScript("document.getElementById('xy_fit_all').click()")
+        try await waitUntil("\(fitLineCount) === 2 && document.getElementById('fit_scope').value === 'all' && !document.documentElement.classList.contains('shiny-busy')")
+        _ = try await webView.evaluateJavaScript("document.getElementById('xy_show_fit').click()")
+        try await waitUntil("\(fitLineCount) === 0 && !document.getElementById('xy_show_fit').checked && !document.documentElement.classList.contains('shiny-busy')")
+        _ = try await webView.evaluateJavaScript("document.getElementById('xy_show_fit').click();document.getElementById('graph').selectize.setValue('scatter')")
+        try await waitUntil("\(fitLineCount) === 2 && document.getElementById('graph').value === 'scatter' && !document.documentElement.classList.contains('shiny-busy')")
+        _ = try await webView.evaluateJavaScript("document.getElementById('graph').selectize.setValue('xymean')")
+        try await waitUntil("\(fitLineCount) === 2 && document.getElementById('graph').value === 'xymean' && !document.documentElement.classList.contains('shiny-busy')")
+        let xyCapture = try await webView.takeSnapshot(configuration:nil)
+        try imageData(xyCapture).write(to:folder.appendingPathComponent("xy-independent-fits.png"))
+        let xyStudy = folder.appendingPathComponent("Independent fitted curves.rdatacraft")
+        nextTestDestination = xyStudy;saveAs();try await waitForFile(xyStudy)
+        let xySaved = try JSONSerialization.jsonObject(with:Data(contentsOf:xyStudy)) as? [String:Any]
+        guard let xySettings = xySaved?["settings"] as? [String:Any],xySettings["fit_scope"] as? String == "all",xySettings["xy_connections"] as? String == "none" else {throw HostError.failed("XY fitting controls were not saved.")}
+        return ["native Paste into selected grid cell", "rectangular paste CRLF", "whole-block undo and redo", "header paste and row expansion", "all 30 rows in one scrolling sheet", "absolute row 14 paste and preserved scroll", "arrow navigation across former page boundary", "redundant example sections removed", "transform action aligns with selection fields", "compact method selector opens a large visible dropdown and changes analysis", "browser clipboard event", "bulk paste from inline editor", "inline bulk paste is one undo action", "atomic invalid paste rejection", "ordinary text-field paste", "pasted headers and observations saved", "inline table heading rename", "navigator rename cancellation", "navigator rename on blur", "XY triplicate creation and grouped headers", "clipboard entry into replicate subcolumns", "replicate mean/error graph", "inch canvas controls", "actual-size pixel dimensions", "fit to window scales without changing export size", "restore actual size", "table names and replicates saved", "exact inch SVG export", "two independent fitted curves on mean/error graph", "graph shortcut fits every series", "fitted curves toggle independently of connections", "two fitted series on scatter graph", "XY fitting controls saved"]
     }
     func graphTest(_ folder:URL) async throws -> [String] {
         func js(_ code:String) async throws {_ = try await webView.evaluateJavaScript("(()=>{\(code);return null;})()")}
@@ -934,7 +973,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         _ = try await webView.evaluateJavaScript("document.getElementById('add_tutorial').click()")
         try await waitUntil("document.getElementById('layout').value==='multiple' && document.getElementById('method').value==='pca' && document.querySelector('#pca_scree tbody tr')!==null && !document.documentElement.classList.contains('shiny-busy')")
         try await waitUntil("document.getElementById('pca_variable_pick').selectize.items.length===5 && !document.getElementById('pca_variable_pick').selectize.items.includes('SampleID') && document.querySelector('#pca_scores .dataTables_info')?.textContent.includes('12 entries')===true")
-        try await waitUntil("document.querySelector('.version-label')?.textContent.includes('v0.31')===true && Object.keys(document.getElementById('graph_view').selectize.options).length===3")
+        try await waitUntil("document.querySelector('.version-label')?.textContent.includes('v0.32')===true && Object.keys(document.getElementById('graph_view').selectize.options).length===3")
         try imageData(try await webView.takeSnapshot(configuration:nil)).write(to:folder.appendingPathComponent("pca-analysis.png"))
         for key in ["scores","loadings","scree","preprocessing"] {
             let file=folder.appendingPathComponent("pca-\(key).csv")
@@ -949,7 +988,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         let file=folder.appendingPathComponent("PCA teaching workflow.rdatacraft")
         nextTestDestination=file;saveAs();try await waitForFile(file)
         let saved=try JSONSerialization.jsonObject(with:Data(contentsOf:file)) as? [String:Any]
-        guard saved?["app_version"] as? String == "0.31",let settings=saved?["settings"] as? [String:Any],let selected=settings["pca_variables"] as? String,!selected.contains("SampleID"),selected.contains("CellArea") else {throw HostError.failed("PCA example settings or release version were not saved correctly.")}
+        guard saved?["app_version"] as? String == "0.32",let settings=saved?["settings"] as? [String:Any],let selected=settings["pca_variables"] as? String,!selected.contains("SampleID"),selected.contains("CellArea") else {throw HostError.failed("PCA example settings or release version were not saved correctly.")}
         return ["PCA in the shared Help example selector", "PCA walkthrough visible", "PCA example adds 12 observations", "PCA selects measurements without numeric IDs", "three linked PCA views", "four PCA CSV exports", "PCA scores graph", "PCA settings and version saved"]
     }
     func workflowTest() async {

@@ -72,8 +72,9 @@ pc_plot_additional <- function(n,s,analysis=NULL) {
     p <- ggplot2::ggplot(z,ggplot2::aes(x=x,y=value,color=group,fill=group,group=group))
     if(graph=="area") {
       if(s$log_y) stop("Area plots use a zero baseline; use a linear Y axis.",call.=FALSE)
-      p <- p + ggplot2::geom_area(position="identity",alpha=.2) + ggplot2::geom_line(linewidth=.7)
-    } else p <- p + ggplot2::geom_step(direction="hv",linewidth=.75)
+      p <- p + ggplot2::geom_area(position="identity",alpha=.2)
+      if(pc_xy_connects(s)) p <- p + ggplot2::geom_line(linewidth=.7)
+    } else if(pc_xy_connects(s)) p <- p + ggplot2::geom_step(direction="hv",linewidth=.75)
     if(s$show_points) p <- p + ggplot2::geom_point(size=s$point_size)
     p <- p + ggplot2::labs(caption="Mean response at each X; source replicates remain unchanged")
   } else {

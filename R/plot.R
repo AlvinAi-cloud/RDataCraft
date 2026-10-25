@@ -10,6 +10,7 @@ pc_defaults <- function() list(layout = "column", method = "welch", graph = "poi
   x_min = "", x_max = "", y_min = "", y_max = "", legend_position = "auto", grid_lines = FALSE,
   title_size = 0, axis_title_size = 0, axis_tick_size = 0, text_color = "#000000", axis_color = "#000000",
   axis_line_width = 0.55, point_shape = 0, line_width = 0, override_x_title = FALSE, override_y_title = FALSE,
+  xy_connections = "auto", xy_show_fit = TRUE, xy_fit_band = TRUE,
   fit_weight = "none", fit_replicates = "individual", fit_scope = "selected", series_styles = "{}", x_tick_step = "", y_tick_step = "", x_tick_angle = 0, ref_x = "", ref_y = "", x_axis_length = 0, y_axis_length = 0,
   pca_scale = TRUE, pca_missing = "error", pca_variables = "", pca_label_column = "", pca_group_column = "", pca_x = 1, pca_y = 2, pca_labels = FALSE)
 
@@ -26,19 +27,9 @@ pc_plot_basic <- function(normalized, settings, analysis = NULL) {
   names(colors) <- normalized$groups
   if (normalized$layout == "xy") {
     p <- ggplot2::ggplot(d, ggplot2::aes(x = x, y = value, color = group))
-    if (settings$graph == "line") p <- p + ggplot2::geom_line(linewidth = 0.65)
+    if (pc_xy_connects(settings)) p <- p + ggplot2::geom_line(data = stats::aggregate(value ~ x + group, d, mean), linewidth = 0.65)
     p <- p + ggplot2::geom_point(size = settings$point_size, alpha = 0.9)
-    if (is.null(analysis$curve) && !is.null(analysis$model) && inherits(analysis$model, "lm")) {
-      selected <- d[d$group == settings$group1, ]
-      line <- data.frame(x = seq(min(selected$x), max(selected$x), length.out = 120))
-      pred <- stats::predict(analysis$model, newdata = line, interval = "confidence")
-      line <- cbind(line, pred)
-      if (settings$log_y && any(line$lwr <= 0)) stop("The regression confidence band includes nonpositive values. Use a linear Y axis to show the full interval.", call. = FALSE)
-      p <- p + ggplot2::geom_ribbon(data = line, ggplot2::aes(x = x, ymin = lwr, ymax = upr),
-                                    inherit.aes = FALSE, fill = colors[[settings$group1]], alpha = 0.12) +
-        ggplot2::geom_line(data = line, ggplot2::aes(x = x, y = fit), inherit.aes = FALSE,
-                          color = colors[[settings$group1]], linewidth = 0.9)
-    }
+
   } else {
     p <- ggplot2::ggplot(d, ggplot2::aes(x = group, y = value, color = group, fill = group))
     if (settings$graph == "violin") {

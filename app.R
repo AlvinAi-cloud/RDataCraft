@@ -128,6 +128,15 @@ ui <- fluidPage(
                               checkboxInput("grid_lines", "Show major grid lines", FALSE),
                               selectInput("annotation", "P-value labels", c("Numeric P (below 10⁻⁶: P < 10⁻⁶)" = "p", "Significance stars (ns, *, **, ***, ****)" = "stars")),
                               div(class = "two-fields", numericInput("font_size", "Text size (pt)", 7, 4, 24), numericInput("point_size", "Point size", 2.8, 1, 6, 0.2))),
+                conditionalPanel("input.layout === 'xy' && input.graph !== 'residual'",
+                  field_section("XY lines & fitted curves",
+                    selectInput("xy_connections", "Connect observations / means", c("Automatic for graph type"="auto", "No connecting lines"="none", "Connect points in X order"="connect")),
+                    checkboxInput("xy_show_fit", "Show fitted curves", TRUE),
+                    checkboxInput("xy_fit_band", "Show fitted mean 95% CI (when available)", TRUE),
+                    textOutput("xy_fit_scope_note"),
+                    actionButton("xy_fit_all", "Fit every Y series independently", class="btn-outline-secondary"),
+                    tags$button(type="button", class="btn btn-outline-secondary", `data-command`="analysis", "Choose model / series…"),
+                    p(class="muted", "Mean error bars and fitted confidence bands describe different quantities. Fitting uses the replicate and weighting choices in Analysis."))),
                 field_section("Axes & export", conditionalPanel("['column','xy','grouped'].indexOf(input.layout) !== -1", checkboxInput("log_y", "Logarithmic Y axis", FALSE)),
                               conditionalPanel("input.layout === 'xy'", checkboxInput("log_x", "Logarithmic X axis", FALSE)),
                               p(class = "muted", "Blank range limits use automatic scaling. Ranges crop the view; analysis still uses all source observations."),
@@ -147,9 +156,7 @@ ui <- fluidPage(
             div(class = "data-toolbar card-surface",
               selectInput("layout", "Table layout", setNames(unname(pc_layouts()), sub(" ·.*", "", names(pc_layouts())))),
               fileInput("import_data", "Import data", accept = c(".csv", ".tsv", ".txt", ".xlsx"), buttonLabel = "Choose file", placeholder = "CSV, TSV or Excel"),
-              fileInput("import_prism","Import Prism file",accept=c(".pzfx",".prism",".pzf"),buttonLabel="Choose Prism file",placeholder="PZFX or PRISM"),
-              div(class = "example-buttons", span("Try an example"), actionButton("sample_column", "Treatment groups", class = "btn-outline-secondary"),
-                  actionButton("sample_xy", "Time course", class = "btn-outline-secondary"), actionButton("sample_dose", "Dose response", class = "btn-outline-secondary"))),
+              fileInput("import_prism","Import Prism file",accept=c(".pzfx",".prism",".pzf"),buttonLabel="Choose Prism file",placeholder="PZFX or PRISM")),
             div(class = "card-surface data-card", div(class = "section-heading", h3("Source observations"),
                   div(class = "table-actions", actionButton("undo_data", "Undo", class = "btn-outline-secondary", disabled = "disabled", title = "Undo committed data edit"),
                       actionButton("redo_data", "Redo", class = "btn-outline-secondary", disabled = "disabled", title = "Redo committed data edit"), actionButton("manage_table", "Rows & series…", class = "btn-outline-secondary"), actionButton("add_row", "+ Row", class = "btn-outline-secondary"), actionButton("add_group", "+ Column", class = "btn-outline-secondary"),
@@ -162,9 +169,10 @@ ui <- fluidPage(
                   DT::DTOutput("data_grid")),
             div(class = "card-surface transform-card", h3("Transform observations into a new worksheet"),
                 p("The source worksheet is preserved. Choose a transform, then review its derived table and analysis."),
-                selectInput("transform_kind", "Transform", c("Percent of selected control mean" = "percent_control", "Log10(Y)" = "log10", "Natural log(Y)" = "ln", "Z score within each numeric column" = "zscore")),
-                selectInput("transform_control", "Control column (percent normalization)", c("Control", "Treatment A", "Treatment B")),
-                actionButton("apply_transform", "Create transformed worksheet", class = "btn-outline-secondary")),
+                div(class="transform-controls",
+                  selectInput("transform_kind", "Transform", c("Percent of selected control mean" = "percent_control", "Log10(Y)" = "log10", "Natural log(Y)" = "ln", "Z score within each numeric column" = "zscore")),
+                  selectInput("transform_control", "Control column (percent normalization)", c("Control", "Treatment A", "Treatment B")),
+                  div(class="transform-action", actionButton("apply_transform", "Create transformed worksheet", class = "btn-outline-secondary")))),
             tags$details(class = "card-surface paste-card", tags$summary("Advanced: replace the entire table from text"),
                 p("Include a header row and follow the table-format guide above. Use a new worksheet template to start a different experiment type."),
                 textAreaInput("paste_data", NULL, placeholder = "Control\tTreatment\n8.4\t12.6\n9.7\t14.2", rows = 6, width = "100%"),
@@ -172,15 +180,15 @@ ui <- fluidPage(
           tabPanel("Analysis", value = "analysis",
             div(class = "page-heading", div(div(class = "eyebrow", "UNDERSTAND THE DIFFERENCE"), h1(textOutput("analysis_heading", inline = TRUE)),
               p("Choose an analysis deliberately. Review its assumptions alongside the result."))),
-            uiOutput("example_guide"),
             div(class="card-surface",actionButton("advanced_open","Advanced R analysis…",class="btn-outline-secondary"),p(class="muted","Use reviewed R scripts for methods beyond the presets. Open the guide for examples and package requirements.")),
-            div(class = "card-surface analysis-controls", selectInput("method", "Analysis", pc_methods("column"), selected = "welch"),
-                conditionalPanel("['welch','student','paired','mann','signedrank','onesample','linear','pearson','spearman','fourpl','origin','quadratic','cubic','logarithmic','power','exponential','decay','association','michaelis','gaussian'].indexOf(input.method) !== -1", selectInput("group1", "First group / regression series", choices = c("Control", "Treatment A", "Treatment B"))),
+            div(class = "card-surface analysis-controls", selectizeInput("method", "Analysis method", pc_methods("column"), selected = "welch", options = list(dropdownParent="body",
+                  onDropdownOpen=I("function(dropdown) { var box=this.$control[0].getBoundingClientRect(), below=window.innerHeight-box.bottom-12, above=box.top-12, upward=below<240 && above>below, height=Math.max(100,Math.min(420,upward?above:below)); dropdown.addClass('analysis-method-menu'); dropdown.find('.selectize-dropdown-content').css('max-height',height+'px'); if(upward) dropdown.css('top',window.scrollY+box.top-dropdown.outerHeight()); }"))),
+                conditionalPanel("['welch','student','paired','mann','signedrank','onesample','linear','pearson','spearman','fourpl','origin','quadratic','cubic','logarithmic','power','exponential','decay','association','michaelis','gaussian'].indexOf(input.method) !== -1 && (input.layout !== 'xy' || input.fit_scope !== 'all' || ['pearson','spearman'].indexOf(input.method) !== -1)", selectInput("group1", "First group / regression series", choices = c("Control", "Treatment A", "Treatment B"))),
                 conditionalPanel("input.layout === 'xy' && ['linear','fourpl','origin','quadratic','cubic','logarithmic','power','exponential','decay','association','michaelis','gaussian'].indexOf(input.method) !== -1",
-                  selectInput("fit_scope","Fit series",c("Selected series"="selected","All series independently"="all")),
+                  selectInput("fit_scope","Fit series",c("Selected Y series only"="selected","All Y series — separate fit per group"="all")),
                   selectInput("fit_replicates","Fit replicates",c("Fit individual observations"="individual","Fit mean Y at each X"="mean")),
                   selectInput("fit_weight","Regression weighting",c("Equal weights"="none","1 / Y² (nonzero Y)"="inv_y2","Replicate SD (requires repeated X)"="replicate_sd")),
-                  p(class="muted","Models fit the original Y scale. Choose Scatter/curve or Residuals on the Graph page to inspect the fit.")),
+                  p(class="muted","Models fit the original Y scale. Fit every series independently to draw all fitted curves on the same graph. Curves are available with scatter, mean/error and shaded-band views; Residuals shows fit diagnostics.")),
                 conditionalPanel("['welch','student','paired','mann','signedrank'].indexOf(input.method) !== -1", selectInput("group2", "Second group", choices = c("Treatment A", "Control", "Treatment B"))),
                 conditionalPanel("input.method === 'onesample'", numericInput("null_mean", "Hypothesized population mean", 0)),
                 conditionalPanel("['multiple','kruskal','simpleeffects'].indexOf(input.method) !== -1", selectInput("correction", "Multiple-comparison correction", c("Holm (family-wise error)" = "holm", "Bonferroni (family-wise error)" = "bonferroni", "Benjamini–Hochberg (false discovery rate)" = "BH")))),
@@ -243,7 +251,7 @@ ui <- fluidPage(
                 fileInput("open_project", "Project file", accept = c(".json", ".rdatacraft", ".plotcraft"), placeholder = "Choose a RDataCraft project"),
                 downloadButton("save_project_copy", "Save current project", class = "btn-primary")),
               div(class = "card-surface", h3("About this version"),
-                  p("RDataCraft v0.31 · Scientific plotting and statistics"),
+                  p("RDataCraft v0.32 · Scientific plotting and statistics"),
                   p("R-powered data analysis and publication-ready figures for Mac and Windows."),
                   p("Six table types including PCA, named worksheets, matched and independent group tests, factorial ANOVA, correlation, dose-response fitting, survival analysis, categorical tests, diagnostic graphs, and reproducible reports."),
                   p("Treat each row as an independent experimental unit unless using a paired test. Technical replicates must not be counted as independent biological replicates."),
@@ -478,16 +486,28 @@ server <- function(input, output, session) {
     session$sendCustomMessage("rdatacraft-header",list(ok=TRUE,message="Column name updated. Undo restores the previous name."))
   },error=function(e) {notify_error(e);session$sendCustomMessage("rdatacraft-header",list(ok=FALSE,message=conditionMessage(e)))}))
   output$data_grid <- DT::renderDT({
-    position <- isolate(input$grid_page)
-    start <- if (!is.null(position) && identical(position$sheet, active_sheet()) &&
-      is.numeric(position$start) && length(position$start) == 1L && is.finite(position$start))
-      max(0, min(floor(position$start / 12) * 12, floor((nrow(raw()) - 1) / 12) * 12)) else 0
     header <- pc_grid_header(raw(),current_layout())
     DT::datatable(raw(), rownames = FALSE, editable = "cell", selection = "none", escape = TRUE, container = header,
       callback = DT::JS(paste0("window.RDataCraftGrid.bind(table,", jsonlite::toJSON(grid_identity(), auto_unbox = TRUE), ");")),
-      options = list(pageLength = 12, lengthChange = FALSE, searching = FALSE, ordering = FALSE,
-                     displayStart = start, scrollX = TRUE, dom = "tip", language = list(emptyTable = "Add observations to begin.")))
+      options = list(paging = FALSE, lengthChange = FALSE, searching = FALSE, ordering = FALSE,
+                     scrollX = TRUE, scrollY = "55vh", scrollCollapse = TRUE, dom = "ti",
+                     createdRow = DT::JS("function(row, data, index) { row.cells[0].dataset.rowNumber = index + 1; }"),
+                     language = list(emptyTable = "Add observations to begin.")))
   }, server = TRUE)
+  output$xy_fit_scope_note <- renderText({
+    label <- names(pc_methods("xy"))[match(input$method, pc_methods("xy"))]
+    if (!input$method %in% c("linear", "fourpl", unname(pc_regression_methods()))) return("Choose a regression model in Analysis to draw fitted curves.")
+    paste(label, "·", if (identical(input$fit_scope, "all")) "All Y series fitted independently" else paste("Selected series:", input$group1))
+  })
+  observeEvent(input$xy_fit_all, {
+    req(identical(input$layout, "xy"))
+    updateSelectInput(session, "fit_scope", selected="all")
+    updateCheckboxInput(session, "xy_show_fit", value=TRUE)
+    if (!input$method %in% c("linear", "fourpl", unname(pc_regression_methods()))) {
+      updateTabsetPanel(session,"workspace",selected="analysis");page("analysis");session$sendCustomMessage("rdatacraft-page","analysis")
+      showNotification("Choose a regression model; each Y series will be fitted independently.",type="message")
+    }
+  })
   normalized <- reactive({
     target <- restoring_settings()
     layout <- if (is.null(target)) input$layout else target$layout
@@ -610,7 +630,7 @@ server <- function(input, output, session) {
     for (key in names(s)) {
       v <- s[[key]]
       if (key %in% c("layout", "method", "graph", "error", "palette", "dpi", "group1", "group2", "correction", "annotation", "legend_position", "pca_missing", "pca_label_column", "pca_group_column")) updateSelectInput(session, key, selected = v)
-      else if (key %in% c("fit_weight","fit_replicates","fit_scope")) updateSelectInput(session,key,selected=v)
+      else if (key %in% c("fit_weight","fit_replicates","fit_scope","xy_connections")) updateSelectInput(session,key,selected=v)
       else if (is.logical(v)) updateCheckboxInput(session, key, value = v)
       else if (is.numeric(v)) updateNumericInput(session, key, value = v)
       else updateTextInput(session, key, value = v)
@@ -697,7 +717,7 @@ server <- function(input, output, session) {
     key <- paste(active_sheet(),active_view(),sep=":");h <- graph_history();entry <- h[[key]];if(is.null(entry) || !length(entry[[direction]])) return()
     target <- tail(entry[[direction]],1)[[1]]
     # Revalidate against the current observations before applying historical appearance.
-    target <- pc_graph_edit(raw(),settings(),target[intersect(names(target),c("graph","title","x_label","y_label","override_x_title","override_y_title","font_size","title_size","axis_title_size","axis_tick_size","text_color","axis_color","axis_line_width","palette","point_size","point_shape","line_width","error","show_points","show_p","legend_position","series_styles","grid_lines","log_x","log_y","x_min","x_max","y_min","y_max","width","height","x_tick_step","y_tick_step","x_tick_angle","ref_x","ref_y","x_axis_length","y_axis_length"))])
+    target <- pc_graph_edit(raw(),settings(),target[intersect(names(target),c("graph","title","x_label","y_label","override_x_title","override_y_title","font_size","title_size","axis_title_size","axis_tick_size","text_color","axis_color","axis_line_width","palette","point_size","point_shape","line_width","xy_connections","xy_show_fit","xy_fit_band","error","show_points","show_p","legend_position","series_styles","grid_lines","log_x","log_y","x_min","x_max","y_min","y_max","width","height","x_tick_step","y_tick_step","x_tick_angle","ref_x","ref_y","x_axis_length","y_axis_length"))])
     entry[[direction]] <- head(entry[[direction]],-1);other <- if(direction=="undo") "redo" else "undo";entry[[other]] <- tail(c(entry[[other]],list(settings())),30);h[[key]] <- entry
     graph_skip(list(key=key,settings=target));graph_history(h);all <- view_book();all[[active_view()]]$settings <- target;views(all);update_settings(target)
   }
@@ -876,10 +896,6 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
   observeEvent(input$help_examples,show_example_guide())
   observeEvent(input$show_pca_guide,show_example_guide("pca"))
   output$tutorial_preview<-renderUI({req(input$tutorial_choice);pc_tutorial_guide(pc_tutorials()[[input$tutorial_choice]])})
-  output$example_guide<-renderUI({
-    guides<-pc_tutorials();matches<-vapply(guides,function(g) identical(sheet_name(),paste("Example ·",g$title)),logical(1))
-    if(any(matches)) div(class="card-surface",tags$details(tags$summary("Example walkthrough"),pc_tutorial_guide(guides[[which(matches)[1]]])))
-  })
   observeEvent(input$add_tutorial,tryCatch({
     e<-pc_tutorial(input$tutorial_choice);add_sheet(e$table,e$settings,e$name,e$views)
     if(input$tutorial_choice=="figures") {

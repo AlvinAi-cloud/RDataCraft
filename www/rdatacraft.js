@@ -6,18 +6,33 @@
   const input = (name, value) => Shiny.setInputValue(name, { ...value, nonce: Date.now() }, { priority: "event" });
 
   let grid = null, anchor = null, pastePending = false;
+  const gridScroll = new Map();
   function gridStatus(message) { const el = document.getElementById("grid_selection"); if (el) el.textContent = message; }
   function selectCell(cell, focus = true) {
     if (!grid) return;
     const index = grid.table.cell(cell).index();
     if (!index) return;
-    // Ordering and filtering are disabled: server-side page start maps the local
-    // DataTables row index to the source observation's absolute row.
-    anchor = {sheet: grid.sheet, row: grid.table.page.info().start + index.row + 1, column: index.column + 1};
+    // Ordering, filtering and paging are disabled: each row keeps its source index.
+    anchor = {sheet: grid.sheet, row: index.row + 1, column: index.column + 1};
     document.querySelectorAll("#data_grid td.grid-anchor").forEach(el => {el.classList.remove("grid-anchor"); el.tabIndex = -1;});
     cell.classList.add("grid-anchor"); cell.tabIndex = 0;
     gridStatus(`Row ${anchor.row} · Column ${anchor.column} — ⌘V / Ctrl+V to paste`);
-    if (focus && !cell.querySelector("input,textarea")) cell.focus({preventScroll: true});
+    if (focus && !cell.querySelector("input,textarea")) {
+      cell.focus({preventScroll: true});
+      revealGridCell(cell);
+    }
+  }
+  function revealGridCell(cell) {
+    if (!grid || !cell) return;
+    const scroller = grid.table.table().container().querySelector(".dataTables_scrollBody");
+      if (scroller) {
+        const box = scroller.getBoundingClientRect(), target = cell.getBoundingClientRect();
+        if (target.bottom > box.bottom) scroller.scrollTop += target.bottom - box.bottom;
+        if (target.top < box.top) scroller.scrollTop -= box.top - target.top;
+        if (target.right > box.right) scroller.scrollLeft += target.right - box.right;
+        if (target.left < box.left) scroller.scrollLeft -= box.left - target.left;
+        gridScroll.set(grid.sheet, {top: scroller.scrollTop, left: scroller.scrollLeft});
+      }
   }
   function pasteGrid(text) {
     if (!grid || !anchor || anchor.sheet !== grid.sheet || !document.querySelector("#nav_data.active")) return false;
@@ -28,6 +43,8 @@
       const cell = this.closest("td"); $(this).off("blur");
       cell.textContent = grid.table.cell(cell).data();
     });
+    const scroller = grid.table.table().container().querySelector(".dataTables_scrollBody");
+    if (scroller) gridScroll.set(grid.sheet, {top: scroller.scrollTop, left: scroller.scrollLeft});
     pastePending = true; gridStatus("Pasting cells…");
     input("grid_paste", {sheet: grid.sheet, token: grid.token, row: anchor.row, column: anchor.column,
       text, headers: document.getElementById("grid_paste_headers").checked});
@@ -37,13 +54,38 @@
     bind(table, identity) {
       grid = {table, ...identity};
       if (anchor?.sheet !== grid.sheet) {anchor = null; gridStatus("Select a cell to paste");}
+      const scroller = table.table().container().querySelector(".dataTables_scrollBody");
+      const savedScroll = gridScroll.get(grid.sheet) || {top: 0, left: 0};
+      let scrollListenerBound = false, restoreFrame = null;
       function draw() {
         if (grid.table !== table) return;
         $(table.table().body()).find("td").attr("tabindex", "-1");
-        const start = table.page.info().start;
-        input("grid_page", {sheet: grid.sheet, start});
+        if (scroller && table.rows().count()) {
+          // DataTables can perform another sizing draw after its server reply.
+          // Restore after the layout settles on every draw, and keep the active
+          // observation visible even if that sizing pass reset scrollTop.
+          if (restoreFrame !== null) cancelAnimationFrame(restoreFrame);
+          restoreFrame = requestAnimationFrame(() => {
+            restoreFrame = requestAnimationFrame(() => {
+              restoreFrame = null;
+              if (grid.table !== table) return;
+              const position = gridScroll.get(grid.sheet) || savedScroll;
+              scroller.scrollTop = position.top; scroller.scrollLeft = position.left;
+              if (anchor?.sheet === grid.sheet)
+                revealGridCell(scroller.querySelector("td.grid-anchor"));
+              if (!scrollListenerBound) {
+                scrollListenerBound = true;
+                scroller.addEventListener("scroll", () => {
+                  if (grid.table === table && !grid.replacing && scroller.isConnected)
+                    gridScroll.set(grid.sheet, {top: scroller.scrollTop, left: scroller.scrollLeft});
+                });
+              }
+            });
+          });
+        }
+
         if (anchor?.sheet === grid.sheet) {
-          const local = anchor.row - start - 1;
+          const local = anchor.row - 1;
           const cell = local >= 0 && local < table.rows().count() && anchor.column <= table.columns().count()
             ? table.cell(local, anchor.column - 1).node() : null;
           if (cell) selectCell(cell, false);
@@ -129,6 +171,10 @@
   }
 
   $(function () {
+    $(document).on("shiny:recalculating", "#data_grid", () => {
+      if (!grid) return;
+      grid.replacing = true;
+    });
     Shiny.addCustomMessageHandler("rdatacraft-welcome", (open) => { document.body.classList.toggle("document-open", open); document.querySelectorAll('.create-choice[data-create="view"],.create-choice[data-create="layout"],.create-choice[data-create="duplicate"]').forEach(b => b.disabled = !open); document.querySelectorAll('[data-command="save"],[data-command="export"],[data-command="data"],[data-command="analysis"],[data-command="figure"],[data-command="inspector"],[data-command="layout"]').forEach(b => b.disabled = !open); });
     document.body.dataset.runtime = native ? "desktop" : "browser";
     $("#nav_data").addClass("active");

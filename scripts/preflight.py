@@ -22,6 +22,7 @@ EXAMPLES = {
     "Prism workflow improvements.rdatacraft", "RDataCraft examples.rdatacraft",
     "Regression model gallery.rdatacraft", "XY replicates example.rdatacraft",
     "dose-response.csv", "treatment.csv", "xy.csv", "RDataCraft help.html",
+    "XY curve fitting review.rdatacraft",
 }
 
 

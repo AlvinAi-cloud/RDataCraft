@@ -1,3 +1,14 @@
+# v0.32 collection update
+
+The release workflow preserves the native archive SHA-256 pins and immutable
+Rtools45 MXE revision from the reviewed v0.31 release preparation. Platform jobs
+also collect their exact R/package source archives and OpenMP source subset.
+Rust sources are vendored from the committed Cargo.lock. Notices are installed
+before the final packages are tested. The resulting source bundle is assembled
+only after the three platform jobs pass for the same commit and workflow run.
+This does not establish bit-identical reproduction of upstream native binaries;
+the historical provenance questions documented below remain explicit.
+
 # Native component source review · v0.3
 
 This review supplements the 89 exact R/package archives in `source-manifest.json`.

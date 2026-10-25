@@ -8,15 +8,6 @@ pc_plot_raw <- function(normalized, settings, analysis = NULL) {
   if (n$layout == "column" && s$graph %in% c("points", "bar", "box", "violin", "paired")) return(pc_plot_basic(n, s, analysis))
   if (n$layout == "xy" && s$graph %in% c("scatter", "line")) {
     p <- pc_plot_basic(n, s, analysis)
-    if (!is.null(analysis$curve)) {
-      curve <- analysis$curve
-      if (!"group" %in% names(curve)) curve$group <- s$group1
-      if(all(c("lower","upper") %in% names(curve))) {
-        if(s$log_y && any(curve$lower<=0, na.rm=TRUE)) stop("The fitted mean confidence interval crosses zero; use a linear Y axis.",call.=FALSE)
-        p <- p + ggplot2::geom_ribbon(data=curve,ggplot2::aes(x=x,ymin=lower,ymax=upper,fill=group,group=group),inherit.aes=FALSE,alpha=.12,na.rm=TRUE,show.legend=FALSE) + ggplot2::scale_fill_manual(values=colors)
-      }
-      p <- p + ggplot2::geom_line(data=curve,ggplot2::aes(x=x,y=fit,color=group,group=group),inherit.aes=FALSE,linewidth=.9)
-    }
     return(p)
   }
   if (s$log_y && n$layout %in% c("survival", "contingency")) stop("Use a linear axis for survival probabilities and counts.", call. = FALSE)
@@ -75,7 +66,8 @@ pc_plot_raw <- function(normalized, settings, analysis = NULL) {
         z$segment <- interaction(z$group,ave(!is.finite(z$margin),z$group,FUN=cumsum),drop=TRUE)
         p <- p + ggplot2::geom_ribbon(data=z[is.finite(z$margin),],ggplot2::aes(ymin=mean-margin,ymax=mean+margin,fill=group,group=segment),colour=NA,alpha=.2,show.legend=FALSE) + ggplot2::scale_fill_manual(values=colors)
       }
-      p <- p + ggplot2::geom_line(linewidth = 0.7) + ggplot2::geom_point(size = s$point_size)
+      if (pc_xy_connects(s)) p <- p + ggplot2::geom_line(linewidth = 0.7)
+      p <- p + ggplot2::geom_point(size = s$point_size)
       if (s$graph != "xyband" && s$error != "none") p <- p + ggplot2::geom_errorbar(ggplot2::aes(ymin = mean - margin, ymax = mean + margin), width = diff(range(d$x)) * 0.012, na.rm = TRUE)
       if (s$show_points) p <- p + ggplot2::geom_point(data = d, ggplot2::aes(y = value), size = s$point_size * 0.7, alpha = 0.45, show.legend = FALSE)
       if (s$graph == "xyband") p <- p + ggplot2::labs(caption=pc_xy_band_caption(n,s))
@@ -126,8 +118,34 @@ StatStepribbon <- ggplot2::ggproto("StatStepribbon", ggplot2::Stat,
 
 pc_plot <- function(normalized, settings, analysis = NULL) {
   p <- pc_plot_raw(normalized, settings, analysis)
+  p <- pc_xy_fitted_curves(p, normalized, settings, analysis)
   p <- pc_format_details(pc_format_axes(p, normalized, settings), normalized, settings)
   if(normalized$layout!="multiple") p <- pc_format_series(p,normalized,settings)
   pc_validate_axis_lengths(p,settings)
   p
+}
+
+# Observation connections and fitted models are independent display choices.
+pc_xy_connects <- function(s) {
+  choice <- if (is.null(s$xy_connections)) "auto" else s$xy_connections
+  if (choice == "auto") s$graph %in% c("line", "xymean", "xyband", "step", "area") else choice == "connect"
+}
+pc_xy_fitted_curves <- function(p, n, s, analysis) {
+  if (n$layout != "xy" || s$graph == "residual" || identical(s$xy_show_fit, FALSE)) return(p)
+  curve <- analysis$curve
+  if (is.null(curve) && inherits(analysis$model, "lm")) {
+    selected <- n$data[n$data$group == s$group1, ]
+    grid <- data.frame(x = seq(min(selected$x), max(selected$x), length.out = 240))
+    pred <- stats::predict(analysis$model, newdata = grid, interval = "confidence")
+    curve <- data.frame(x = grid$x, fit = pred[,"fit"], lower = pred[,"lwr"], upper = pred[,"upr"])
+  }
+  if (is.null(curve) || !nrow(curve)) return(p)
+  if (!"group" %in% names(curve)) curve$group <- s$group1
+  if (s$log_y && any(curve$fit <= 0, na.rm = TRUE)) stop("The fitted curve crosses zero; use a linear Y axis.", call. = FALSE)
+  if (!identical(s$xy_fit_band, FALSE) && all(c("lower", "upper") %in% names(curve))) {
+    if (s$log_y && any(curve$lower <= 0, na.rm = TRUE)) stop("The fitted mean confidence interval crosses zero; use a linear Y axis or hide the fitted confidence band.", call. = FALSE)
+    p <- p + ggplot2::geom_ribbon(data = curve, ggplot2::aes(x = x, ymin = lower, ymax = upper, fill = group, group = group), inherit.aes = FALSE, colour = NA, alpha = .12, na.rm = TRUE, show.legend = FALSE)
+    if (is.null(p$scales$get_scales("fill"))) p <- p + ggplot2::scale_fill_manual(values = pc_series_colors(n, s))
+  }
+  p + ggplot2::geom_line(data = curve, ggplot2::aes(x = x, y = fit, color = group, group = group), inherit.aes = FALSE, linewidth = .9)
 }

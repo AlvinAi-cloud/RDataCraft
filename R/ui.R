@@ -24,7 +24,7 @@ pc_chrome <- function() {
   tagList(
     div(class = "application-bar", div(class = "app-brand", pc_icon("graph"), strong("RDataCraft")),
         span("Scientific plotting & statistics", class = "application-description"),
-        span(if(identical(Sys.getenv("RDATACRAFT_PORTABLE"),"1") && !nzchar(Sys.getenv("RDATACRAFT_NATIVE_HOST"))) "v0.31 · Portable preview" else "v0.31 · Desktop preview", class = "version-label")),
+        span(if(identical(Sys.getenv("RDATACRAFT_PORTABLE"),"1") && !nzchar(Sys.getenv("RDATACRAFT_NATIVE_HOST"))) "v0.32 · Portable preview" else "v0.32 · Desktop preview", class = "version-label")),
     tags$dialog(id = "create_dialog", `aria-labelledby` = "create_heading",
       h2(id = "create_heading", "What would you like to create?"),
       p("A study holds your data tables, linked analyses, graphs, and figure layouts."),

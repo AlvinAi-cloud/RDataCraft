@@ -13,6 +13,8 @@
     data: [["palette","Palette","select",{craft:"RDataCraft",accessible:"Colorblind accessible",monochrome:"Monochrome"}],
       ["point_size","Symbol size","number",1,6,0.2],["point_shape","Symbol","select",{0:"Automatic",16:"Circle",15:"Square",17:"Triangle",18:"Diamond",1:"Open circle"}],
       ["line_width","Curve width (mm; 0 = automatic)","number",0,4,0.1],
+      ["xy_connections","XY connecting lines","select",{auto:"Automatic for graph type",none:"No connecting lines",connect:"Connect points in X order"}],
+      ["xy_show_fit","Show XY fitted curves","checkbox"],["xy_fit_band","Show fitted mean 95% CI (when available)","checkbox"],
       ["error","Mean interval (bars / shading)","select",{sem:"SEM",sd:"SD",ci:"95% CI",none:"None"}],
       ["show_points","Show individual observations","checkbox"],["show_p","Show comparison P values","checkbox"],
       ["annotation","P-value labels","select",{p:"Numeric P (P < 10⁻⁶ below threshold)",stars:"Significance stars (ns, *, **, ***, ****)"}],
@@ -83,6 +85,7 @@
       const settings = source.settings, layout = settings.layout;
       if (individual && layout === "survival" && ["point_shape","point_size"].includes(key)) continue;
       if (key === "log_x" && layout !== "xy") continue;
+      if (key.startsWith("xy_") && (layout !== "xy" || settings.graph === "residual")) continue;
       if (key === "log_y" && !["column","xy","grouped"].includes(layout)) continue;
       if (["x_min","x_max","x_tick_step","ref_x"].includes(key) && !["xy","survival","multiple"].includes(layout) && !["histogram","ecdf","qq","density"].includes(settings.graph)) continue;
       if (["y_min","y_max","y_tick_step","ref_y"].includes(key) && ["heatmap","groupheat"].includes(settings.graph)) continue;

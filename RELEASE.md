@@ -1,100 +1,59 @@
-The v0.31 revision includes a bundled Rust AI connection service. Rebuild and test every platform after this source change; previous v0.3 installer results do not certify v0.31. Direct ChatGPT sign-in and provider transport have synthetic/local tests; live account eligibility and paid provider requests require user acceptance testing.
-
-# RDataCraft v0.31 release preparation
-
-## Suggested GitHub description
+# RDataCraft v0.32 release preparation
 
 Open-source scientific plotting and statistics powered by R, with editable tables,
 curve fitting, PCA and optional AI-assisted analysis.
 
-## Suggested introduction
+## Keep the single main branch
 
-RDataCraft is an open-source, R-powered workspace for scientific data analysis
-and publication-quality figures. It brings editable data tables, linked graphs,
-statistical workflows, curve fitting, PCA and multi-panel layouts into one local
-application. Advanced R analysis supports methods beyond the presets, with
-reviewed scripts, optional AI assistance and approval before installing missing
-packages. Studies retain data, settings, analysis code and saved results.
+The existing repository is https://github.com/AlvinAi-cloud/RDataCraft.
+Use its existing GitHub Desktop checkout on **main**. The prepared source-only
+folder is `dist/RDataCraft-0.32-GitHub`; it contains no installers or private studies.
+Copy its source changes into the existing checkout, review them in GitHub Desktop,
+commit **Prepare RDataCraft v0.32**, then **Push origin**. No new branch is needed.
 
-Mac and Windows x64 editions use dedicated desktop windows with native menus
-and file dialogs. The Windows installer includes Microsoft WebView2. Packaged editions include R and required packages.
-Connected AI requests use an external service when the user chooses to send them.
+## GitHub creates the three installers
 
-## GitHub Desktop
+A push to main runs **Actions → Native platform validation**. It collects the
+pinned source material and notices, builds Intel Mac, Apple Silicon and Windows
+installers on matching runners, runs the source tests, and exercises the installed
+applications. The Mac tests run from the read-only disk image; Windows tests cover
+setup, the embedded desktop window, bundled R, uninstall and study preservation.
+The Mac installed-app tests also cover worksheet paste, XY fits and the dropdown.
 
-Use the source folder `dist/RDataCraft-0.31-GitHub`, rather than this entire working
-directory. It excludes private studies, runtimes, installers and test artifacts.
+After every required job passes, the workflow prepares a **draft** v0.32 release
+with exactly three installer downloads, checksums, the combined validation report
+and corresponding source/build material. Open **Releases**, review the draft and
+choose **Publish release** when ready. Preparing or uploading source locally does
+not publish a release. Draft releases can be updated by later passing main builds;
+a published version is never overwritten. The release tag records the tested commit
+and does not create another development branch.
 
-1. In GitHub Desktop, select **File → Add Local Repository** and choose that folder.
-   If Desktop says it is not a Git repository, use its **create a repository here**
-   link. Keep the existing README, license and ignore files.
-2. Review the changed files and commit the prepared source. Choose **Publish
-   repository**, name it **RDataCraft**, and select the intended visibility.
-3. Open the repository on GitHub. The **Actions → Native platform validation**
-   workflow runs tests on Intel Mac, Apple Silicon and Windows. Review every job.
-   It now exercises the Mac app from the read-only disk image and the Windows
-   setup/uninstall path. Reports upload automatically. Binary artifact upload is
-   a separate manual opt-in for development testing.
-4. Create a **draft** release tagged **v0.31** after resolving the remaining checks.
-   Attach installer files as release assets. Keep all final checksums and validation
-   reports together. Complete the native-source review and attach the required
-   corresponding source/build material before publishing bundled binaries.
+Do not build the Windows installer on this Mac. Release installers should come
+from the tested GitHub workflow. Local Mac app builds remain useful for UI review;
+local DMGs and Windows setup generation are optional and skipped for this release.
 
-No repository or release has been created by the local preparation tools. Desktop
-does not supply Apple/Windows signing credentials or itself run target-platform
-tests. [GitHub's Desktop instructions](https://docs.github.com/en/desktop/adding-and-cloning-repositories/adding-a-repository-from-your-local-computer-to-github-desktop).
+After publishing, share these three links:
 
-## Signing setup
+- [Intel Mac](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.32/RDataCraft-0.32-macos-x86_64.dmg)
+- [Apple Silicon Mac](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.32/RDataCraft-0.32-macos-arm64.dmg)
+- [Windows x64](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.32/RDataCraft-0.32-windows-x64-setup.exe)
 
-No distribution signing credentials are currently configured. Current installers
-are release candidates: Mac signatures are ad-hoc and Windows setup is unsigned.
-The following tools are prepared but their credential-dependent paths have not
-been executed. A signing plan or a script is not a signed release.
+These URLs become available when the draft is published; their presence here is
+not evidence that the builds have run or passed.
 
-For Mac, obtain an Apple Developer ID Application certificate/private key through
-your Apple developer account and configure a `notarytool` Keychain profile locally.
-Keep credentials in Keychain or protected CI secrets, never source files or chat.
-Preview the work without changing the app:
+## Signing and compatibility
 
-```sh
-python3 scripts/sign_macos.py --app "dist/RDataCraft 0.3 Intel.app"
-```
+GitHub runners do not supply signing credentials. Mac builds currently use ad-hoc
+signatures and are not notarized; Windows setup is unsigned. Trusted signing needs
+an Apple Developer ID/notarization setup and a Windows signing certificate/service.
+The prepared signing tools remain available, but this workflow does not claim
+trusted signing. Re-test final installers after any later signing changes.
 
-After setup, use `--apply --output NEW-APP-PATH --identity FULL-IDENTITY-NAME
---notary-profile PROFILE-NAME`. The tool signs a separate copy, signs nested code
-before containers, enables hardened runtime, submits to Apple, requires Accepted,
-staples the ticket and runs Gatekeeper checks. Only R executable processes get
-exceptions for loading user-approved R packages and the bundled library path.
-Run the native workflow tests again on the signed copy, especially Advanced R and
-new package loading. Package it with `package_installers.py --distribution`.
-The disk image itself may additionally be Developer ID signed/notarized before
-the final checksum. [Apple's notarization requirements](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution).
+Studies using the new XY connection/curve controls use project schema 12 and need
+v0.32 or later. Older studies continue to open with their original automatic
+connection behavior. The included release source material preserves the R/package,
+native-toolchain and Rust sources/notices; bit-for-bit reproduction of upstream
+CRAN binaries is not claimed. See [redistribution notes](licenses/REDISTRIBUTION.md).
 
-For Windows, obtain a trusted code-signing certificate/service with a private key
-accessible through the Windows certificate provider. Install the Windows SDK's
-SignTool. The current tool supports a certificate in the current user's My store,
-including a compatible hardware/provider-backed certificate; a cloud service
-that exposes a different API needs its provider integration first.
-
-Run Windows packaging with `--distribution --sign-certificate PUBLIC-THUMBPRINT
---timestamp-url PROVIDER-HTTPS-ENDPOINT --signtool SIGNTOOL-PATH`. NSIS hooks sign
-and verify both setup and its embedded uninstaller. Verification requires a valid
-signature, an RFC 3161 timestamp and the selected signer. No passwords or private
-keys are passed by the build script. Test installation/uninstallation again after
-signing. [Microsoft SignTool documentation](https://learn.microsoft.com/en-us/windows/win32/seccrypto/signtool).
-
-## Final binary release gates
-
-- Passing reports for the exact final packages on all target systems, including
-  clean machines without system R and a Windows embedded-window workflow check.
-- Native corresponding-source/build coverage completed; see
-  [the source review](licenses/NATIVE_SOURCE_REVIEW.md) and
-  [redistribution status](licenses/REDISTRIBUTION.md).
-- Trusted signing/notarization verified where planned, with signed-runtime tests.
-- Regenerated SHA-256 hashes after all signing, stapling and packaging changes.
-- Optional connected AI and vector paste checked in the intended external apps;
-  clearly disclose any remaining limitations in the release notes.
-
-The local report accompanying v0.31 distinguishes executed checks from pending
-checks. Do not relabel earlier v0.25 installers as v0.31; rebuild them from this
-source so internal version metadata and download names agree.
+Automated tests use synthetic/local AI services. Live provider account eligibility
+and vector paste into Illustrator/Affinity Designer still require acceptance testing.

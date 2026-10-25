@@ -1,0 +1,494 @@
+{
+  "archives": [
+    {
+      "component": "cairo",
+      "version": "1.17.6",
+      "archive": "cairo-1.17.6.tar.xz",
+      "url": "https://download.gnome.org/sources/cairo/1.17/cairo-1.17.6.tar.xz",
+      "sha256": "4eebc4c2bad0402bc3f501db184417094657d111fb6c06f076a82ea191fe1faf",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/cairo"
+    },
+    {
+      "component": "expat",
+      "version": "2.7.5",
+      "archive": "expat-2.7.5.tar.gz",
+      "url": "https://github.com/libexpat/libexpat/releases/download/R_2_7_5/expat-2.7.5.tar.gz",
+      "sha256": "9931f9860d18e6cf72d183eb8f309bfb96196c00e1d40caa978e95bc9aa978b6",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/expat"
+    },
+    {
+      "component": "ffi",
+      "version": "3.5.2",
+      "archive": "libffi-3.5.2.tar.gz",
+      "url": "https://github.com/libffi/libffi/releases/download/v3.5.2/libffi-3.5.2.tar.gz",
+      "sha256": "f3a3082a23b37c293a4fcd1053147b371f2ff91fa7ea1b2a52e335676bac82dc",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/ffi"
+    },
+    {
+      "component": "fontconfig",
+      "version": "2.14.2",
+      "archive": "fontconfig-2.14.2.tar.xz",
+      "url": "https://www.freedesktop.org/software/fontconfig/release/fontconfig-2.14.2.tar.xz",
+      "sha256": "dba695b57bce15023d2ceedef82062c2b925e51f5d4cc4aef736cf13f60a468b",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/fontconfig"
+    },
+    {
+      "component": "freetype",
+      "version": "2.14.3",
+      "archive": "freetype-2.14.3.tar.xz",
+      "url": "https://download.savannah.gnu.org/releases/freetype/freetype-2.14.3.tar.xz",
+      "sha256": "36bc4f1cc413335368ee656c42afca65c5a3987e8768cc28cf11ba775e785a5f",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/freetype"
+    },
+    {
+      "component": "fribidi",
+      "version": "1.0.16",
+      "archive": "fribidi-1.0.16.tar.xz",
+      "url": "https://github.com/fribidi/fribidi/releases/download/v1.0.16/fribidi-1.0.16.tar.xz",
+      "sha256": "1b1cde5b235d40479e91be2f0e88a309e3214c8ab470ec8a2744d82a5a9ea05c",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/fribidi"
+    },
+    {
+      "component": "gettext",
+      "version": "0.22.5",
+      "archive": "gettext-0.22.5.tar.gz",
+      "url": "https://ftp.gnu.org/pub/gnu/gettext/gettext-0.22.5.tar.gz",
+      "sha256": "ec1705b1e969b83a9f073144ec806151db88127f5e40fe5a94cb6c8fa48996a0",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/gettext"
+    },
+    {
+      "component": "glib",
+      "version": "2.76.1",
+      "archive": "glib-2.76.1.tar.xz",
+      "url": "https://download.gnome.org/sources/glib/2.76/glib-2.76.1.tar.xz",
+      "sha256": "43dc0f6a126958f5b454136c4398eab420249c16171a769784486e25f2fda19f",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/glib"
+    },
+    {
+      "component": "harfbuzz",
+      "version": "14.1.0",
+      "archive": "harfbuzz-14.1.0.tar.xz",
+      "url": "https://github.com/harfbuzz/harfbuzz/releases/download/14.1.0/harfbuzz-14.1.0.tar.xz",
+      "sha256": "ee0eb3a1da2c5a28147f12dff55f6c7d60aeeeb29ac7ef334eabe84c8476c105",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/harfbuzz"
+    },
+    {
+      "component": "icu",
+      "version": "71.1",
+      "archive": "icu4c-71_1-src.tgz",
+      "url": "https://github.com/unicode-org/icu/releases/download/release-71-1/icu4c-71_1-src.tgz",
+      "sha256": "67a7e6e51f61faf1306b6935333e13b2c48abd8da6d2f46ce6adca24b1e21ebf",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/icu"
+    },
+    {
+      "component": "jpeg",
+      "version": "9f",
+      "archive": "jpegsrc.v9f.tar.gz",
+      "url": "https://www.ijg.org/files/jpegsrc.v9f.tar.gz",
+      "sha256": "04705c110cb2469caa79fb71fba3d7bf834914706e9641a4589485c1f832565b",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/jpeg"
+    },
+    {
+      "component": "libdeflate",
+      "version": "1.25",
+      "archive": "libdeflate-1.25.tar.gz",
+      "url": "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.25.tar.gz",
+      "sha256": "d11473c1ad4c57d874695e8026865e38b47116bbcb872bfc622ec8f37a86017d",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/libdeflate"
+    },
+    {
+      "component": "libpng",
+      "version": "1.6.56",
+      "archive": "libpng-1.6.56.tar.xz",
+      "url": "https://downloads.sourceforge.net/project/libpng/libpng16/1.6.56/libpng-1.6.56.tar.xz",
+      "sha256": "f7d8bf1601b7804f583a254ab343a6549ca6cf27d255c302c47af2d9d36a6f18",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/libpng"
+    },
+    {
+      "component": "libssh2",
+      "version": "1.11.1",
+      "archive": "libssh2-1.11.1.tar.gz",
+      "url": "https://github.com/libssh2/libssh2/releases/download/libssh2-1.11.1/libssh2-1.11.1.tar.gz",
+      "sha256": "d9ec76cbe34db98eec3539fe2c899d26b0c837cb3eb466a56b0f109cabf658f7",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/libssh2"
+    },
+    {
+      "component": "libuv",
+      "version": "1.52.1",
+      "archive": "libuv-v1.52.1.tar.gz",
+      "url": "https://dist.libuv.org/dist/v1.52.1/libuv-v1.52.1.tar.gz",
+      "sha256": "66d511b9e6e334c0e62279eb234fbfb2b3110b1479c09b95b44c7afca8cff9e7",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/libuv"
+    },
+    {
+      "component": "libwebp",
+      "version": "1.6.0",
+      "archive": "libwebp-1.6.0.tar.gz",
+      "url": "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz",
+      "sha256": "e4ab7009bf0629fd11982d4c2aa83964cf244cffba7347ecd39019a9e38c4564",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/libwebp"
+    },
+    {
+      "component": "lz4",
+      "version": "1.9.4",
+      "archive": "lz4-1.9.4.tar.gz",
+      "url": "https://github.com/lz4/lz4/archive/v1.9.4.tar.gz",
+      "sha256": "0b0e3aa07c8c063ddf40b082bdf7e37a1562bda40a0ff5272957f3e987e0e54b",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/lz4"
+    },
+    {
+      "component": "openssl",
+      "version": "3.6.1",
+      "archive": "openssl-3.6.1.tar.gz",
+      "url": "https://github.com/openssl/openssl/releases/download/openssl-3.6.1/openssl-3.6.1.tar.gz",
+      "sha256": "b1bfedcd5b289ff22aee87c9d600f515767ebf45f77168cb6d64f231f518a82e",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/openssl"
+    },
+    {
+      "component": "pango",
+      "version": "1.50.14",
+      "archive": "pango-1.50.14.tar.xz",
+      "url": "https://download.gnome.org/sources/pango/1.50/pango-1.50.14.tar.xz",
+      "sha256": "1d67f205bfc318c27a29cfdfb6828568df566795df0cb51d2189cde7f2d581e8",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/pango"
+    },
+    {
+      "component": "pcre",
+      "version": "8.45",
+      "archive": "pcre-8.45.tar.bz2",
+      "url": "https://sourceforge.net/projects/pcre/files/pcre/8.45/pcre-8.45.tar.bz2",
+      "sha256": "4dae6fdcd2bb0bb6c37b5f97c33c2be954da743985369cddac3546e3218bffb8",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/pcre"
+    },
+    {
+      "component": "pcre2",
+      "version": "10.47",
+      "archive": "pcre2-10.47.tar.bz2",
+      "url": "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.47/pcre2-10.47.tar.bz2",
+      "sha256": "47fe8c99461250d42f89e6e8fdaeba9da057855d06eb7fc08d9ca03fd08d7bc7",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/pcre2"
+    },
+    {
+      "component": "pixman",
+      "version": "0.42.2",
+      "archive": "pixman-0.42.2.tar.gz",
+      "url": "https://www.cairographics.org/releases/pixman-0.42.2.tar.gz",
+      "sha256": "ea1480efada2fd948bc75366f7c349e1c96d3297d09a3fe62626e38e234a625e",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/pixman"
+    },
+    {
+      "component": "pkgconfig",
+      "version": "0.29.2",
+      "archive": "pkg-config-0.29.2.tar.gz",
+      "url": "https://pkgconfig.freedesktop.org/releases/pkg-config-0.29.2.tar.gz",
+      "sha256": "6fc69c01688c9458a57eb9a1664c9aba372ccda420a02bf4429fe610e7e7d591",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/pkgconfig"
+    },
+    {
+      "component": "qpdf",
+      "version": "11.9.1",
+      "archive": "qpdf-11.9.1.tar.gz",
+      "url": "https://github.com/qpdf/qpdf/releases/download/v11.9.1/qpdf-11.9.1.tar.gz",
+      "sha256": "2ba4d248f9567a27c146b9772ef5dc93bd9622317978455ffe91b259340d13d1",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/qpdf"
+    },
+    {
+      "component": "readline5",
+      "version": "5.2-014",
+      "archive": "readline-5.2-014.tar.gz",
+      "url": "https://mac.r-project.org/src/readline-5.2-014.tar.gz",
+      "sha256": "afe3579d32afa23bd601b5ac1e4a494cb4996efc8eb843369c3eb6a07cbd8b0c",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/readline5"
+    },
+    {
+      "component": "sys-stubs",
+      "version": "1.0",
+      "archive": "pkgconfig-sys-stubs-1.0.tar.gz",
+      "url": "https://mac.r-project.org/pkgconfig-sys-stubs-1.0.tar.gz",
+      "sha256": "2e057f1274a0dbfffe3bbe89c8200930d170ac5b8b97c4bdfd43cbaa7ad122a3",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/sys-stubs"
+    },
+    {
+      "component": "texinfo",
+      "version": "7.3",
+      "archive": "texinfo-7.3.tar.gz",
+      "url": "https://ftp.gnu.org/gnu/texinfo/texinfo-7.3.tar.gz",
+      "sha256": "4fc30d71e00416f0b4884994f1db9db2901f03603f8e69d92dd46fa018d998d7",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/texinfo"
+    },
+    {
+      "component": "tiff",
+      "version": "4.7.0",
+      "archive": "tiff-4.7.0.tar.gz",
+      "url": "https://download.osgeo.org/libtiff/tiff-4.7.0.tar.gz",
+      "sha256": "67160e3457365ab96c5b3286a0903aa6e78bdc44c4bc737d2e486bcecb6ba976",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/tiff"
+    },
+    {
+      "component": "xz",
+      "version": "5.8.3",
+      "archive": "xz-5.8.3.tar.gz",
+      "url": "https://github.com/tukaani-project/xz/releases/download/v5.8.3/xz-5.8.3.tar.gz",
+      "sha256": "3d3a1b973af218114f4f889bbaa2f4c037deaae0c8e815eec381c3d546b974a0",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/xz"
+    },
+    {
+      "component": "zstd",
+      "version": "1.5.7",
+      "archive": "zstd-1.5.7.tar.gz",
+      "url": "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz",
+      "sha256": "eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3",
+      "recipe": "R-macos/recipes@31e34aad7ae160981913d9f30426bf5529edd60e/zstd"
+    },
+    {
+      "component": "gcc",
+      "version": "14.3.0",
+      "archive": "gcc-14.3.0.tar.xz",
+      "url": "https://ftp.gnu.org/gnu/gcc/gcc-14.3.0/gcc-14.3.0.tar.xz",
+      "sha256": "e0dc77297625631ac8e50fa92fffefe899a4eb702592da5c32ef04e2293aca3a",
+      "recipe": "Rtools45 MXE SVN r6768/src/gcc.mk"
+    },
+    {
+      "component": "curl",
+      "version": "8.18.0",
+      "archive": "curl-8.18.0.tar.xz",
+      "url": "https://curl.haxx.se/download/curl-8.18.0.tar.xz",
+      "sha256": "40df79166e74aa20149365e11ee4c798a46ad57c34e4f68fd13100e2c9a91946",
+      "recipe": "Rtools45 MXE SVN r6768/src/curl.mk"
+    },
+    {
+      "component": "expat",
+      "version": "2.7.3",
+      "archive": "expat-2.7.3.tar.bz2",
+      "url": "https://github.com/libexpat/libexpat/releases/download/R_2_7_3/expat-2.7.3.tar.bz2",
+      "sha256": "59c31441fec9a66205307749eccfee551055f2d792f329f18d97099e919a3b2f",
+      "recipe": "Rtools45 MXE SVN r6768/src/expat.mk"
+    },
+    {
+      "component": "fontconfig",
+      "version": "2.17.1",
+      "archive": "fontconfig-2.17.1.tar.xz",
+      "url": "https://gitlab.freedesktop.org/api/v4/projects/890/packages/generic/fontconfig/2.17.1/fontconfig-2.17.1.tar.xz",
+      "sha256": "9f5cae93f4fffc1fbc05ae99cdfc708cd60dfd6612ffc0512827025c026fa541",
+      "recipe": "Rtools45 MXE SVN r6768/src/fontconfig.mk"
+    },
+    {
+      "component": "freetype",
+      "version": "2.14.1",
+      "archive": "freetype-2.14.1.tar.xz",
+      "url": "https://downloads.sourceforge.net/project/freetype/freetype2/2.14.1/freetype-2.14.1.tar.xz",
+      "sha256": "32427e8c471ac095853212a37aef816c60b42052d4d9e48230bab3bdf2936ccc",
+      "recipe": "Rtools45 MXE SVN r6768/src/freetype.mk"
+    },
+    {
+      "component": "gettext",
+      "version": "0.26",
+      "archive": "gettext-0.26.tar.lz",
+      "url": "https://ftp.gnu.org/gnu/gettext/gettext-0.26.tar.lz",
+      "sha256": "a0151088dad8942374dc038e461b228352581defd7055e79297f156268b8d508",
+      "recipe": "Rtools45 MXE SVN r6768/src/gettext.mk"
+    },
+    {
+      "component": "glib",
+      "version": "2.86.3",
+      "archive": "glib-2.86.3.tar.xz",
+      "url": "https://download.gnome.org/sources/glib/2.86/glib-2.86.3.tar.xz",
+      "sha256": "b3211d8d34b9df5dca05787ef0ad5d7ca75dec998b970e1aab0001d229977c65",
+      "recipe": "Rtools45 MXE SVN r6768/src/glib.mk"
+    },
+    {
+      "component": "harfbuzz",
+      "version": "12.3.0",
+      "archive": "harfbuzz-12.3.0.tar.xz",
+      "url": "https://github.com/harfbuzz/harfbuzz/releases/download/12.3.0/harfbuzz-12.3.0.tar.xz",
+      "sha256": "8660ebd3c27d9407fc8433b5d172bafba5f0317cb0bb4339f28e5370c93d42b7",
+      "recipe": "Rtools45 MXE SVN r6768/src/harfbuzz.mk"
+    },
+    {
+      "component": "libgcrypt",
+      "version": "1.11.2",
+      "archive": "libgcrypt-1.11.2.tar.bz2",
+      "url": "https://gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.11.2.tar.bz2",
+      "sha256": "6ba59dd192270e8c1d22ddb41a07d95dcdbc1f0fb02d03c4b54b235814330aac",
+      "recipe": "Rtools45 MXE SVN r6768/src/libgcrypt.mk"
+    },
+    {
+      "component": "libgpg_error",
+      "version": "1.58",
+      "archive": "libgpg-error-1.58.tar.bz2",
+      "url": "https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.58.tar.bz2",
+      "sha256": "f943aea9a830a8bd938e5124b579efaece24a3225ff4c3d27611a80ce1260c27",
+      "recipe": "Rtools45 MXE SVN r6768/src/libgpg_error.mk"
+    },
+    {
+      "component": "libiconv",
+      "version": "1.18",
+      "archive": "libiconv-1.18.tar.gz",
+      "url": "https://ftp.gnu.org/gnu/libiconv/libiconv-1.18.tar.gz",
+      "sha256": "3b08f5f4f9b4eb82f151a7040bfd6fe6c6fb922efe4b1659c66ea933276965e8",
+      "recipe": "Rtools45 MXE SVN r6768/src/libiconv.mk"
+    },
+    {
+      "component": "libidn2",
+      "version": "2.3.8",
+      "archive": "libidn2-2.3.8.tar.gz",
+      "url": "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz",
+      "sha256": "f557911bf6171621e1f72ff35f5b1825bb35b52ed45325dcdee931e5d3c0787a",
+      "recipe": "Rtools45 MXE SVN r6768/src/libidn2.mk"
+    },
+    {
+      "component": "libpng",
+      "version": "1.6.54",
+      "archive": "libpng-1.6.54.tar.xz",
+      "url": "https://downloads.sourceforge.net/project/libpng/libpng16/1.6.54/libpng-1.6.54.tar.xz",
+      "sha256": "01c9d8a303c941ec2c511c14312a3b1d36cedb41e2f5168ccdaa85d53b887805",
+      "recipe": "Rtools45 MXE SVN r6768/src/libpng.mk"
+    },
+    {
+      "component": "libpsl",
+      "version": "0.21.5",
+      "archive": "libpsl-0.21.5.tar.gz",
+      "url": "https://github.com/rockdaboot/libpsl/releases/download/0.21.5/libpsl-0.21.5.tar.gz",
+      "sha256": "1dcc9ceae8b128f3c0b3f654decd0e1e891afc6ff81098f227ef260449dae208",
+      "recipe": "Rtools45 MXE SVN r6768/src/libpsl.mk"
+    },
+    {
+      "component": "libunistring",
+      "version": "1.4.1",
+      "archive": "libunistring-1.4.1.tar.xz",
+      "url": "https://ftp.gnu.org/gnu/libunistring/libunistring-1.4.1.tar.xz",
+      "sha256": "67d88430892527861903788868c77802a217b0959990f7449f2976126a307763",
+      "recipe": "Rtools45 MXE SVN r6768/src/libunistring.mk"
+    },
+    {
+      "component": "libuv",
+      "version": "1.51.0",
+      "archive": "libuv-1.51.0.tar.gz",
+      "url": "https://github.com/libuv/libuv/archive/v1.51.0.tar.gz",
+      "sha256": "27e55cf7083913bfb6826ca78cde9de7647cded648d35f24163f2d31bb9f51cd",
+      "recipe": "Rtools45 MXE SVN r6768/src/libuv.mk"
+    },
+    {
+      "component": "nghttp2",
+      "version": "1.68.0",
+      "archive": "nghttp2-1.68.0.tar.gz",
+      "url": "https://github.com/nghttp2/nghttp2/releases/download/v1.68.0/nghttp2-1.68.0.tar.gz",
+      "sha256": "2c16ffc588ad3f9e2613c3fad72db48ecb5ce15bc362fcc85b342e48daf51013",
+      "recipe": "Rtools45 MXE SVN r6768/src/nghttp2.mk"
+    },
+    {
+      "component": "pango",
+      "version": "1.57.0",
+      "archive": "pango-1.57.0.tar.xz",
+      "url": "https://download.gnome.org/sources/pango/1.57/pango-1.57.0.tar.xz",
+      "sha256": "890640c841dae77d3ae3d8fe8953784b930fa241b17423e6120c7bfdf8b891e7",
+      "recipe": "Rtools45 MXE SVN r6768/src/pango.mk"
+    },
+    {
+      "component": "pixman",
+      "version": "0.46.4",
+      "archive": "pixman-0.46.4.tar.gz",
+      "url": "https://cairographics.org/releases/pixman-0.46.4.tar.gz",
+      "sha256": "d09c44ebc3bd5bee7021c79f922fe8fb2fb57f7320f55e97ff9914d2346a591c",
+      "recipe": "Rtools45 MXE SVN r6768/src/pixman.mk"
+    },
+    {
+      "component": "tiff",
+      "version": "4.7.1",
+      "archive": "tiff-4.7.1.tar.xz",
+      "url": "https://download.osgeo.org/libtiff/tiff-4.7.1.tar.xz",
+      "sha256": "b92017489bdc1db3a4c97191aa4b75366673cb746de0dce5d7a749d5954681ba",
+      "recipe": "Rtools45 MXE SVN r6768/src/tiff.mk"
+    },
+    {
+      "component": "xz",
+      "version": "5.8.2",
+      "archive": "xz-5.8.2.tar.gz",
+      "url": "https://github.com/tukaani-project/xz/releases/download/v5.8.2/xz-5.8.2.tar.gz",
+      "sha256": "ce09c50a5962786b83e5da389c90dd2c15ecd0980a258dd01f70f9e7ce58a8f1",
+      "recipe": "Rtools45 MXE SVN r6768/src/xz.mk"
+    },
+    {
+      "component": "cairo",
+      "version": "1.18.4",
+      "archive": "cairo-1.18.4.tar.xz",
+      "url": "https://cairographics.org/releases/cairo-1.18.4.tar.xz",
+      "sha256": "445ed8208a6e4823de1226a74ca319d3600e83f6369f99b14265006599c32ccb",
+      "recipe": "Rtools45 MXE SVN r6768/src/cairo.mk"
+    },
+    {
+      "component": "openssl",
+      "version": "3.6.0",
+      "archive": "openssl-3.6.0.tar.gz",
+      "url": "https://github.com/openssl/openssl/releases/download/openssl-3.6.0/openssl-3.6.0.tar.gz",
+      "sha256": "b6a5f44b7eb69e3fa35dbf15524405b44837a481d43d81daddde3ff21fcbb8e9",
+      "recipe": "Rtools45 MXE SVN r6768/src/openssl.mk"
+    },
+    {
+      "component": "libxml2",
+      "version": "2.12.10",
+      "archive": "libxml2-2.12.10.tar.xz",
+      "url": "https://download.gnome.org/sources/libxml2/2.12/libxml2-2.12.10.tar.xz",
+      "sha256": "c3d8c0c34aa39098f66576fe51969db12a5100b956233dc56506f7a8679be995",
+      "recipe": "Rtools45 MXE SVN r6768/src/libxml2.mk"
+    },
+    {
+      "component": "readline",
+      "version": "8.3",
+      "archive": "readline-8.3.tar.gz",
+      "url": "https://ftp.gnu.org/gnu/readline/readline-8.3.tar.gz",
+      "sha256": "fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc",
+      "recipe": "Rtools45 MXE SVN r6768/src/readline.mk"
+    },
+    {
+      "component": "lz4",
+      "version": "1.10.0",
+      "archive": "lz4-1.10.0.tar.gz",
+      "url": "https://github.com/lz4/lz4/archive/v1.10.0.tar.gz",
+      "sha256": "537512904744b35e232912055ccf8ec66d768639ff3abe5788d90d792ec5f48b",
+      "recipe": "Rtools45 MXE SVN r6768/src/lz4.mk"
+    },
+    {
+      "component": "zlib",
+      "version": "1.3.1",
+      "archive": "zlib-1.3.1.tar.xz",
+      "url": "https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.xz",
+      "sha256": "38ef96b8dfe510d42707d9c781877914792541133e1870841463bfa73f883e32",
+      "recipe": "Rtools45 MXE SVN r6768/src/zlib.mk"
+    },
+    {
+      "component": "bzip2",
+      "version": "1.0.8",
+      "archive": "bzip2-1.0.8.tar.gz",
+      "url": "https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz",
+      "sha256": "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269",
+      "recipe": "Rtools45 MXE SVN r6768/src/bzip2.mk"
+    },
+    {
+      "archive": "gcc-14.2-darwin-r2.1-source.tar.gz",
+      "repository": "R-macos/gcc-14-branch",
+      "commit": "6e68ae7aab634951d2a2ed285dedbe0fd963f83b",
+      "url": "https://codeload.github.com/R-macos/gcc-14-branch/tar.gz/6e68ae7aab634951d2a2ed285dedbe0fd963f83b",
+      "sha256": "899b7dc5f12dc073fd3ee67f4111f9e5cadf9eb84f46a65419622915d7d2b90b",
+      "component": "R-macos/gcc-14-branch",
+      "version": "6e68ae7aab634951d2a2ed285dedbe0fd963f83b"
+    },
+    {
+      "archive": "R-macos-recipes-31e34aad-source.tar.gz",
+      "repository": "R-macos/recipes",
+      "commit": "31e34aad7ae160981913d9f30426bf5529edd60e",
+      "url": "https://codeload.github.com/R-macos/recipes/tar.gz/31e34aad7ae160981913d9f30426bf5529edd60e",
+      "sha256": "2599e9acde23353242893e0b7b17c2f83a5f1ab77a1d780adb1229e868346d2a",
+      "component": "R-macos/recipes",
+      "version": "31e34aad7ae160981913d9f30426bf5529edd60e"
+    },
+    {
+      "component": "NSIS",
+      "version": "3.13",
+      "archive": "nsis-3.13-src.tar.bz2",
+      "url": "https://downloads.sourceforge.net/project/nsis/NSIS%203/3.13/nsis-3.13-src.tar.bz2",
+      "sha256": "a8ffe024602d46b6d766f9e1ce30c324ad2a24daeacd3efc2642d436a0c157ac"
+    }
+  ],
+  "missing": []
+}

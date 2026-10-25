@@ -89,3 +89,13 @@ release's validation report. Current installers are development builds; complete
 `scripts/prepare_github.py` prepares source for a GitHub repository without uploading
 or publishing anything. Large installers belong in release assets. The source
 upload excludes runtimes, generated builds, caches and private studies.
+
+## XY fitted curves in v0.32
+
+Choose a regression model in Analysis. Set **Fit series → All Y series — separate fit per group**,
+or click **Fit every Y series independently** under **Figure settings → XY lines & fitted curves**.
+Each series gets its own parameters; this is not a pooled or shared-parameter fit.
+Scatter, mean/error and shaded-band views can display the fitted curves.
+Use **No connecting lines** to hide observation/mean connections while retaining the fitted curves.
+The curve and fitted-mean confidence-band checkboxes are independent of SD/SEM observation intervals.
+Replicate fitting and weighting remain controlled by Analysis.

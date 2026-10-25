@@ -13,7 +13,7 @@ from runtime_inventory import write_notices
 from build_ai import build as build_ai
 
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = "0.31"
+VERSION = "0.32"
 
 
 def run(*args):
@@ -115,7 +115,7 @@ def main():
     info = {
         "CFBundleName": "RDataCraft", "CFBundleDisplayName": "RDataCraft", "CFBundleExecutable": "RDataCraft",
         "CFBundleIdentifier": "org.rdatacraft.desktop", "CFBundlePackageType": "APPL",
-        "CFBundleShortVersionString": VERSION, "CFBundleVersion": "31.1", "CFBundleIconFile": "RDataCraft.icns",
+        "CFBundleShortVersionString": VERSION, "CFBundleVersion": "32.1", "CFBundleIconFile": "RDataCraft.icns",
         "LSMinimumSystemVersion": deployment, "NSHighResolutionCapable": True,
         "NSPrincipalClass": "NSApplication", "NSAppTransportSecurity": {"NSAllowsLocalNetworking": True},
         "NSHumanReadableCopyright": "Copyright © 2026 RDataCraft contributors. GPL-3.0.",
@@ -138,19 +138,16 @@ def main():
     shutil.copy2(decoder, ROOT / "artifacts/desktop/PrismDecode")
     tooling = ROOT / "artifacts/desktop"
     tooling.mkdir(parents=True, exist_ok=True)
-    source_icon = ROOT / "desktop/RDataCraft.icns"
-    if source_icon.is_file():
-        shutil.copy2(source_icon, resources / "RDataCraft.icns")
-    else:
-        run("xcrun", "swiftc", "-module-cache-path", module_cache, "desktop/MakeIcon.swift", "-o", tooling / "MakeIcon")
-        run(tooling / "MakeIcon", tooling / "icon.png")
-        iconset = tooling / "RDataCraft.iconset"
-        iconset.mkdir(exist_ok=True)
-        for size in (16, 32, 128, 256, 512):
-            for scale in (1, 2):
-                suffix = "@2x" if scale == 2 else ""
-                run("sips", "-z", size * scale, size * scale, tooling / "icon.png", "--out", iconset / f"icon_{size}x{size}{suffix}.png")
-        run("iconutil", "-c", "icns", iconset, "-o", resources / "RDataCraft.icns")
+    # Generate every build from the artwork; a checked-in .icns may be stale.
+    run("xcrun", "swiftc", "-module-cache-path", module_cache, "desktop/MakeIcon.swift", "-o", tooling / "MakeIcon")
+    run(tooling / "MakeIcon", tooling / "icon.png")
+    iconset = tooling / "RDataCraft.iconset"
+    iconset.mkdir(exist_ok=True)
+    for size in (16, 32, 128, 256, 512):
+        for scale in (1, 2):
+            suffix = "@2x" if scale == 2 else ""
+            run("sips", "-z", size * scale, size * scale, tooling / "icon.png", "--out", iconset / f"icon_{size}x{size}{suffix}.png")
+    run("iconutil", "-c", "icns", iconset, "-o", resources / "RDataCraft.icns")
     # Finder transfers may leave source directories owner-only. Installed apps
     # must remain readable when copied to Applications by a different account.
     for entry in app.rglob('*'):

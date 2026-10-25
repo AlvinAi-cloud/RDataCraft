@@ -32,7 +32,7 @@ if not args.source_tools_only:
     subprocess.run(r_command("tests/setup.R"), cwd=root, check=True)
 results = []
 for name in ([] if args.source_tools_only else json.loads((root / 'config/validation-suites.json').read_text(encoding='utf-8'))):
-    log = root / "artifacts" / f"v0.31-{name}.log"
+    log = root / "artifacts" / f"v0.32-{name}.log"
     with log.open("w") as output:
         run = subprocess.run(r_command(f"tests/{name}.R"), cwd=root, stdout=output, stderr=subprocess.STDOUT)
     output = log.read_text(encoding='utf-8', errors='replace')
@@ -42,21 +42,21 @@ for name in ([] if args.source_tools_only else json.loads((root / 'config/valida
         print(output[-4000:], flush=True)
 if node:
     for name in ["assistant_js", "windows_js"]:
-        log = root / f"artifacts/v0.31-{name}.log"
+        log = root / f"artifacts/v0.32-{name}.log"
         with log.open("w") as output:
             run = subprocess.run([node, f"tests/{name}.cjs"], cwd=root, stdout=output, stderr=subprocess.STDOUT)
         results.append(dict(test=name, exit_code=run.returncode, checks=log.read_text(encoding='utf-8', errors='replace').count("PASS:"), log=str(log)))
         print(f"{name}: {'PASS' if run.returncode == 0 else 'FAIL'} ({results[-1]['checks']} checks)", flush=True)
 else:
     print("assistant_js: not run (Node.js not available)", flush=True)
-log = root / "artifacts/v0.31-release_tools.log"
+log = root / "artifacts/v0.32-release_tools.log"
 with log.open("w") as output:
     run = subprocess.run([sys.executable, "tests/release_tools.py"], cwd=root, stdout=output, stderr=subprocess.STDOUT)
 results.append(dict(test="release_tools", exit_code=run.returncode, checks=log.read_text(encoding='utf-8', errors='replace').count("PASS:"), log=str(log)))
 print(f"release_tools: {'PASS' if run.returncode == 0 else 'FAIL'} ({results[-1]['checks']} checks)", flush=True)
 if run.returncode:
     print(log.read_text(encoding='utf-8', errors='replace')[-4000:], flush=True)
-report = dict(version="0.31", scope='source tools; full R validation required in installed bundle' if args.source_tools_only else 'full source suite', status="passed" if all(r["exit_code"] == 0 for r in results) else "failed",
+report = dict(version="0.32", scope='source tools; full R validation required in installed bundle' if args.source_tools_only else 'full source suite', status="passed" if all(r["exit_code"] == 0 for r in results) else "failed",
               javascript_executed=bool(node), skipped=[] if node else ["assistant_js", "windows_js"], tests=results)
-(root / ("artifacts/validation-source-tools-0.31.json" if args.source_tools_only else "artifacts/validation-0.31.json")).write_text(json.dumps(report, indent=2) + "\n")
+(root / ("artifacts/validation-source-tools-0.32.json" if args.source_tools_only else "artifacts/validation-0.32.json")).write_text(json.dumps(report, indent=2) + "\n")
 sys.exit(report["status"] != "passed")
