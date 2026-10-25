@@ -43,7 +43,17 @@ check(fails(pc_ai_prepare(tab,s,'Synthetic',plan(op('layout','Invalid layout',co
 r<-pc_ai_prepare(tab,s,'Synthetic',list(answer='<script>untrusted()</script>',operations=list()))
 check(is.null(r$table) && !length(r$operations),'answer-only responses do not create or mutate a table')
 check(fails(pc_ai_prepare(tab,s,'Synthetic',list(answer='Invalid',operations=rep(plan(op('graph','x',graph='box'))$operations,7)))),'operation count is bounded')
+# Isolate operation staging from account state; the native bridge has its own tests.
+real_connected_ai<-pc_connected_ai
+ai_commands<-list();fake_account<-NULL
+pc_connected_ai<-function(deliver,connection_event) list(start=function(body) invisible(NULL),cancel=function(...) invisible(NULL),close=function() invisible(NULL),status=function() 'Synthetic connection',command=function(action,body=list()) {ai_commands[[length(ai_commands)+1L]]<<-list(action=action,body=body);invisible(NULL)},account=function() fake_account)
 shiny::testServer(app,{
+ session$setInputs(ai_mode='api',ai_model='draft-provider-model');session$flushReact()
+ check(!any(vapply(ai_commands,function(x)x$action=='set_model',logical(1))),'an API connection draft does not change the active model before Save and connect')
+ fake_account<<-'synthetic-account'
+ session$setInputs(ai_mode='chatgpt',ai_model='account-provided-model');session$flushReact()
+ check(any(vapply(ai_commands,function(x)x$action=='set_model' && identical(x$body$model,'account-provided-model'),logical(1))),'the ChatGPT model picker updates the selected account connection')
+ fake_account<<-NULL
   # Explicit fixture: production startup is intentionally empty.
   raw(pc_example("column")$table);sheet_name("Treatment groups");project_name("Example study");document_open(TRUE)
  do.call(session$setInputs,pc_defaults());session$flushReact()
@@ -75,4 +85,5 @@ shiny::testServer(app,{
  check(!length(assistant$history()),'conversation can be cleared from the session')
  check(!'assistant_history' %in% names(snapshot()),'conversation history is excluded from saved studies')
 })
+pc_connected_ai<-real_connected_ai
 cat(checks,'checks passed\n')

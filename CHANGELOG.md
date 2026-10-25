@@ -1,3 +1,11 @@
+# v0.31
+
+- Added Accounts and Models with direct ChatGPT browser sign-in, saved-account switching, renewal and sign-out. Plan inference depends on OpenAI eligibility and consent.
+- Added OpenAI, Claude, Gemini and compatible/local API connections, model discovery, remembered connections, a data-free connection test, and disconnect/forget controls. No Codex installation is required.
+- Kept AI operation previews, table sharing controls and reviewed Advanced R execution.
+- Rebuilt every Mac icon representation with the same visible footprint as the current companion app, independent of display scaling.
+- Updated app, project, packaging and About version information to v0.31.
+
 # Changelog
 
 ## v0.3 — release candidate (2026-10-24)

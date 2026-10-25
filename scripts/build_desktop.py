@@ -10,9 +10,10 @@ import plistlib
 import shutil
 import subprocess
 from runtime_inventory import write_notices
+from build_ai import build as build_ai
 
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = "0.3"
+VERSION = "0.31"
 
 
 def run(*args):
@@ -58,7 +59,7 @@ def main():
     deployment = "14.0" if args.arch == "arm64" and "arm64" in arches else "13.0"
     if args.arch not in arches and not (args.allow_rosetta and args.arch=='arm64' and 'x86_64' in arches):
         raise SystemExit(f'R architecture {arches} does not match host {args.arch}. Use bootstrap.py --arch {args.arch} --runtime-root runtime-{args.arch}.')
-    required = ["R/r_packages.R", "R/r_packages_server.R", "scripts/r_packages_worker.R", "R/advanced_r.R", "R/advanced_r_server.R", "scripts/advanced_r_worker.R", "examples/Advanced R teaching example.rdatacraft", "R/prism_xml.R", "R/prism_convert.R", "R/portable_ai.R", "R/tutorials.R", "R/prism_archive.R", "desktop/RDataCraft.swift", "desktop/Assistant.swift", "R/pca.R", "R/assistant.R", "R/assistant_server.R", "www/assistant.js", "desktop/PrismXML.swift", "desktop/PrismDecode.swift",
+    required = ["R/r_packages.R", "R/r_packages_server.R", "scripts/r_packages_worker.R", "R/advanced_r.R", "R/advanced_r_server.R", "scripts/advanced_r_worker.R", "examples/Advanced R teaching example.rdatacraft", "R/prism_xml.R", "R/prism_convert.R", "R/portable_ai.R", "R/tutorials.R", "R/prism_archive.R", "desktop/RDataCraft.swift", "R/pca.R", "R/assistant.R", "R/assistant_server.R", "www/assistant.js", "desktop/PrismXML.swift", "desktop/PrismDecode.swift",
                 "www/rdatacraft.css", "www/craft.css", "examples/xy.csv", "examples/dose-response.csv",
                 "examples/Prism workflow improvements.rdatacraft", "examples/Figure studio.rdatacraft",
                 "R/graph_options.R", "R/layout_editor.R", "www/layout-editor.js"]
@@ -76,6 +77,7 @@ def main():
         if previous.get("CFBundleIdentifier") != "org.rdatacraft.desktop":
             raise SystemExit("Unexpected application in the build destination.")
         shutil.rmtree(app)
+    ai_output=build_ai(target=("aarch64-apple-darwin" if args.arch=="arm64" else "x86_64-apple-darwin") if cross else None)
     macos = app / "Contents/MacOS"
     resources = app / "Contents/Resources"
     backend = resources / "RDataCraft"
@@ -89,7 +91,16 @@ def main():
                             ignore=shutil.ignore_patterns(".DS_Store", "__pycache__", "*.pyc"))
             continue
         shutil.copytree(ROOT / name, backend / name, symlinks=True, dirs_exist_ok=True,
-                        ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc", ".DS_Store", "cache"))
+                        ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc", ".DS_Store", "cache", "target", "bin", "obj"))
+    shutil.copytree(ai_output, backend/"desktop/ai-helper/bin",dirs_exist_ok=True)
+    run("codesign","--force","--sign","-",backend/"desktop/ai-helper/bin/rdatacraft-ai")
+    ai_manifest=backend/"desktop/ai-helper/bin/build.json"
+    ai_record=json.loads(ai_manifest.read_text())
+    for name,digest in ai_record['source_files'].items():
+        if hashlib.sha256((backend/'desktop/ai-helper'/name).read_bytes()).hexdigest()!=digest:raise SystemExit('Bundled AI source differs from its build: '+name)
+    ai_record['sha256']=hashlib.sha256((backend/"desktop/ai-helper/bin/rdatacraft-ai").read_bytes()).hexdigest()
+    ai_record['ad_hoc_signed']=True
+    ai_manifest.write_text(json.dumps(ai_record,indent=2)+'\n')
     if (ROOT / "downloads/sources").is_dir():
         shutil.copytree(ROOT / "downloads/sources", backend / "downloads/sources", dirs_exist_ok=True)
     if (ROOT / "downloads/native-sources").is_dir():
@@ -104,7 +115,7 @@ def main():
     info = {
         "CFBundleName": "RDataCraft", "CFBundleDisplayName": "RDataCraft", "CFBundleExecutable": "RDataCraft",
         "CFBundleIdentifier": "org.rdatacraft.desktop", "CFBundlePackageType": "APPL",
-        "CFBundleShortVersionString": VERSION, "CFBundleVersion": "1", "CFBundleIconFile": "RDataCraft.icns",
+        "CFBundleShortVersionString": VERSION, "CFBundleVersion": "31.1", "CFBundleIconFile": "RDataCraft.icns",
         "LSMinimumSystemVersion": deployment, "NSHighResolutionCapable": True,
         "NSPrincipalClass": "NSApplication", "NSAppTransportSecurity": {"NSAllowsLocalNetworking": True},
         "NSHumanReadableCopyright": "Copyright © 2026 RDataCraft contributors. GPL-3.0.",
@@ -119,7 +130,7 @@ def main():
     module_cache = ROOT / ("artifacts/desktop/module-cache" if args.arch=="arm64" else "artifacts/desktop/module-cache-intel")
     module_cache.mkdir(parents=True, exist_ok=True)
     run("xcrun", "swiftc", "-module-cache-path", module_cache, "-parse-as-library", "-swift-version", "5", "-O", "-target", f"{args.arch}-apple-macosx{deployment}",
-        "-framework", "Cocoa", "-framework", "WebKit", "-framework", "PDFKit", ROOT / "desktop/RDataCraft.swift", ROOT / "desktop/Assistant.swift", "-o", macos / "RDataCraft")
+        "-framework", "Cocoa", "-framework", "WebKit", "-framework", "PDFKit", ROOT / "desktop/RDataCraft.swift", "-o", macos / "RDataCraft")
     decoder = backend / "desktop/PrismDecode"
     run("xcrun", "swiftc", "-module-cache-path", module_cache, "-parse-as-library", "-swift-version", "5", "-O", "-target", f"{args.arch}-apple-macosx{deployment}",
         ROOT / "desktop/PrismXML.swift", ROOT / "desktop/PrismDecode.swift", "-o", decoder)

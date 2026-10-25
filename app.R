@@ -14,6 +14,7 @@ source("R/prism_import.R",local=TRUE)
 source("R/tutorials.R",local=TRUE)
 source("R/assistant.R",local=TRUE)
 source("R/portable_ai.R",local=TRUE)
+source("R/ai_connections.R",local=TRUE)
 source("R/assistant_server.R",local=TRUE)
 source("R/advanced_r_server.R",local=TRUE)
 source("R/help.R",local=TRUE)
@@ -242,7 +243,7 @@ ui <- fluidPage(
                 fileInput("open_project", "Project file", accept = c(".json", ".rdatacraft", ".plotcraft"), placeholder = "Choose a RDataCraft project"),
                 downloadButton("save_project_copy", "Save current project", class = "btn-primary")),
               div(class = "card-surface", h3("About this version"),
-                  p("RDataCraft v0.3 · Scientific plotting and statistics"),
+                  p("RDataCraft v0.31 · Scientific plotting and statistics"),
                   p("R-powered data analysis and publication-ready figures for Mac and Windows."),
                   p("Six table types including PCA, named worksheets, matched and independent group tests, factorial ANOVA, correlation, dose-response fitting, survival analysis, categorical tests, diagnostic graphs, and reproducible reports."),
                   p("Treat each row as an independent experimental unit unless using a paired test. Technical replicates must not be counted as independent biological replicates."),

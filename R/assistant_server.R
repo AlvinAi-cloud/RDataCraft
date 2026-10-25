@@ -1,6 +1,33 @@
 pc_assistant_server <- function(input,output,session,capture,apply_result,open_r=NULL) {
-  portable<-identical(Sys.getenv('RDATACRAFT_PORTABLE'),'1')
-  transport<-if(portable) pc_portable_ai(function(message) session$sendCustomMessage('rdatacraft-ai-delivery',message)) else NULL
+  connection_value<-shiny::reactiveVal(list())
+  transport<-pc_connected_ai(function(message) session$sendCustomMessage('rdatacraft-ai-delivery',message),function(value) {shiny::isolate({
+    connection_value(value)
+    if(!is.null(value$chatgpt)) {
+      accounts<-value$chatgpt$accounts
+      choices<-if(length(accounts)) stats::setNames(vapply(accounts,function(x) x$id,character(1)),vapply(accounts,function(x) x$label,character(1))) else character()
+      shiny::updateSelectInput(session,'ai_account',choices=choices,selected=value$chatgpt$activeId)
+      if(!is.null(value$chatgpt$activeId) && !busy()) {
+        shiny::updateRadioButtons(session,'ai_mode',selected='chatgpt')
+        transport$command('account_models',list(registrationId=value$chatgpt$activeId))
+      }
+    }
+    if(!is.null(value$connection)) {
+      shiny::updateRadioButtons(session,'ai_mode',selected='api')
+      shiny::updateSelectInput(session,'ai_provider',selected=value$connection$provider)
+      shiny::updateTextInput(session,'ai_endpoint',value=value$connection$endpoint)
+      shiny::updateTextInput(session,'ai_model',value=value$connection$model)
+    }
+    if(!is.null(value$model) && !identical(input$ai_model,value$model)) shiny::updateTextInput(session,'ai_model',value=value$model)
+    if(!is.null(value$models)) {
+      models<-value$models
+      choices<-stats::setNames(vapply(models,function(x) if(is.null(x$id)) x$slug else x$id,character(1)),vapply(models,function(x) if(is.null(x$name)) x$display_name else x$name,character(1)))
+      selected<-if(!is.null(input$ai_model) && input$ai_model %in% choices) input$ai_model else if(length(choices)) choices[1] else ''
+      shiny::updateSelectInput(session,'ai_model_list',choices=choices,selected=selected)
+    }
+    session$sendCustomMessage('rdatacraft-ai-connection',c(value,list(loginBusy=FALSE)))
+    if(!is.null(value$status)) notify(value$status)
+    if(!is.null(value$error)) notify(value$error)
+  })})
   pending<-shiny::reactiveVal(NULL); ready<-shiny::reactiveVal(NULL); history<-shiny::reactiveVal(list())
   busy<-shiny::reactiveVal(FALSE); status<-shiny::reactiveVal("Check connection to use the connected model. Local tools work offline.")
   notify<-function(message) {status(message);session$sendCustomMessage("rdatacraft-ai-state",list(busy=busy(),message=message))}
@@ -12,7 +39,11 @@ pc_assistant_server <- function(input,output,session,capture,apply_result,open_r
     record("assistant",result$answer);notify(if(length(result$operations)) "Preview ready. Review the operations before applying to a new table copy." else "Response ready.")
   }
   fail<-function(e) {busy(FALSE);pending(NULL);ready(NULL);notify(conditionMessage(e))}
-  shiny::observeEvent(input$assistant_connection,{if(portable) notify(transport$status()) else session$sendCustomMessage("rdatacraft-ai-status",list())})
+  shiny::observeEvent(input$assistant_connection,{
+    shiny::showModal(pc_ai_connections_ui())
+    tryCatch(transport$command('status'),error=function(e) notify(conditionMessage(e)))
+  })
+  shiny::observeEvent(input$assistant_status_check,{notify(transport$status());tryCatch(transport$command('status'),error=function(e) notify(conditionMessage(e)))})
   shiny::observeEvent(input$assistant_native_status,notify(pc_ai_text(input$assistant_native_status$message,1000)))
   shiny::observeEvent(input$assistant_send,tryCatch({
     if(busy()) {notify("Finish or stop the current request first.");return()}
@@ -21,7 +52,7 @@ pc_assistant_server <- function(input,output,session,capture,apply_result,open_r
     id<-paste0(as.integer(Sys.time()),"-",sample.int(1e8,1));pending(list(id=id,state=state));ready(NULL);busy(TRUE)
     prior<-tail(history(),10);record("user",prompt);notify("Thinking with the connected model…")
     request<-list(id=id,instructions=pc_ai_instructions(),prompt=prompt,context=context,history=prior,schema=pc_ai_schema())
-    if(portable) transport$start(request) else session$sendCustomMessage("rdatacraft-ai-request",request)
+    transport$start(request)
   },error=fail))
   shiny::observeEvent(input$assistant_response,tryCatch({
     value<-input$assistant_response;request<-pending()
@@ -34,7 +65,7 @@ pc_assistant_server <- function(input,output,session,capture,apply_result,open_r
     show_plan(request$state,plan)
   },error=fail))
   shiny::observeEvent(input$assistant_stop,{
-    p<-pending();if(!is.null(p)) {if(portable) transport$cancel(p$id,announce=FALSE) else session$sendCustomMessage("rdatacraft-ai-cancel",list(id=p$id))}
+    p<-pending();if(!is.null(p)) {transport$cancel(p$id,announce=FALSE)}
     pending(NULL);busy(FALSE);notify("Request stopped. No changes were applied.")
   })
   shiny::observeEvent(input$assistant_local,tryCatch({
@@ -77,6 +108,30 @@ pc_assistant_server <- function(input,output,session,capture,apply_result,open_r
   output$assistant_context<-shiny::renderText({s<-capture();paste(s$name,"·",nrow(s$table),"rows ·",s$settings$layout,"·",s$settings$graph)})
   output$assistant_status<-shiny::renderText(status())
   for(id in c("assistant_history","assistant_operations","assistant_context","assistant_status")) shiny::outputOptions(output,id,suspendWhenHidden=FALSE)
-  session$onSessionEnded(function() {p<-isolate(pending());if(!is.null(p)) {if(portable) transport$cancel(p$id,announce=FALSE) else session$sendCustomMessage("rdatacraft-ai-cancel",list(id=p$id))}})
+  api_body<-function() list(connection=list(provider=input$ai_provider,endpoint=if(identical(input$ai_provider,'compatible')) input$ai_endpoint else '',apiKey=if(is.null(input$ai_key)) '' else input$ai_key))
+  op<-function(action,body=list()) tryCatch({if(action=='sign_in') session$sendCustomMessage('rdatacraft-ai-connection',list(notice='Complete sign-in and consent in your browser, then return here.',loginBusy=TRUE));transport$command(action,body)},error=function(e) {notify(conditionMessage(e));session$sendCustomMessage('rdatacraft-ai-connection',list(error=conditionMessage(e),loginBusy=FALSE))})
+  shiny::observeEvent(input$ai_sign_in,op('sign_in'))
+  shiny::observeEvent(input$ai_cancel_login,op('cancel_login'))
+  shiny::observeEvent(input$ai_activate,op('activate',list(registrationId=input$ai_account)))
+  shiny::observeEvent(input$ai_reauthorize,op('sign_in',list(registrationId=input$ai_account)))
+  shiny::observeEvent(input$ai_sign_out,op('sign_out',list(registrationId=input$ai_account)))
+  shiny::observeEvent(list(input$ai_models,input$ai_discover),{
+    if(is.null(input$ai_provider)) return()
+    if(identical(input$ai_mode,'chatgpt') && !is.null(transport$account())) op('account_models',list(registrationId=transport$account()))
+    else op('models',if(nzchar(if(is.null(input$ai_key)) '' else input$ai_key) || identical(input$ai_provider,'compatible')) api_body() else list())
+  })
+  shiny::observeEvent(input$ai_connect,{
+    op('connect',c(api_body(),list(model=input$ai_model,remember=isTRUE(input$ai_remember))))
+    shiny::updateTextInput(session,'ai_key',value='')
+    session$sendCustomMessage('rdatacraft-ai-clear-key',list())
+  })
+  shiny::observeEvent(input$ai_model_list,{if(nzchar(input$ai_model_list)) shiny::updateTextInput(session,'ai_model',value=input$ai_model_list)})
+  shiny::observeEvent(input$ai_model,{if(nzchar(input$ai_model) && identical(input$ai_mode,'chatgpt') && !is.null(transport$account())) op('set_model',list(model=input$ai_model))},ignoreInit=TRUE)
+  shiny::observeEvent(input$ai_provider,{shiny::updateTextInput(session,'ai_key',value='');shiny::updateSelectInput(session,'ai_model_list',choices=character());transport$command('discard_models')},ignoreInit=TRUE)
+  shiny::observeEvent(input$ai_test,op('test',list(model=input$ai_model)))
+  shiny::observeEvent(input$ai_disconnect,op('disconnect'))
+  shiny::observeEvent(input$ai_forget,op('forget'))
+  shiny::observeEvent(input$ai_settings_closed,{shiny::updateTextInput(session,'ai_key',value='');op('cancel_login')})
+  session$onSessionEnded(function() transport$close())
   invisible(list(pending=pending,ready=ready,history=history,busy=busy))
 }

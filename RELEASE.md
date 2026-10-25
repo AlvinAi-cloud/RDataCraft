@@ -1,4 +1,6 @@
-# RDataCraft v0.3 release preparation
+The v0.31 revision includes a bundled Rust AI connection service. Rebuild and test every platform after this source change; previous v0.3 installer results do not certify v0.31. Direct ChatGPT sign-in and provider transport have synthetic/local tests; live account eligibility and paid provider requests require user acceptance testing.
+
+# RDataCraft v0.31 release preparation
 
 ## Suggested GitHub description
 
@@ -20,7 +22,7 @@ Connected AI requests use an external service when the user chooses to send them
 
 ## GitHub Desktop
 
-Use the source folder `dist/RDataCraft-0.3-GitHub`, rather than this entire working
+Use the source folder `dist/RDataCraft-0.31-GitHub`, rather than this entire working
 directory. It excludes private studies, runtimes, installers and test artifacts.
 
 1. In GitHub Desktop, select **File → Add Local Repository** and choose that folder.
@@ -33,7 +35,7 @@ directory. It excludes private studies, runtimes, installers and test artifacts.
    It now exercises the Mac app from the read-only disk image and the Windows
    setup/uninstall path. Reports upload automatically. Binary artifact upload is
    a separate manual opt-in for development testing.
-4. Create a **draft** release tagged **v0.3** after resolving the remaining checks.
+4. Create a **draft** release tagged **v0.31** after resolving the remaining checks.
    Attach installer files as release assets. Keep all final checksums and validation
    reports together. Complete the native-source review and attach the required
    corresponding source/build material before publishing bundled binaries.
@@ -93,6 +95,6 @@ signing. [Microsoft SignTool documentation](https://learn.microsoft.com/en-us/wi
 - Optional connected AI and vector paste checked in the intended external apps;
   clearly disclose any remaining limitations in the release notes.
 
-The local report accompanying v0.3 distinguishes executed checks from pending
-checks. Do not relabel earlier v0.25 installers as v0.3; rebuild them from this
+The local report accompanying v0.31 distinguishes executed checks from pending
+checks. Do not relabel earlier v0.25 installers as v0.31; rebuild them from this
 source so internal version metadata and download names agree.

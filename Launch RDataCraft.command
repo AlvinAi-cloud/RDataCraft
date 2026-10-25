@@ -6,7 +6,7 @@ if [[ "$(uname -m)" == "arm64" ]]; then
 else
   RDATACRAFT_CANDIDATES=("RDataCraft 0.3 Intel.app")
 fi
-RDATACRAFT_CANDIDATES+=("RDataCraft v0.3.app")
+RDATACRAFT_CANDIDATES+=("RDataCraft v0.31.app")
 for RDATACRAFT_NAME in "${RDATACRAFT_CANDIDATES[@]}"; do
   RDATACRAFT_APP="$RDATACRAFT_ROOT/dist/$RDATACRAFT_NAME"
   if [[ -d "$RDATACRAFT_APP" ]]; then

@@ -103,7 +103,7 @@ internal static class NativeTests
             await Until(window, "document.querySelector('#figure svg.graph-interactive')?.textContent.includes('Independent fits for each series')===true", "Regression figure missing");
             Checks.Add("Linked multi-series regression renders in the embedded window");
             await using (var file = File.Create(Path.Combine(folder, "figure.png"))) await window.Web.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, file);
-            File.WriteAllText(Path.Combine(folder, "validation-windows-desktop.json"), JsonSerializer.Serialize(new { version = "0.3", status = "passed", native_window = true, embedded_webview = true, bundled_R = true, external_browser_launched = false, engine_pid = window.EnginePid, checks = Checks }, new JsonSerializerOptions { WriteIndented = true }));
+            File.WriteAllText(Path.Combine(folder, "validation-windows-desktop.json"), JsonSerializer.Serialize(new { version = "0.31", status = "passed", native_window = true, embedded_webview = true, bundled_R = true, external_browser_launched = false, engine_pid = window.EnginePid, checks = Checks }, new JsonSerializerOptions { WriteIndented = true }));
             finished = true; Program.Result = 0;
             window.CloseForTest();
         }
@@ -116,7 +116,7 @@ internal static class NativeTests
         if (finished) return;
         finished = true; Program.Result = 1;
         Directory.CreateDirectory(folder);
-        File.WriteAllText(Path.Combine(folder, "validation-windows-desktop.json"), JsonSerializer.Serialize(new { version = "0.3", status = "failed", error = error.ToString(), checks = Checks }, new JsonSerializerOptions { WriteIndented = true }));
+        File.WriteAllText(Path.Combine(folder, "validation-windows-desktop.json"), JsonSerializer.Serialize(new { version = "0.31", status = "failed", error = error.ToString(), checks = Checks }, new JsonSerializerOptions { WriteIndented = true }));
         foreach (var window in Program.Windows.ToArray()) window.CloseForTest();
     }
 }

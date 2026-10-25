@@ -5,11 +5,13 @@ publication-quality figures. It combines editable tables, linked graphs,
 statistical workflows, curve fitting, PCA, multi-panel layouts and reviewed custom
 R scripts with optional AI assistance.
 
-**v0.3 is a development preview.** Mac and Windows x64 editions open in dedicated desktop windows, with native
-menus and file dialogs. R and the required packages are included in packaged builds. 
-Scientific calculations run locally. The optional connected AI Assistant uses your signed-in Codex CLI.
+**v0.31 is a development preview.** Mac and Windows x64 editions open in dedicated desktop windows, with native
+menus and file dialogs. The Windows installer includes Microsoft WebView2; no
+external browser or separate R installation is needed. R and the required
+packages are included in packaged builds. Scientific calculations run locally.
+The optional AI Assistant connects directly to your ChatGPT account or to OpenAI, Anthropic/Claude, Gemini, and OpenAI-compatible API services. Open **AI → Accounts and Models…** to connect. No Codex installation is required. ChatGPT plan access depends on OpenAI eligibility and your consent.
 
-Installation: https://github.com/AlvinAi-cloud/RDataCraft/releases/tag/V0.3installer
+Installation: [Existing v0.3 installers](https://github.com/AlvinAi-cloud/RDataCraft/releases/tag/V0.3installer). Updated v0.31 installers are undergoing platform validation.
 
 ## Start a study
 
@@ -89,7 +91,7 @@ Review code before running it. See the in-app Advanced R guide and
 [the original teaching example](examples/Advanced%20R%20teaching%20example.rdatacraft).
 
 The connected assistant sends your message, column names, graph settings and
-recent conversation to the model service. Table values and computed results are
+recent conversation to your selected model service. Table values and computed results are
 included only when **Share active table values and computed results** is checked.
 Local assistant tools and the main analysis workflows work offline. Model changes
 require review; Advanced R proposals remain drafts until explicitly run.
@@ -149,7 +151,7 @@ Prepare an upload without publishing:
 
 ```sh
 python3 scripts/prepare_github.py
-python3 scripts/preflight.py --source dist/RDataCraft-0.3-GitHub
+python3 scripts/preflight.py --source dist/RDataCraft-0.31-GitHub
 ```
 
 Use the generated **source folder contents**, rather than the entire development
@@ -173,3 +175,13 @@ their licenses and notices; see [LICENSE](LICENSE), [licenses](licenses) and the
 dependency manifests. ggprism is not used or included in current builds. The UI
 adaptation retains the original MIT attribution in
 [licenses/PlasmidCraft-LICENSE](licenses/PlasmidCraft-LICENSE).
+
+### AI accounts in v0.31
+
+Use **AI → Accounts and Models…** or the matching button in the AI panel. **Continue with ChatGPT** opens the official sign-in and consent page in your system browser and returns to RDataCraft. Saved accounts remain separate; choose **Use saved account** to switch, or **Sign in again / grant plan access** to renew authorization. Only account-provided models are offered. Identity sign-in alone does not guarantee plan inference; eligibility is controlled by OpenAI.
+
+For an API service, select a provider, enter your own key and refresh the model list. Compatible/local services accept an HTTPS base URL, or HTTP on localhost. Choose a model and **Save and connect**. **Test connection** makes a small request without study data and may consume quota or incur provider charges. Provider website subscriptions do not automatically supply API access.
+
+Remembered keys and ChatGPT tokens are stored in the RDataCraft local configuration folder, outside studies and exports, with Unix file/folder permissions restricted to the current user. They are not stored in browser storage or borrowed from Codex or another application. **Disconnect for now** retains the saved connection; **Forget saved API connection** removes it. Signing out a ChatGPT account removes its local tokens and attempts remote revocation, reporting if revocation cannot be confirmed.
+
+Building from source also requires Rust (end users need only the installer). Run `python3 scripts/build_ai.py --test` to exercise the native connection service. Its adapters are adapted from MIT-licensed PlasmidCraft code; the attribution is included in `licenses/PlasmidCraft-AI-MIT.txt`. RDataCraft remains GPL-3.0.

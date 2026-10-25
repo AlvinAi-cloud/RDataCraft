@@ -1,0 +1,27 @@
+source('app.R')
+checks<-0L
+check<-function(ok,label){if(!isTRUE(ok))stop('FAIL: ',label);checks<<-checks+1L;cat('PASS:',label,'\n')}
+wait<-function(predicate){deadline<-Sys.time()+15;while(!predicate() && Sys.time()<deadline){later::run_now(.05);Sys.sleep(.02)};if(!predicate())stop('Native bridge timed out')}
+events<-list();answers<-list()
+bridge<-pc_connected_ai(function(x) answers[[length(answers)+1L]]<<-x,function(x) events[[length(events)+1L]]<<-x)
+bridge$command('connect',list(connection=list(provider='compatible',endpoint=Sys.getenv('RDATACRAFT_AI_TEST_ENDPOINT'),apiKey='synthetic-bridge-key'),model='synthetic-model',remember=TRUE))
+wait(function() any(vapply(events,function(x)!is.null(x$connection),logical(1))))
+check(grepl('synthetic-model',bridge$status()),'R bridge connects through the bundled service without Codex')
+bridge$command('models');wait(function() any(vapply(events,function(x)!is.null(x$models),logical(1))))
+check(any(vapply(events,function(x)length(x$models)==1L,logical(1))),'native model discovery reaches the R interface')
+bridge$start(list(id='synthetic-send',prompt='Explain the active graph.',context=list(columns=c('Group','Value')),history=list(),schema=pc_ai_schema(),instructions=pc_ai_instructions()))
+wait(function() length(answers)>0)
+check(isTRUE(answers[[1]]$ok) && grepl('Synthetic native bridge answer',answers[[1]]$response),'Send returns a validated operation envelope through the real native bridge')
+bridge$close();later::run_now(.1)
+events<-list()
+bridge<-pc_connected_ai(function(x)NULL,function(x)events[[length(events)+1L]]<<-x)
+bridge$command('status');wait(function()any(vapply(events,function(x)!is.null(x$connection),logical(1))))
+check(grepl('compatible',bridge$status()) && grepl('synthetic-model',bridge$status()),'a remembered connection restores in a new helper process')
+before<-length(events);bridge$command('forget');wait(function()length(events)>before && !grepl('Connected',bridge$status(),fixed=TRUE))
+bridge$close();later::run_now(.1)
+file<-file.path(Sys.getenv('RDATACRAFT_AI_PROFILE'),'api','connection.json')
+# Allow the asynchronous native deletion to finish before inspecting synthetic storage.
+wait(function()file.exists(file) && identical(trimws(paste(readLines(file,warn=FALSE),collapse='')),'null'))
+check(!grepl('synthetic-bridge-key',paste(readLines(file,warn=FALSE),collapse=''),fixed=TRUE),'Forget removes the remembered credential bytes')
+check(!grepl('synthetic-bridge-key',as.character(jsonlite::toJSON(pc_project(pc_example('column')$table,pc_defaults()),auto_unbox=TRUE)),fixed=TRUE),'study serialization excludes connection credentials')
+cat(checks,'bridge checks passed\n')

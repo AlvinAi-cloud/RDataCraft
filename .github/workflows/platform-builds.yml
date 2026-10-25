@@ -34,7 +34,15 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '24'
+      - name: Prepare Rust for the bundled AI service
+        run: rustup update stable --no-self-update
+      - run: python3 scripts/build_ai.py --test
       - run: python3 scripts/bootstrap.py --arch ${{ matrix.arch }} --runtime-root runtime
+      - name: Exercise the bundled AI bridge without a real provider
+        run: |
+          python3 scripts/build_ai.py
+          helper=$(find artifacts/ai-helper -name rdatacraft-ai -type f | head -1)
+          python3 tests/ai_bridge.py --helper "$helper"
       - run: python3 scripts/test.py --require-node
       - run: ./scripts/rscript.sh scripts/collect_licenses.R
       - run: python3 scripts/fetch_sources.py
@@ -81,7 +89,16 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '24'
+      - name: Prepare Rust for the bundled AI service
+        run: rustup update stable --no-self-update
+      - run: python scripts/build_ai.py --test
       - run: Rscript --vanilla scripts/install.R
+      - name: Exercise the bundled AI bridge without a real provider
+        shell: pwsh
+        run: |
+          python scripts/build_ai.py
+          $helper = Get-ChildItem artifacts/ai-helper -Recurse -Filter rdatacraft-ai.exe | Select-Object -First 1
+          python tests/ai_bridge.py --helper $helper.FullName
       - name: Check source tools (full R suite runs after installation)
         run: python scripts/test.py --require-node --source-tools-only
       - run: Rscript --vanilla scripts/collect_licenses.R

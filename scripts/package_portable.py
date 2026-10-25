@@ -5,8 +5,9 @@ R and compiled R packages must come from this same platform and architecture.
 import argparse, hashlib, json, os, platform, shutil, subprocess, zipfile, struct, re
 from pathlib import Path
 from runtime_inventory import manifest as runtime_manifest, write_notices
+from build_ai import build as build_ai
 ROOT=Path(__file__).resolve().parent.parent
-VERSION='0.3'
+VERSION='0.31'
 
 def portable_arch(system, arch):
     arch={'amd64':'x86_64','x64':'x86_64','aarch64':'arm64'}.get(arch.lower(),arch.lower())
@@ -89,12 +90,16 @@ def main():
     tag=f'{system.lower()}-{arch}'
     destination=(args.output or ROOT/'dist'/f'RDataCraft-{VERSION}-{tag}-portable').resolve()
     if destination.exists():raise SystemExit('Choose a new output folder; existing builds are never overwritten.')
+    ai_target="x86_64-pc-windows-msvc" if system=="Windows" else ("aarch64-apple-darwin" if arch=="arm64" else "x86_64-apple-darwin")
+    ai_output=build_ai(target=ai_target)
     destination.mkdir(parents=True)
     for name in ['app.R','README.md','PLATFORM_SUPPORT.md','WORKFLOWS.md','RELEASE.md','LICENSE','CHANGELOG.md','dependencies.csv','dependencies.lock.json','source-manifest.json',
                  'Launch RDataCraft.cmd','Launch RDataCraft.ps1','Validate RDataCraft.cmd','Launch RDataCraft portable.command']:
         shutil.copy2(ROOT/name,destination/name)
     for name in ['R','www','config','scripts','examples','licenses','tests']:
         shutil.copytree(ROOT/name,destination/name,symlinks=True,ignore=shutil.ignore_patterns('__pycache__','*.pyc','.DS_Store'))
+    shutil.copytree(ROOT/'desktop/ai-helper',destination/'desktop/ai-helper',ignore=shutil.ignore_patterns('target','bin'))
+    shutil.copytree(ai_output,destination/'desktop/ai-helper/bin',dirs_exist_ok=True)
     if (ROOT/'.github').exists():shutil.copytree(ROOT/'.github',destination/'.github')
     (destination/'runtime').mkdir()
     if system=='Windows':
@@ -133,7 +138,7 @@ def main():
     archive=Path(str(destination)+'.zip')
     if system=='Darwin':subprocess.run(['ditto','-c','-k','--sequesterRsrc','--keepParent',str(destination),str(archive)],check=True)
     else:
-        with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED) as z:
+        with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,strict_timestamps=False) as z:
             for f in destination.rglob('*'):
                 if f.is_file():z.write(f,Path(destination.name)/f.relative_to(destination))
     checksum=hashlib.sha256(archive.read_bytes()).hexdigest()

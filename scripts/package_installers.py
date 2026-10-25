@@ -13,7 +13,7 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = "0.3"
+VERSION = "0.31"
 
 
 def checksum(path):
@@ -85,9 +85,9 @@ def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signto
         f'Name "RDataCraft {VERSION}"', f'OutFile "{nsis_quote(output)}"',
         f'InstallDir "$LOCALAPPDATA\\Programs\\RDataCraft-{VERSION}"',
         'RequestExecutionLevel user', 'SetCompressor /FINAL zlib',
-        'VIProductVersion "0.3.0.2"', 'VIAddVersionKey "ProductName" "RDataCraft"',
-        'VIAddVersionKey "FileDescription" "RDataCraft 0.3 development setup"',
-        'VIAddVersionKey "FileVersion" "0.3.0.2"', 'VIAddVersionKey "LegalCopyright" "RDataCraft contributors; GPL-3.0"',
+        'VIProductVersion "0.31.0.1"', 'VIAddVersionKey "ProductName" "RDataCraft"',
+        'VIAddVersionKey "FileDescription" "RDataCraft 0.31 development setup"',
+        'VIAddVersionKey "FileVersion" "0.31.0.1"', 'VIAddVersionKey "LegalCopyright" "RDataCraft contributors; GPL-3.0"',
         '!insertmacro MUI_PAGE_WELCOME', f'!insertmacro MUI_PAGE_LICENSE "{nsis_quote(ROOT / "LICENSE")}"',
         '!insertmacro MUI_PAGE_DIRECTORY', '!insertmacro MUI_PAGE_INSTFILES', '!insertmacro MUI_PAGE_FINISH',
         '!insertmacro MUI_UNPAGE_CONFIRM', '!insertmacro MUI_UNPAGE_INSTFILES', '!insertmacro MUI_LANGUAGE "English"',
@@ -169,7 +169,7 @@ def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signto
     environment = dict(os.environ, NSISDIR=str(nsis_dir.resolve()))
     subprocess.run([str(compiler.resolve()), '-V2', str(script)], env=environment, check=True)
     checksum(output)
-    (ROOT / 'artifacts/windows-installer-audit-0.3.json').write_text(json.dumps(
+    (ROOT / 'artifacts/windows-installer-audit-0.31.json').write_text(json.dumps(
         dict(audit, installer='NSIS', execution_tested=False, per_user=True,
              setup_and_uninstaller_signatures_verified=bool(certificate),
              uninstall_preserves_extra_files=True, script=str(script.relative_to(ROOT))), indent=2) + '\n')

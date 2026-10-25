@@ -143,6 +143,9 @@ internal sealed class StudyWindow : Form
         var view = Menu("&View");
         foreach (string name in new[] { "data", "analysis", "figure", "layout", "project", "inspector", "assistant" })
         { string command = name; Item(view, char.ToUpper(name[0]) + name[1..], Keys.None, () => Command(command)); }
+        var ai = Menu("&AI");
+        Item(ai, "AI Assistant", Keys.None, () => Command("assistant"));
+        Item(ai, "Accounts and Models…", Keys.None, () => Command("ai-accounts"));
         var export = Menu("E&xport");
         foreach (string format in new[] { "svg", "pdf", "png" })
         { string command = "export-" + format; Item(export, "Figure as " + format.ToUpper() + "…", Keys.None, () => Command(command)); }
@@ -150,7 +153,7 @@ internal sealed class StudyWindow : Form
         Item(help, "Examples & analysis guide", Keys.F1, () => Command("help"));
         Item(help, "Show engine log", Keys.None, () => Process.Start(new ProcessStartInfo("notepad.exe") { ArgumentList = { logPath }, UseShellExecute = false }));
         Item(help, "About RDataCraft", Keys.None, () => MessageBox.Show(this,
-            "RDataCraft v0.3\nScientific data analysis and publication-ready figures, powered by R.\n\nGPL-3.0. Third-party notices are included in the application folder.", "About RDataCraft", MessageBoxButtons.OK, MessageBoxIcon.Information));
+            "RDataCraft v0.31\nScientific data analysis and publication-ready figures, powered by R.\n\nGPL-3.0. Third-party notices are included in the application folder.", "About RDataCraft", MessageBoxButtons.OK, MessageBoxIcon.Information));
         return bar;
     }
 

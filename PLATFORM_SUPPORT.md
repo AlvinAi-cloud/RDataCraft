@@ -34,7 +34,7 @@ python scripts/build_windows.py
 python scripts/package_portable.py --native-host artifacts/windows-host
 ```
 
-The assistant's offline tools run on all three targets. The connected model uses the existing signed-in Codex CLI when its executable is installed. Prompts go through input files and an argument-array process API; shell execution is disabled for model requests. Model plans still pass the same local validators and require Apply to new table copy. Both desktop hosts expose PDF/SVG clipboard data. Direct paste depends on the receiving application; SVG/PDF/PNG file exports are also available.
+The assistant's offline tools run on all three targets. The connected assistant uses the bundled native AI service. Users can sign in with an eligible ChatGPT account or connect an OpenAI, Claude, Gemini or compatible/local API service through AI → Accounts and Models. No Codex installation is required. Credentials stay in the local app profile outside studies; model requests have no shell or computer-control tools. Model plans still pass the same local validators and require Apply to new table copy. Both desktop hosts expose PDF/SVG clipboard data. Direct paste depends on the receiving application; SVG/PDF/PNG file exports are also available.
 
 ## Verification and delivery
 

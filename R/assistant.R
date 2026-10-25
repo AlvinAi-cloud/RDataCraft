@@ -132,7 +132,7 @@ pc_ai_local_plan <- function(kind,s) {
 pc_assistant_ui <- function() shiny::tags$aside(id="assistant_panel",class="assistant-panel",hidden=NA,`aria-label`="AI Workspace",`aria-busy`="false",
   shiny::div(class="assistant-heading",shiny::h2("AI Workspace"),shiny::tags$button(id="assistant_close",type="button",`aria-label`="Hide AI assistant","×")),
   shiny::div(class="assistant-scroll",
-    shiny::div(class="assistant-connection",shiny::strong("Internal AI operations"),shiny::textOutput("assistant_status"),shiny::actionButton("assistant_connection","Check connection",class="btn-outline-secondary")),
+    shiny::div(class="assistant-connection",shiny::strong("Internal AI operations"),shiny::textOutput("assistant_status"),shiny::actionButton("assistant_connection","Accounts and Models…",class="btn-outline-secondary")),
     shiny::tags$section(`aria-label`="Message input",shiny::h3("Message input"),shiny::textAreaInput("assistant_prompt",NULL,placeholder="Describe a graph, analysis, or figure layout…",rows=4,width="100%"),
       shiny::checkboxInput("assistant_share","Share active table values and computed results",FALSE),
       shiny::p(class="assistant-note","Send shares your message, column names, graph settings and recent conversation with the connected model. Table values are included only when checked."),

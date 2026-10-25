@@ -98,6 +98,7 @@
     if (name === "examples") return input("show_examples", {});
     if (name === "help") return input("show_help", {});
     if (name === "pca-guide") return input("show_pca_guide", {});
+    if (name === "ai-accounts") return Shiny.setInputValue("assistant_connection",Date.now(),{priority:"event"});
     if (name === "assistant") return window.RDataCraftAssistant?.toggle();
     if (name === "create") return document.getElementById("create_dialog").showModal();
     if (["data", "analysis", "figure", "layout", "project"].includes(name)) return click("nav_" + name);

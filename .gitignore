@@ -17,6 +17,8 @@ Rplots.pdf
 .env.*
 /desktop/windows/bin/
 /desktop/windows/obj/
+/desktop/ai-helper/target/
+/desktop/ai-helper/bin/
 *.rdatacraft
 !examples/*.rdatacraft
 *.prism
