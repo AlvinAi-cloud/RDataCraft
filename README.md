@@ -11,7 +11,13 @@ external browser or separate R installation is needed. R and the required
 packages are included in packaged builds. Scientific calculations run locally.
 The optional AI Assistant connects directly to your ChatGPT account or to OpenAI, Anthropic/Claude, Gemini, and OpenAI-compatible API services. Open **AI → Accounts and Models…** to connect. No Codex installation is required. ChatGPT plan access depends on OpenAI eligibility and your consent.
 
-Installation: [Existing v0.3 installers](https://github.com/AlvinAi-cloud/RDataCraft/releases/tag/V0.3installer). Updated v0.31 installers are undergoing platform validation.
+Download v0.31 (development preview):
+
+- [Intel Mac installer](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.31/RDataCraft-0.31-macos-x86_64.dmg)
+- [Apple Silicon Mac installer](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.31/RDataCraft-0.31-macos-arm64.dmg)
+- [Windows x64 installer](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.31/RDataCraft-0.31-windows-x64-setup.exe)
+
+[Release notes, checksums and source material](https://github.com/AlvinAi-cloud/RDataCraft/releases/tag/v0.31).
 
 ## Start a study
 
