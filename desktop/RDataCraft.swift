@@ -728,7 +728,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         let capture = try await webView.takeSnapshot(configuration: nil)
         try imageData(capture).write(to: folder.appendingPathComponent("direct-grid-paste.png"))
         _ = try await webView.evaluateJavaScript("document.querySelector('.transform-card').scrollIntoView({block:'center'})")
-        try await waitUntil("(()=>{const button=document.getElementById('apply_transform').getBoundingClientRect(),first=document.getElementById('transform_kind').selectize.$control[0].getBoundingClientRect(),second=document.getElementById('transform_control').selectize.$control[0].getBoundingClientRect();return Math.abs(button.bottom-first.bottom)<2 && Math.abs(button.bottom-second.bottom)<2 && button.left>second.right;})()")
+        try await waitUntil("(()=>{const button=document.getElementById('apply_transform').getBoundingClientRect(),controls=['transform_kind','transform_control'].map(id=>document.getElementById(id).selectize.$control[0].getBoundingClientRect());return button.width>0 && button.height>0 && controls.every(control=>control.width>0 && (button.top>=control.bottom+12 || (button.left>=control.right && Math.abs(button.bottom-control.bottom)<2)));})()")
         let transformCapture = try await webView.takeSnapshot(configuration:nil)
         try imageData(transformCapture).write(to:folder.appendingPathComponent("transform-controls.png"))
         _ = try await webView.evaluateJavaScript("document.getElementById('nav_analysis').click()")

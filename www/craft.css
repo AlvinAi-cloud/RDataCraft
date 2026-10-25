@@ -161,6 +161,7 @@ body[data-runtime="desktop"] .desktop-only { display: initial; }
 .transform-card{margin-top:20px;padding:22px}
 .transform-controls{display:flex;flex-wrap:wrap;gap:16px 20px;align-items:flex-end}
 .transform-controls .shiny-input-container{flex:1 1 240px;max-width:320px;width:auto;margin:0}
+.transform-controls .selectize-control{margin-bottom:0}
 .transform-action{display:flex;align-items:flex-end;padding-top:24px}
 .transform-action .btn{min-height:38px;margin:0}
 .card-surface{overflow-x:auto}

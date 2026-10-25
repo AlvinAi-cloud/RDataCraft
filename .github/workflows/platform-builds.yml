@@ -12,6 +12,7 @@ on:
         options:
           - all
           - mac-arm64
+          - mac
       upload_development_bundles:
         description: 'Also retain development ZIPs (release installers are always retained)'
         required: false
@@ -127,7 +128,7 @@ jobs:
             dist/*.sha256
             dist/*.dmg
   windows:
-    if: inputs.platform != 'mac-arm64' && !contains(github.event.head_commit.message, '[mac-arm-only]')
+    if: inputs.platform != 'mac-arm64' && inputs.platform != 'mac' && !contains(github.event.head_commit.message, '[mac-arm-only]') && !contains(github.event.head_commit.message, '[mac-only]')
     needs: sources
     timeout-minutes: 45
     runs-on: windows-2025
@@ -234,7 +235,7 @@ jobs:
             dist/*-setup.exe
   draft-release:
     needs: [sources, mac, windows]
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && inputs.platform != 'mac-arm64' && !contains(github.event.head_commit.message, '[mac-arm-only]')
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && inputs.platform != 'mac-arm64' && inputs.platform != 'mac' && !contains(github.event.head_commit.message, '[mac-arm-only]') && !contains(github.event.head_commit.message, '[mac-only]')
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
