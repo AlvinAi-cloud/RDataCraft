@@ -1,0 +1,47 @@
+name: Finish v0.31 release links
+on:
+  workflow_run:
+    workflows: [Publish tested RDataCraft v0.31 preview]
+    types: [completed]
+permissions:
+  contents: write
+jobs:
+  finish:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'release/v0.31-publication'
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Link the three installers and remove temporary branches
+        shell: python
+        run: |
+          import base64,json,os,pathlib,subprocess
+          repo='AlvinAi-cloud/RDataCraft'
+          def api(path):return json.loads(subprocess.check_output(['gh','api',path],text=True))
+          release=api(f'repos/{repo}/releases/tags/v0.31')
+          assert not release['draft']
+          expected={'RDataCraft-0.31-macos-x86_64.dmg','RDataCraft-0.31-macos-arm64.dmg','RDataCraft-0.31-windows-x64-setup.exe'}
+          assert expected <= {a['name'] for a in release['assets']}
+          doc=api(f'repos/{repo}/contents/README.md?ref=main')
+          text=base64.b64decode(doc['content']).decode()
+          old='Installation: [Existing v0.3 installers](https://github.com/AlvinAi-cloud/RDataCraft/releases/tag/V0.3installer). Updated v0.31 installers are undergoing platform validation.'
+          new='''Download v0.31 (development preview):
+
+          - [Intel Mac installer](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.31/RDataCraft-0.31-macos-x86_64.dmg)
+          - [Apple Silicon Mac installer](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.31/RDataCraft-0.31-macos-arm64.dmg)
+          - [Windows x64 installer](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.31/RDataCraft-0.31-windows-x64-setup.exe)
+
+          [Release notes, checksums and source material](https://github.com/AlvinAi-cloud/RDataCraft/releases/tag/v0.31).'''
+          assert text.count(old)==1
+          payload={'message':'Link the three v0.31 installers [skip ci]','content':base64.b64encode(text.replace(old,new).encode()).decode(),'sha':doc['sha'],'branch':'main'}
+          p=pathlib.Path('readme-update.json');p.write_text(json.dumps(payload))
+          subprocess.run(['gh','api','--method','PUT',f'repos/{repo}/contents/README.md','--input',str(p)],check=True)
+          event=json.loads(pathlib.Path(os.environ['GITHUB_EVENT_PATH']).read_text())
+          branches={'release/v0.31-installers':'37ac44b3942849ee0734841c27c8dc652fec7000','release/v0.31-publication':event['workflow_run']['head_sha']}
+          for branch,expected_sha in branches.items():
+            ref=api(f'repos/{repo}/git/ref/heads/{branch}')
+            assert ref['object']['sha']==expected_sha,'Temporary branch changed; preserve it for review'
+            subprocess.run(['gh','api','--method','DELETE',f'repos/{repo}/git/refs/heads/{branch}'],check=True)
+          remaining=api(f'repos/{repo}/branches?per_page=100')
+          assert [x['name'] for x in remaining]==['main']
+          print('Only main remains; README links all three installers.')
