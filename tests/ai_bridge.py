@@ -21,6 +21,7 @@ server=ThreadingHTTPServer(('127.0.0.1',0),Provider);threading.Thread(target=ser
 try:
     with tempfile.TemporaryDirectory(prefix='RDataCraft-AI-test-') as folder:
         environment=dict(os.environ,RDATACRAFT_AI_HELPER=str(args.helper.resolve()),RDATACRAFT_AI_PROFILE=folder,RDATACRAFT_AI_TEST_ENDPOINT=f'http://127.0.0.1:{server.server_port}/v1')
+        if os.name=='nt':environment['R_LIBS_USER']=str(ROOT/'runtime/library')
         runner=[str(ROOT/'scripts/rscript.sh')] if os.name!='nt' else [os.environ.get('RDATACRAFT_RSCRIPT','Rscript'),'--vanilla']
         subprocess.run(runner+['tests/ai_bridge.R'],cwd=ROOT,env=environment,check=True)
         posts=[r for r in Provider.requests if r[0]=='POST'];gets=[r for r in Provider.requests if r[0]=='GET']
