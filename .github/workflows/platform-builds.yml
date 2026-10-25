@@ -4,6 +4,14 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
+      platform:
+        description: 'Platforms to rebuild'
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - mac-arm64
       upload_development_bundles:
         description: 'Also retain development ZIPs (release installers are always retained)'
         required: false
@@ -46,12 +54,8 @@ jobs:
     timeout-minutes: 45
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - runner: macos-15
-            arch: arm64
-          - runner: macos-15-intel
-            arch: x86_64
+      # The commit marker also permits a focused build from GitHub Desktop.
+      matrix: ${{ fromJSON((inputs.platform == 'mac-arm64' || contains(github.event.head_commit.message, '[mac-arm-only]')) && '{"include":[{"runner":"macos-15","arch":"arm64"}]}' || '{"include":[{"runner":"macos-15","arch":"arm64"},{"runner":"macos-15-intel","arch":"x86_64"}]}') }}
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -123,6 +127,7 @@ jobs:
             dist/*.sha256
             dist/*.dmg
   windows:
+    if: inputs.platform != 'mac-arm64' && !contains(github.event.head_commit.message, '[mac-arm-only]')
     needs: sources
     timeout-minutes: 45
     runs-on: windows-2025
@@ -229,7 +234,7 @@ jobs:
             dist/*-setup.exe
   draft-release:
     needs: [sources, mac, windows]
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && inputs.platform != 'mac-arm64' && !contains(github.event.head_commit.message, '[mac-arm-only]')
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
