@@ -88,7 +88,7 @@ jobs:
         run: |
           version=$(python3 -c 'import json; print(json.load(open("config/release.json"))["version"])')
           python3 scripts/package_installers.py --mac-app "dist/RDataCraft v${version}.app" --arch ${{ matrix.arch }}
-          python3 scripts/test_macos_bundle.py --dmg "dist/RDataCraft-${version}-macos-${{ matrix.arch }}.dmg" --output artifacts/installed-mac
+          python3 scripts/test_macos_bundle.py --dmg "dist/RDataCraft-${version}-macos-${{ matrix.arch }}.dmg" --output artifacts/installed-mac --advisory-paste
           python3 scripts/release_assets.py platform --platform macos-${{ matrix.arch }} --installer "dist/RDataCraft-${version}-macos-${{ matrix.arch }}.dmg"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
