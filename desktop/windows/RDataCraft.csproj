@@ -17,9 +17,9 @@
     <PathMap>$(MSBuildProjectDirectory)=/_/RDataCraft/desktop/windows</PathMap>
     <ApplicationIcon>RDataCraft.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>0.32.0</Version>
-    <FileVersion>0.32.0.1</FileVersion>
-    <AssemblyVersion>0.32.0.0</AssemblyVersion>
+    <Version>0.33.0</Version>
+    <FileVersion>0.33.0.1</FileVersion>
+    <AssemblyVersion>0.33.0.0</AssemblyVersion>
     <Copyright>RDataCraft contributors; GPL-3.0</Copyright>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>

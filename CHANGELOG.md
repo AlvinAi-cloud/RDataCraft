@@ -1,3 +1,13 @@
+# v0.33
+
+- Add power/sample-size planning with manual inputs, sensitivity curves, dropout recruitment estimates and CSV export.
+- Add read-only active-table pilot estimates, explicit review/fill, editable assumptions and source context in planning exports. Unsupported models receive appropriate summaries and guidance rather than a different test.
+- Place Power analysis and Advanced R on the toolbar beside Figure layout.
+- Float dropdowns outside clipping sections; improve whole-table text paste/replacement, validation feedback and Undo.
+- Add layout-aware transformation targets, preserve XY X by default and reset transformed-axis limits.
+- Add offline Help and numerical, server and native preview coverage. Extended Mac UI checks remain advisory with accurate reports.
+- Prepare all three native installers through GitHub Actions on the existing main branch; source, checksums and draft release assembly remain gated by required checks.
+
 # v0.32
 
 - Replaced paged data tables with a continuous worksheet, fixed headers, numbered rows and scrolling that stays in place after edits.

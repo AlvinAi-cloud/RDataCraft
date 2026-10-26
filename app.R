@@ -18,6 +18,8 @@ source("R/ai_connections.R",local=TRUE)
 source("R/assistant_server.R",local=TRUE)
 source("R/advanced_r_server.R",local=TRUE)
 source("R/help.R",local=TRUE)
+source("R/power.R",local=TRUE)
+source("R/power_pilot.R",local=TRUE)
 options(shiny.maxRequestSize = 32 * 1024^2)
 
 nav_button <- function(id, number, label) actionButton(id,
@@ -29,7 +31,7 @@ ui <- fluidPage(
   tags$head(tags$title("RDataCraft"),
             tags$link(rel = "stylesheet", href = "rdatacraft.css"),
             tags$link(rel = "stylesheet", href = "craft.css"),
-            tags$script(src = "rdatacraft.js"), tags$script(src="graph-editor.js"), tags$script(src="layout-editor.js"),tags$script(src="assistant.js")),
+            tags$script(src = "rdatacraft.js"), tags$script(src="dropdowns.js"), tags$script(src="graph-editor.js"), tags$script(src="layout-editor.js"),tags$script(src="assistant.js")),
   div(style="display:none", lapply(c("title_size","axis_title_size","axis_tick_size","text_color","axis_color","axis_line_width","point_shape","line_width","override_x_title","override_y_title","series_styles","x_tick_step","y_tick_step","x_tick_angle","ref_x","ref_y","pca_variables"),function(key) {
     value <- pc_defaults()[[key]]
     if(is.logical(value)) checkboxInput(key,key,value) else if(is.numeric(value)) numericInput(key,key,value) else textInput(key,key,value)
@@ -168,19 +170,22 @@ ui <- fluidPage(
                     tags$label(tags$input(id = "grid_paste_headers", type = "checkbox"), " First pasted row contains column names")),
                   DT::DTOutput("data_grid")),
             div(class = "card-surface transform-card", h3("Transform observations into a new worksheet"),
-                p("The source worksheet is preserved. Choose a transform, then review its derived table and analysis."),
+                p("The source worksheet is preserved. Choose which measurements change; labels and unselected columns remain unchanged."),
+                uiOutput("transform_scope_note"),
                 div(class="transform-controls",
-                  selectInput("transform_kind", "Transform", c("Percent of selected control mean" = "percent_control", "Log10(Y)" = "log10", "Natural log(Y)" = "ln", "Z score within each numeric column" = "zscore")),
-                  selectInput("transform_control", "Control column (percent normalization)", c("Control", "Treatment A", "Treatment B")),
+                  selectInput("transform_kind", "Transform", c("Log10" = "log10", "Natural log" = "ln", "Z score within each column" = "zscore", "Percent of selected control mean"="percent_control")),
+                  uiOutput("transform_targets"),
+                  conditionalPanel("input.transform_kind === 'percent_control' && input.layout === 'column'",selectInput("transform_control", "Control column", c("Control", "Treatment A", "Treatment B"))),
                   div(class="transform-action", actionButton("apply_transform", "Create transformed worksheet", class = "btn-outline-secondary")))),
             tags$details(class = "card-surface paste-card", tags$summary("Advanced: replace the entire table from text"),
                 p("Include a header row and follow the table-format guide above. Use a new worksheet template to start a different experiment type."),
                 textAreaInput("paste_data", NULL, placeholder = "Control\tTreatment\n8.4\t12.6\n9.7\t14.2", rows = 6, width = "100%"),
-                actionButton("apply_paste", "Replace table with pasted data", class = "btn-primary"))),
+                selectInput("paste_delimiter","Text format",c("Detect CSV or tabs"="auto","Tab separated"="\t","Comma separated (CSV)"=",","Semicolon separated"=";")),
+                actionButton("apply_paste", "Replace table with pasted data", class = "btn-primary",onclick="Shiny.setInputValue('paste_data', document.getElementById('paste_data').value, {priority:'event'});"),
+                uiOutput("replace_status"))),
           tabPanel("Analysis", value = "analysis",
             div(class = "page-heading", div(div(class = "eyebrow", "UNDERSTAND THE DIFFERENCE"), h1(textOutput("analysis_heading", inline = TRUE)),
               p("Choose an analysis deliberately. Review its assumptions alongside the result."))),
-            div(class="card-surface",actionButton("advanced_open","Advanced R analysis…",class="btn-outline-secondary"),p(class="muted","Use reviewed R scripts for methods beyond the presets. Open the guide for examples and package requirements.")),
             div(class = "card-surface analysis-controls", selectizeInput("method", "Analysis method", pc_methods("column"), selected = "welch", options = list(dropdownParent="body",
                   onDropdownOpen=I("function(dropdown) { var box=this.$control[0].getBoundingClientRect(), below=window.innerHeight-box.bottom-12, above=box.top-12, upward=below<240 && above>below, height=Math.max(100,Math.min(420,upward?above:below)); dropdown.addClass('analysis-method-menu'); dropdown.find('.selectize-dropdown-content').css('max-height',height+'px'); if(upward) dropdown.css('top',window.scrollY+box.top-dropdown.outerHeight()); }"))),
                 conditionalPanel("['welch','student','paired','mann','signedrank','onesample','linear','pearson','spearman','fourpl','origin','quadratic','cubic','logarithmic','power','exponential','decay','association','michaelis','gaussian'].indexOf(input.method) !== -1 && (input.layout !== 'xy' || input.fit_scope !== 'all' || ['pearson','spearman'].indexOf(input.method) !== -1)", selectInput("group1", "First group / regression series", choices = c("Control", "Treatment A", "Treatment B"))),
@@ -251,7 +256,7 @@ ui <- fluidPage(
                 fileInput("open_project", "Project file", accept = c(".json", ".rdatacraft", ".plotcraft"), placeholder = "Choose a RDataCraft project"),
                 downloadButton("save_project_copy", "Save current project", class = "btn-primary")),
               div(class = "card-surface", h3("About this version"),
-                  p("RDataCraft v0.32 · Scientific plotting and statistics"),
+                  p("RDataCraft v0.33 · Scientific plotting and statistics"),
                   p("R-powered data analysis and publication-ready figures for Mac and Windows."),
                   p("Six table types including PCA, named worksheets, matched and independent group tests, factorial ANOVA, correlation, dose-response fitting, survival analysis, categorical tests, diagnostic graphs, and reproducible reports."),
                   p("Treat each row as an independent experimental unit unless using a paired test. Technical replicates must not be counted as independent biological replicates."),
@@ -376,7 +381,15 @@ server <- function(input, output, session) {
       session$sendCustomMessage("rdatacraft-paste-result", list(ok = FALSE, message = paste("Paste rejected:", conditionMessage(e))))
     })
   })
-  observeEvent(input$apply_paste, tryCatch({ tab <- pc_read_text(input$paste_data); pc_normalize(tab, input$layout, allow_empty = TRUE); commit_data(tab, "replace pasted data"); showNotification("Table updated.", type = "message") }, error = notify_error))
+  replacement_message <- reactiveVal("Paste a header row and measurements, then replace. Undo restores the previous table.")
+  output$replace_status<-renderUI(p(role="status",replacement_message()))
+  observeEvent(input$apply_paste, tryCatch({
+    tab <- pc_read_text(input$paste_data,if(is.null(input$paste_delimiter)) "auto" else input$paste_delimiter)
+    pc_normalize(tab, current_layout(), allow_empty = TRUE)
+    changed<-commit_data(tab,"replace pasted data")
+    replacement_message(if(isTRUE(changed)) sprintf("Replaced with %d rows × %d columns. Undo restores the previous table.",nrow(tab),ncol(tab)) else "The pasted table is identical; no change was needed.")
+    showNotification(replacement_message(),type="message")
+  }, error=function(e) {replacement_message(paste("Table unchanged:",conditionMessage(e)));notify_error(e)}))
   import_table <- function(path, name) {
     tab <- pc_import_file(path, name)
     pc_normalize(tab, input$layout, allow_empty = TRUE); commit_data(tab, "import data")
@@ -992,9 +1005,31 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
   observeEvent(input$confirm_rename_sheet, tryCatch({
     rename_table(active_sheet(), input$rename_sheet); removeModal()
   }, error = notify_error))
+  output$transform_scope_note<-renderUI({
+    text<-switch(input$layout,xy="XY: Y values only by default, including every replicate. X changes only when explicitly selected.",grouped="Grouped: transform replicate measurements; the first two factor columns are preserved.",column="Column: transform all groups or select specific columns.",multiple="Multiple variables: explicitly select measurements. Leave numeric IDs and group codes unselected.","Count and survival tables are not transformed by this tool.")
+    p(class="muted",text)
+  })
+  output$transform_targets<-renderUI({
+    eligible<-pc_transform_columns(raw(),input$layout)
+    if(!length(eligible)) return(p("Use Advanced R for a reviewed custom transformation."))
+    choices<-c(if(input$layout=="xy") c("All Y values (preserve X)"="measurements","X values only"="x","X and all Y values"="both") else if(input$layout!="multiple") c("All measurement columns"="measurements"),"Selected measurement columns"="selected")
+    tagList(selectInput("transform_target","Apply to",choices,selected=if(input$layout=="multiple") "selected" else "measurements"),
+      conditionalPanel("input.transform_target === 'selected'",selectizeInput("transform_columns","Measurement columns",choices=eligible,multiple=TRUE)))
+  })
+  observeEvent(input$layout, {
+    kinds<-c("Log10"="log10","Natural log"="ln","Z score within each column"="zscore")
+    if(input$layout=="column") kinds<-c(kinds,"Percent of selected control mean"="percent_control")
+    old<-isolate(input$transform_kind);updateSelectInput(session,"transform_kind",choices=kinds,selected=if(!is.null(old)&&old %in% kinds) old else "log10")
+  })
   observeEvent(input$apply_transform, tryCatch({
-    s <- settings(); tab <- pc_transform(raw(), s$layout, input$transform_kind, input$transform_control)
-    s$method <- "descriptive"; s$log_y <- FALSE; s$title <- paste(s$title, input$transform_kind); s$y_label <- paste(input$transform_kind, s$y_label)
+    s <- settings(); target<-if(is.null(input$transform_target)) "measurements" else input$transform_target
+    tab <- pc_transform(raw(),s$layout,input$transform_kind,input$transform_control,target,input$transform_columns)
+    pc_normalize(tab,s$layout,allow_empty=TRUE)
+    s$method <- "descriptive"; s$show_p<-FALSE; s$title <- paste(s$title, input$transform_kind)
+    if(target %in% c("x","both")) {s$x_label<-paste(input$transform_kind,s$x_label);s$log_x<-FALSE;s$x_min<-"";s$x_max<-""}
+    if(target!="x") {s$y_label <- paste(input$transform_kind, s$y_label);s$log_y<-FALSE;s$y_min<-"";s$y_max<-""}
+    if(s$graph=="residual") s$graph<-"scatter"
+    if(s$layout=="multiple") s$graph<-"variables"
     add_sheet(tab, s, paste(substr(sheet_name(), 1, 65), input$transform_kind))
   }, error = notify_error))
   signature_state <- reactive(tryCatch(list(value = signature()), error = function(e) list(value = NULL)))
@@ -1180,6 +1215,8 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
       }, contentType = switch(fmt, svg = "image/svg+xml", pdf = "application/pdf", png = "image/png"))
     outputOptions(output, paste0("export_", fmt), suspendWhenHidden = FALSE)
   })
+
+  pc_power_server(input,output,session,capture=function() list(open=document_open(),table=raw(),settings=settings(),name=sheet_name()))
 
   advanced <- pc_r_server(input,output,session,
     capture=function() list(open=document_open(),table=raw(),name=sheet_name()),

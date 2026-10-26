@@ -400,3 +400,14 @@ body[data-runtime="desktop"] .welcome-prism {display:none}
 .selectize-dropdown.analysis-method-menu {z-index:2100;box-shadow:0 8px 24px #203e3526}
 .selectize-dropdown.analysis-method-menu .selectize-dropdown-content {max-height:420px;overflow-y:auto;overscroll-behavior:contain}
 .selectize-dropdown.analysis-method-menu .option {white-space:normal;line-height:1.5;padding:9px 12px}
+
+/* Floating menus must escape cards and modal scrolling regions. */
+.selectize-dropdown.rdata-floating-menu{z-index:12000;box-shadow:0 8px 24px #203e3526}
+.selectize-dropdown.rdata-floating-menu .selectize-dropdown-content{overflow-y:auto;overscroll-behavior:contain}
+.selectize-dropdown.rdata-floating-menu .option{white-space:normal;line-height:1.5;padding:8px 12px}
+.transform-controls>div.shiny-html-output{display:contents}
+.power-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 22px}
+.power-controls .shiny-input-container{width:100%;margin-bottom:8px}
+.power-controls>.shiny-panel-conditional.shiny-conditional--shown{display:contents}
+@media(max-width:700px){.power-controls{grid-template-columns:1fr}}
+#replace_status{margin-top:12px}

@@ -7,7 +7,7 @@ from pathlib import Path
 from runtime_inventory import manifest as runtime_manifest, write_notices
 from build_ai import build as build_ai
 ROOT=Path(__file__).resolve().parent.parent
-VERSION='0.32'
+VERSION='0.33'
 
 def portable_arch(system, arch):
     arch={'amd64':'x86_64','x64':'x86_64','aarch64':'arm64'}.get(arch.lower(),arch.lower())

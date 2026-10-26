@@ -113,6 +113,16 @@
   };
 
   window.RDataCraftDesktop = {
+    pasteText(text) {
+      const field=document.activeElement;
+      if(!field?.matches('textarea,input[type=text],input[type=search],input:not([type])') || field.readOnly || field.disabled) return false;
+      // WebKit's responder fallback may not paste into a textarea in a background
+      // desktop window. Insert into the actual focused field, preserving selection.
+      if(!document.execCommand('insertText',false,text)) field.setRangeText(text,field.selectionStart,field.selectionEnd,'end');
+      field.dispatchEvent(new Event('input',{bubbles:true}));
+      field.dispatchEvent(new Event('change',{bubbles:true}));
+      return true;
+    },
     receive(message) {
       switch (message.type) {
         case "command": return command(message.name);
@@ -137,6 +147,8 @@
       else if (document.querySelector("#nav_data.active")) { const button = document.getElementById(name + "_data"); if (button && !button.disabled) button.click(); }
       return;
     }
+    if (name === "power") return Shiny.setInputValue("power_open",Date.now(),{priority:"event"});
+    if (name === "advanced") return Shiny.setInputValue("advanced_open",Date.now(),{priority:"event"});
     if (name === "examples") return input("show_examples", {});
     if (name === "help") return input("show_help", {});
     if (name === "pca-guide") return input("show_pca_guide", {});

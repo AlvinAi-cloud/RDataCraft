@@ -24,7 +24,7 @@ pc_chrome <- function() {
   tagList(
     div(class = "application-bar", div(class = "app-brand", pc_icon("graph"), strong("RDataCraft")),
         span("Scientific plotting & statistics", class = "application-description"),
-        span(if(identical(Sys.getenv("RDATACRAFT_PORTABLE"),"1") && !nzchar(Sys.getenv("RDATACRAFT_NATIVE_HOST"))) "v0.32 · Portable preview" else "v0.32 · Desktop preview", class = "version-label")),
+        span(if(identical(Sys.getenv("RDATACRAFT_PORTABLE"),"1") && !nzchar(Sys.getenv("RDATACRAFT_NATIVE_HOST"))) "v0.33 · Portable preview" else "v0.33 · Desktop preview", class = "version-label")),
     tags$dialog(id = "create_dialog", `aria-labelledby` = "create_heading",
       h2(id = "create_heading", "What would you like to create?"),
       p("A study holds your data tables, linked analyses, graphs, and figure layouts."),
@@ -46,7 +46,7 @@ pc_chrome <- function() {
         div(class = "toolbar-group", pc_tool("data", "Data table", "data"),
             pc_tool("analysis", "Analyze", "analysis"), pc_tool("figure", "Graph", "graph"),
             tags$button(type="button",class="toolbar-button inspector-tool",`data-command`="inspector",`aria-pressed`="false",`aria-controls`="figure_settings",title="Show or hide settings for the active graph",pc_icon("inspector"),span("Figure settings")),
-            pc_tool("layout","Figure layout","layout")),
+            pc_tool("layout","Figure layout","layout"),pc_tool("power","Power analysis","analysis"),pc_tool("advanced","Advanced R","project")),
         div(class = "toolbar-spacer"), pc_tool("help","Help","help"),
         tags$button(type="button",class="toolbar-button",`data-command`="assistant",`aria-expanded`="false",pc_icon("assistant"),span("AI Assistant"))))
 }

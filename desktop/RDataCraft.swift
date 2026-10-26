@@ -20,7 +20,7 @@ final class RDataCraftApp: NSObject, NSApplicationDelegate {
     var quitQueue: [RDataCraftWindow] = []
     var testQuitReply: ((Bool) -> Void)?
     var testFolder: URL? {
-        let prefixes=["--multiwindow-test=","--studio-test=","--workflow-test=","--smoke-test=","--navigator-test=","--paste-test=","--graph-test="]
+        let prefixes=["--multiwindow-test=","--studio-test=","--workflow-test=","--smoke-test=","--navigator-test=","--paste-test=","--graph-test=","--planning-test="]
         guard let flag=CommandLine.arguments.first(where:{value in prefixes.contains(where:{value.hasPrefix($0)})}) else {return nil}
         return URL(fileURLWithPath:String(flag.split(separator:"=",maxSplits:1)[1]),isDirectory:true)
     }
@@ -425,6 +425,9 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
             if inGrid as? Bool == true, let text = NSPasteboard.general.string(forType: .string),
                let data = try? JSONSerialization.data(withJSONObject: [text]), let json = String(data: data, encoding: .utf8),
                let consumed = try? await webView.evaluateJavaScript("window.RDataCraftGrid.pasteNative((\(json))[0])"), consumed as? Bool == true { return }
+            if inGrid as? Bool != true, let text = NSPasteboard.general.string(forType: .string),
+               let data = try? JSONSerialization.data(withJSONObject: [text]), let json = String(data: data, encoding: .utf8),
+               let consumed = try? await webView.evaluateJavaScript("window.RDataCraftDesktop.pasteText((\(json))[0])"), consumed as? Bool == true { return }
             if window.firstResponder?.tryToPerform(#selector(NSText.paste(_:)), with: self) != true {
                 NSApp.sendAction(#selector(NSText.paste(_:)), to: nil, from: self)
             }
@@ -604,7 +607,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         return ready
     }
     @objc func about() {
-        NSApp.orderFrontStandardAboutPanel(options: [.applicationName: "RDataCraft", .applicationVersion: "v0.32 · Development preview", .credits: NSAttributedString(string: "Scientific plotting and statistics\nR-powered data analysis and publication-ready figures.\nAvailable for Mac and Windows.")])
+        NSApp.orderFrontStandardAboutPanel(options: [.applicationName: "RDataCraft", .applicationVersion: "v0.33 · Development preview", .credits: NSAttributedString(string: "Scientific plotting and statistics\nR-powered data analysis and publication-ready figures.\nAvailable for Mac and Windows.")])
     }
     @objc func showExamples() { send(["type":"examples"]) }
     @objc func showHelp() {
@@ -667,6 +670,53 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         try imageData(capture).write(to:folder.appendingPathComponent("navigator.png"))
         try "passed".write(to:folder.appendingPathComponent("status.txt"),atomically:true,encoding:.utf8)
     }
+    func planningTest(_ folder: URL) async throws -> [String] {
+        send(["type":"new"])
+        try await waitUntil("document.querySelector('#data_grid tbody td') !== null && !document.documentElement.classList.contains('shiny-busy')")
+        _ = try await webView.evaluateJavaScript("document.getElementById('layout').selectize.open()")
+        try await waitUntil("(()=>{const s=document.getElementById('layout').selectize,r=s.$dropdown[0].getBoundingClientRect();return s.$dropdown[0].parentElement===document.body && r.height>100 && r.bottom<=window.innerHeight && r.top>=0})()")
+        _ = try await webView.evaluateJavaScript("document.getElementById('layout').selectize.close();document.getElementById('layout').selectize.setValue('xy')")
+        try await waitUntil("document.getElementById('transform_target')?.selectize !== undefined && document.getElementById('transform_target').value==='measurements'")
+        _ = try await webView.evaluateJavaScript("document.querySelector('.paste-card').open=true;document.getElementById('paste_data').scrollIntoView({block:'center'});document.getElementById('paste_data').focus()")
+        let clipboard=NSPasteboard.general
+        clipboard.clearContents();clipboard.setString("X\tA\tB\n1\t10\t100\n10\t100\t1000\n100\t1000\t10000\n",forType:.string)
+        pasteEdit()
+        try await waitUntil("document.getElementById('paste_data').value.includes('10000')")
+        _ = try await webView.evaluateJavaScript("document.getElementById('apply_paste').click()")
+        try await waitUntil("document.querySelectorAll('#data_grid tbody tr').length===3 && document.querySelector('#data_grid tbody tr:nth-child(2) td:nth-child(2)').textContent==='100' && document.getElementById('replace_status').textContent.includes('Replaced')")
+        _ = try await webView.evaluateJavaScript("document.querySelector('.transform-card').scrollIntoView({block:'center'});document.getElementById('transform_kind').selectize.open()")
+        try await waitUntil("(()=>{const s=document.getElementById('transform_kind').selectize,r=s.$dropdown[0].getBoundingClientRect();return s.$dropdown[0].parentElement===document.body && r.height>60 && r.bottom<=window.innerHeight && r.top>=0})()")
+        let capture=try await webView.takeSnapshot(configuration:nil)
+        try imageData(capture).write(to:folder.appendingPathComponent("transform-menu.png"))
+        _ = try await webView.evaluateJavaScript("document.getElementById('transform_kind').selectize.close();document.getElementById('transform_kind').selectize.setValue('log10');document.getElementById('apply_transform').click()")
+        try await waitUntil("document.querySelector('#data_grid tbody tr:nth-child(2) td:nth-child(1)')?.textContent==='10' && document.querySelector('#data_grid tbody tr:nth-child(2) td:nth-child(2)')?.textContent==='2'")
+        _ = try await webView.evaluateJavaScript("document.getElementById('nav_analysis').click();document.querySelector('[data-command=power]').click()")
+        try await waitUntil("document.getElementById('power_calculate') !== null")
+        _ = try await webView.evaluateJavaScript("document.getElementById('power_calculate').click()")
+        try await waitUntil("document.getElementById('power_metrics').textContent.includes('64') && document.querySelector('#shiny-modal.show')!==null")
+        _ = try await webView.evaluateJavaScript("document.getElementById('power_use_pilot').click()")
+        try await waitUntil("document.getElementById('power_pilot_review').textContent.includes('XY summaries retain X') && document.getElementById('power_apply_pilot')===null")
+        let powerCapture=try await webView.takeSnapshot(configuration:nil)
+        try imageData(powerCapture).write(to:folder.appendingPathComponent("power-planning.png"))
+        _ = try await webView.evaluateJavaScript("document.querySelector('#shiny-modal .modal-footer button').click();document.getElementById('nav_data').click();document.getElementById('layout').selectize.setValue('column')")
+        try await waitUntil("document.getElementById('layout').value==='column' && !document.documentElement.classList.contains('shiny-busy')")
+        _ = try await webView.evaluateJavaScript("document.querySelector('[data-command=power]').click()")
+        try await waitUntil("document.getElementById('power_use_pilot')!==null")
+        _ = try await webView.evaluateJavaScript("document.getElementById('power_use_pilot').click()")
+        try await waitUntil("document.getElementById('power_apply_pilot')!==null")
+        _ = try await webView.evaluateJavaScript("document.getElementById('power_apply_pilot').click()")
+        try await waitUntil("document.getElementById('power_design').value==='anova' && document.getElementById('power_groups').value==='3'")
+        _ = try await webView.evaluateJavaScript("document.getElementById('power_calculate').click()")
+        try await waitUntil("document.getElementById('power_metrics').textContent.includes('Pilot snapshot')")
+        let pilotCapture=try await webView.takeSnapshot(configuration:nil)
+        try imageData(pilotCapture).write(to:folder.appendingPathComponent("pilot-planning.png"))
+        _ = try await webView.evaluateJavaScript("document.querySelector('#shiny-modal .modal-footer button').click();document.querySelector('[data-command=advanced]').click()")
+        try await waitUntil("document.querySelector('#nav_advanced.active')!==null")
+        let toolbarCapture=try await webView.takeSnapshot(configuration:nil)
+        try imageData(toolbarCapture).write(to:folder.appendingPathComponent("advanced-toolbar.png"))
+        return ["table layout menu escapes card boundaries", "native clipboard fills replacement textarea", "whole table replacement applies numeric XY data", "transform menu floats inside viewport", "Y-only transformation preserves X", "power planning calculates 64 observations per group", "XY pilot reports model-specific limitations without substituting a t test", "column pilot prefills ANOVA inputs and retains provenance", "Advanced R toolbar opens its workspace"]
+    }
+
     func pasteTest(_ folder: URL) async throws -> [String] {
         send(["type": "new"])
         try await waitUntil("document.getElementById('title').value === 'Untitled figure' && document.querySelector('#nav_data').classList.contains('active') && document.querySelector('#data_grid tbody td') !== null && !document.documentElement.classList.contains('shiny-busy')")
@@ -978,7 +1028,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         _ = try await webView.evaluateJavaScript("document.getElementById('add_tutorial').click()")
         try await waitUntil("document.getElementById('layout').value==='multiple' && document.getElementById('method').value==='pca' && document.querySelector('#pca_scree tbody tr')!==null && !document.documentElement.classList.contains('shiny-busy')")
         try await waitUntil("document.getElementById('pca_variable_pick').selectize.items.length===5 && !document.getElementById('pca_variable_pick').selectize.items.includes('SampleID') && document.querySelector('#pca_scores .dataTables_info')?.textContent.includes('12 entries')===true")
-        try await waitUntil("document.querySelector('.version-label')?.textContent.includes('v0.32')===true && Object.keys(document.getElementById('graph_view').selectize.options).length===3")
+        try await waitUntil("document.querySelector('.version-label')?.textContent.includes('v0.33')===true && Object.keys(document.getElementById('graph_view').selectize.options).length===3")
         try imageData(try await webView.takeSnapshot(configuration:nil)).write(to:folder.appendingPathComponent("pca-analysis.png"))
         for key in ["scores","loadings","scree","preprocessing"] {
             let file=folder.appendingPathComponent("pca-\(key).csv")
@@ -993,7 +1043,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         let file=folder.appendingPathComponent("PCA teaching workflow.rdatacraft")
         nextTestDestination=file;saveAs();try await waitForFile(file)
         let saved=try JSONSerialization.jsonObject(with:Data(contentsOf:file)) as? [String:Any]
-        guard saved?["app_version"] as? String == "0.32",let settings=saved?["settings"] as? [String:Any],let selected=settings["pca_variables"] as? String,!selected.contains("SampleID"),selected.contains("CellArea") else {throw HostError.failed("PCA example settings or release version were not saved correctly.")}
+        guard saved?["app_version"] as? String == "0.33",let settings=saved?["settings"] as? [String:Any],let selected=settings["pca_variables"] as? String,!selected.contains("SampleID"),selected.contains("CellArea") else {throw HostError.failed("PCA example settings or release version were not saved correctly.")}
         return ["PCA in the shared Help example selector", "PCA walkthrough visible", "PCA example adds 12 observations", "PCA selects measurements without numeric IDs", "three linked PCA views", "four PCA CSV exports", "PCA scores graph", "PCA settings and version saved"]
     }
     func workflowTest() async {
@@ -1274,6 +1324,11 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
                 throw HostError.failed("Use a new empty folder for each native smoke test.")
             }
             try fm.createDirectory(at: folder, withIntermediateDirectories: true)
+            if CommandLine.arguments.contains(where:{$0.hasPrefix("--planning-test=")}) {
+                let checks=try await planningTest(folder)
+                try JSONSerialization.data(withJSONObject:["status":"passed","checks":checks],options:[.prettyPrinted,.sortedKeys]).write(to:folder.appendingPathComponent("report.json"))
+                stopEngine();Darwin.exit(0)
+            }
             if CommandLine.arguments.contains(where:{$0.hasPrefix("--graph-test=")}) {
                 let checks=try await graphTest(folder)
                 try JSONSerialization.data(withJSONObject:["status":"passed","external_paste_tested":false,"checks":checks],options:[.prettyPrinted,.sortedKeys]).write(to:folder.appendingPathComponent("report.json"))

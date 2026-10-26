@@ -34,11 +34,15 @@ def check(value, label):
 with tempfile.TemporaryDirectory() as temporary:
     root = Path(temporary)
     for name in ["app.R", "README.md", "LICENSE", ".gitignore", "R/help.R",
+                 "R/power.R", "R/power_pilot.R", "www/dropdowns.js", "tests/power_pilot.R",
                  "scripts/test.py", ".github/workflows/platform-builds.yml"]:
         file = root / name
         file.parent.mkdir(parents=True, exist_ok=True)
         file.write_text("Original synthetic fixture\n")
     check(audit(root)["status"] == "passed", "minimal synthetic public source passes privacy checks")
+    (root / "R/power_pilot.R").unlink()
+    check(any("Required source missing: R/power_pilot.R" in x for x in audit(root)["findings"]), "upload rejects a missing pilot-analysis implementation")
+    (root / "R/power_pilot.R").write_text("Original synthetic fixture\n")
     private = root / "study.rdatacraft"
     private.write_text('{"format":"rdatacraft"}')
     check(any("Unreviewed study" in x for x in audit(root)["findings"]), "private studies outside curated examples are rejected")
@@ -251,3 +255,39 @@ with tempfile.TemporaryDirectory() as temporary:
         os.chdir(previous)
 
 print(checks, "release-tool checks passed.")
+
+# Release gating: extended UI diagnostics cannot be counted as required passes,
+# and required native failures must still block assembly.
+import plistlib
+spec = importlib.util.spec_from_file_location('mac_bundle_validation', ROOT/'scripts/test_macos_bundle.py')
+mac_validation = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mac_validation)
+for failing in ('paste', 'planning', 'studio', None):
+    with tempfile.TemporaryDirectory() as temporary:
+        output = Path(temporary)/'native'
+        def fake_run(command, **kwargs):
+            if command[1] == 'attach':
+                app = output/'mounted/Fixture.app/Contents'
+                app.mkdir(parents=True)
+                (app/'Info.plist').write_bytes(plistlib.dumps({'CFBundleShortVersionString':json.loads((ROOT/'config/release.json').read_text())['version']}))
+        class FakeProcess:
+            def __init__(self, command, **kwargs):
+                mode = command[1].split('-test=')[0][2:]
+                directory = Path(command[1].split('=',1)[1]);directory.mkdir()
+                (directory/'report.json').write_text(json.dumps({'status':'passed','checks':['fixture check']}))
+                self.returncode = 1 if mode == failing else 0
+            def poll(self):
+                return self.returncode
+        with patch.object(sys,'argv',['test','--dmg','fixture.dmg','--output',str(output),'--advisory-paste']), patch.object(mac_validation.subprocess,'run',fake_run), patch.object(mac_validation.subprocess,'Popen',FakeProcess):
+            blocked = False
+            try:
+                mac_validation.main()
+            except RuntimeError:
+                blocked = True
+            if failing == 'studio':
+                check(blocked,'required core native failure still blocks release')
+            else:
+                summary = json.loads((output/'validation.json').read_text())
+                expected = 'failed' if failing else 'passed'
+                check(not blocked and summary['advisory_workflows'][failing or 'planning']['status']==expected and set(summary['workflows'])=={'studio','multiwindow','graph'},'advisory UI outcomes stay accurate and separate from required native checks')
+print(checks, 'total release-tool checks passed.')

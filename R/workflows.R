@@ -34,10 +34,25 @@ pc_blank <- function(layout) {
   else tab <- data.frame(Time = NA_character_, Status = NA_character_, Group = NA_character_)
   pc_check_table(tab)
 }
-pc_transform <- function(tab, layout, operation, reference = NULL) {
-  if (!layout %in% c("column", "xy", "grouped")) stop("Transforms apply to numeric column, XY, or grouped observations.", call. = FALSE)
+pc_transform_columns <- function(tab, layout) {
+  if(layout=="column") names(tab)
+  else if(layout=="xy") names(tab)[-1]
+  else if(layout=="grouped") names(tab)[-(1:2)]
+  else if(layout=="multiple") names(tab)[vapply(tab,function(x) {
+    v<-suppressWarnings(as.numeric(x));any(!is.na(v)) && all(is.na(x)|is.finite(v))
+  },logical(1))]
+  else character()
+}
+pc_transform <- function(tab, layout, operation, reference = NULL, target="measurements", columns=NULL) {
   tab <- pc_check_table(tab)
-  cols <- switch(layout, column = seq_len(ncol(tab)), xy = seq.int(2, ncol(tab)), grouped = seq.int(3, ncol(tab)))
+  eligible <- pc_transform_columns(tab,layout)
+  if(!length(eligible)) stop("Transformations support Column, XY, Grouped and selected numeric Multiple-variable measurements. Count and survival contracts are preserved; use reviewed Advanced R for other operations.",call.=FALSE)
+  if(!target %in% c("measurements","x","both","selected")) stop("Choose a valid transformation target.",call.=FALSE)
+  if(target %in% c("x","both") && layout!="xy") stop("X targets are available only for XY tables.",call.=FALSE)
+  if(target=="selected" || layout=="multiple") {
+    if(!is.character(columns)||!length(columns)||anyNA(columns)||anyDuplicated(columns)||!all(columns %in% eligible)) stop("Select numeric measurement columns; keep sample IDs and group codes unselected.",call.=FALSE)
+    cols<-match(columns,names(tab))
+  } else cols<-switch(target,measurements=match(eligible,names(tab)),x=1L,both=seq_len(ncol(tab)))
   values <- lapply(cols, function(i) pc_numeric(tab[[i]], names(tab)[i]))
   if (operation == "percent_control") {
     if (layout != "column" || is.null(reference) || !reference %in% names(tab)) stop("Choose a control column for percent-of-control normalization.", call. = FALSE)
@@ -46,10 +61,11 @@ pc_transform <- function(tab, layout, operation, reference = NULL) {
   }
   for (j in seq_along(cols)) {
     x <- values[[j]]
-    if (operation %in% c("log10", "ln") && any(x <= 0, na.rm = TRUE)) stop("Log transforms require all nonmissing values to be positive.", call. = FALSE)
-    if (operation == "zscore" && (!is.finite(stats::sd(x, na.rm = TRUE)) || stats::sd(x, na.rm = TRUE) == 0)) stop("Z scores need at least two values with nonzero SD in every numeric column.", call. = FALSE)
+    if (operation %in% c("log10", "ln") && any(x <= 0, na.rm = TRUE)) stop("Log transforms require all selected nonmissing values to be positive.", call. = FALSE)
+    if (operation == "zscore" && (!is.finite(stats::sd(x, na.rm = TRUE)) || stats::sd(x, na.rm = TRUE) == 0)) stop("Z scores need at least two values with nonzero SD in each selected column.", call. = FALSE)
     tab[[cols[j]]] <- switch(operation, log10 = log10(x), ln = log(x), percent_control = 100 * x / base,
       zscore = (x - mean(x, na.rm = TRUE)) / stats::sd(x, na.rm = TRUE), stop("Unknown transform."))
+    if(any(!is.na(tab[[cols[j]]]) & !is.finite(tab[[cols[j]]]))) stop("The transform produced nonfinite values.",call.=FALSE)
   }
   pc_check_table(tab)
 }

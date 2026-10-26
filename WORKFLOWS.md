@@ -99,3 +99,24 @@ Scatter, mean/error and shaded-band views can display the fitted curves.
 Use **No connecting lines** to hide observation/mean connections while retaining the fitted curves.
 The curve and fitted-mean confidence-band checkboxes are independent of SD/SEM observation intervals.
 Replicate fitting and weighting remain controlled by Analysis.
+
+## v0.33 power planning and data entry
+
+The top toolbar places Power analysis and Advanced R beside Figure layout. Power
+planning retains manual input and offers a read-only active-table pilot snapshot.
+Review estimates, select groups/outcomes where offered, then explicitly fill and
+edit planning inputs. Column mean/paired/one-way ANOVA and two-category count
+models can prefill compatible designs; other table types provide summaries and
+explain model-specific limitations. Paired estimates use complete matched rows.
+Zero effects, undefined SD and boundary proportions are not invented or regularized.
+CSV retains pilot context and final planning assumptions; results are not stored
+as study analyses. Use scientifically meaningful future effects and sensitivity
+checks rather than treating observed power as evidence about a completed study.
+
+XY transformations preserve X by default, with explicit X/both/selected targets.
+Grouped labels and unselected metadata are retained; multiple-variable tables
+require measurement selection. Derived axes reset to valid automatic limits.
+Whole-table replacement validates before committing and is one undoable action.
+
+Extended Mac UI paste/planning checks are advisory. Required numerical, data,
+source, installation and core native checks continue to block a failed release.

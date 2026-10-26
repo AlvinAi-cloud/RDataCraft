@@ -72,6 +72,7 @@ def audit(source):
                 if target and not (file.parent / target).exists():
                     findings.append(f"Broken local link: {label} → {target}")
     for required in ["app.R", "README.md", "LICENSE", ".gitignore", "R/help.R",
+                     "R/power.R", "R/power_pilot.R", "www/dropdowns.js", "tests/power_pilot.R",
                      "scripts/test.py", ".github/workflows/platform-builds.yml"]:
         if not (source / required).is_file():
             findings.append(f"Required source missing: {required}")

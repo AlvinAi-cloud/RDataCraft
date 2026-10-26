@@ -51,20 +51,31 @@ def main():
             if comparison['status'] != 'ahead':
                 raise ValueError('Refusing to move the draft tag to a divergent commit.')
             api(f'repos/{repo}/git/refs/tags/{tag}', dict(sha=sha, force=False))
+    advisory_lines = []
+    for record in validation.get('platforms', []):
+        for mode in ('paste', 'planning'):
+            status = record.get('reports', {}).get('native', {}).get('advisory_workflows', {}).get(mode, {}).get('status')
+            if status:
+                advisory_lines.append(f"- {record['platform']}: {mode} UI checks — {status} (advisory).")
+    advisory_text = ('Extended Mac UI tests are advisory; failures remain visible in the validation report.\n' +
+                     '\n'.join(advisory_lines) + '\n\n')
     notes = Path('artifacts/release-notes.md')
     notes.write_text(
         f'RDataCraft {tag}\n\n'
         'R-powered scientific plotting and statistics for Mac and Windows.\n\n'
-        'This update adds continuous worksheets, clearer analysis menus, independent XY fits on scatter and mean/error graphs, '
-        'separate connection/curve controls, the corrected Intel Dock icon and aligned transform controls.\n\n'
+        'This update adds power/sample-size planning with optional active-table pilot estimates, editable assumptions and CSV export; '
+        'Power analysis and Advanced R toolbar buttons; layout-aware transformations; floating dropdowns; '
+        'and validated whole-table text replacement with Undo. Pilot estimates never change source observations, '
+        'and unsupported models receive summaries and guidance instead of an incompatible power test.\n\n'
         'Download the installer for your computer:\n\n'
         f'- [Intel Mac](https://github.com/{repo}/releases/download/{tag}/RDataCraft-{VERSION}-macos-x86_64.dmg)\n'
         f'- [Apple Silicon Mac](https://github.com/{repo}/releases/download/{tag}/RDataCraft-{VERSION}-macos-arm64.dmg)\n'
         f'- [Windows x64](https://github.com/{repo}/releases/download/{tag}/RDataCraft-{VERSION}-windows-x64-setup.exe)\n\n'
-        'All three installers were built and tested in this GitHub Actions run. R and required packages are bundled; '
+        'All three installers passed required build, source and installed-app checks in this GitHub Actions run. R and required packages are bundled; '
         'Windows uses its own desktop window, not an external browser. Mac builds are ad-hoc signed and not notarized; '
         'Windows setup is unsigned. GitHub does not provide trusted signing credentials.\n\n'
-        'Studies using the new XY display options require v0.32 or later. Corresponding source, dependency notices, '
+        + advisory_text +
+        'Studies using the XY display options introduced in v0.32 require v0.32 or later. Corresponding source, dependency notices, '
         'SHA-256 checksums and the matching validation report accompany these installers. '
         'Live AI-provider account access and vector paste into external design apps are not certified by these automated tests.\n\n'
         f'Built from `{sha}`.\n')

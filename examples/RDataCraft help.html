@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <body>
-    <h1>RDataCraft help · v0.32</h1>
+    <h1>RDataCraft help · v0.33</h1>
     <p>Offline instructions for data entry, analysis and figures. In the app, Help provides search and access to the teaching examples.</p>
     <nav>
       <ul>
@@ -16,6 +16,12 @@
         </li>
         <li>
           <a href="#regression">Regression &amp; curve fitting</a>
+        </li>
+        <li>
+          <a href="#power">Power &amp; sample-size planning</a>
+        </li>
+        <li>
+          <a href="#transformations">Transform observations &amp; replace a whole table</a>
         </li>
         <li>
           <a href="#pca">Principal component analysis (PCA)</a>
@@ -80,6 +86,23 @@
       <p>To fit several Y series, set Fit series to All Y series — separate fit per group in Analysis, or use Fit every Y series independently under Figure settings → XY lines &amp; fitted curves. Each group gets its own parameters and curve; these are not shared-parameter or global fits. Mean/error and shaded-band graphs can show the same fitted curves as scatter plots. Choose No connecting lines to hide point-to-point connections while retaining fitted curves. Show fitted curves and Show fitted mean 95% CI control those overlays separately. Error bars summarize observations at each X; a fitted confidence band describes uncertainty in the model mean.</p>
       <p>Review convergence, parameter intervals and a residuals view before interpreting a curve. A four-parameter dose-response fit needs positive concentrations and adequate coverage of both plateaus. Poorly identified parameters can be misleading even when a curve looks smooth.</p>
       <p>For a formula, model family or dependency outside the presets, use Advanced R analysis and return coefficients, diagnostics and a figure. The app does not automatically establish that a selected model is scientifically appropriate.</p>
+    </section>
+    <section id="power">
+      <h3>Power &amp; sample-size planning</h3>
+      <p>Use Power analysis in the top toolbar beside Figure layout; Advanced R is next to it. Select a design, then calculate required sample size or power at a chosen N. Use anticipated effects from scientific requirements or independent pilot information, not a post-hoc observed P value.</p>
+      <p>Two independent means assumes equal group sizes and a common population SD; it does not calculate Welch-test power. Enter Cohen d = mean difference / common SD. Paired designs use dz = mean within-pair difference / SD of within-pair differences; N is complete pairs. ANOVA uses balanced independent groups and Cohen f. Two proportions uses a normal approximation, not an exact test.</p>
+      <p>Required N is rounded up and achieved power is recalculated at that integer. Dropout inflates recruitment; it does not change analyzable N. For paired designs, the dropout assumption is loss of complete pairs. Check assumptions, independence and multiplicity. Use active table as pilot data to review estimates from a frozen snapshot of the current worksheet and selected analysis. Choose groups/populations and the outcome where offered. Fill planning inputs explicitly, then review and edit the anticipated effect before Calculate. Column t tests/ANOVA and two-category independent counts can prefill compatible designs. XY slopes/residual SD/correlation, grouped cell summaries, survival event fractions and multiple-variable summaries are supplied without substituting a different power test for unsupported models. Manual entry clears the pilot context and remains available. Export the planning CSV to retain final assumptions, pilot context and results; this calculator does not modify observations.</p>
+      <p>
+        Reference:
+        <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/power.t.test.html" target="_blank" rel="noopener">R stats power calculations</a>
+      </p>
+      <button id="power_help_open" type="button" class="btn btn-default action-button"><span class="action-label">Open power planning…</span></button>
+    </section>
+    <section id="transformations">
+      <h3>Transform observations &amp; replace a whole table</h3>
+      <p>Data table → Transform observations creates a new worksheet. Column tables can transform all groups or selected columns. XY defaults to all Y observations and replicates, preserving X; choose X only or X and Y explicitly when needed. Grouped tables preserve both factor columns. Multiple-variable tables require you to select measurements; leave numeric IDs and group codes unselected.</p>
+      <p>Log transforms require positive selected values. Z scores standardize each selected column independently. Percent-of-control uses a selected Column-table control mean. Count and survival tables have structural constraints and are not transformed here. Source observations and unselected cells remain unchanged.</p>
+      <p>Advanced: replace the entire table from text accepts a header row followed by CSV, tabs or semicolons. Select the delimiter if detection is unsuitable, then choose Replace. Read the inline result or validation error. Invalid text leaves the table unchanged; Undo restores a successful replacement. A graph display log axis does not change observations.</p>
     </section>
     <section id="pca">
       <h3>Principal component analysis (PCA)</h3>

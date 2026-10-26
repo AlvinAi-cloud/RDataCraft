@@ -3,6 +3,8 @@ pc_read_text <- function(text, delimiter = "auto") {
   if (!is.character(text) || length(text) != 1L || nchar(text) > 5e6) {
     stop("Paste a CSV or tab-separated table smaller than 5 MB.", call. = FALSE)
   }
+  text <- gsub("\r\n?", "\n", text)
+  text <- sub("\n+$", "", text)
   if (!nzchar(trimws(text))) stop("Add a table with column headers and numeric data.", call. = FALSE)
   if (delimiter == "auto") delimiter <- if (grepl("\t", strsplit(text, "\n", fixed = TRUE)[[1]][1], fixed = TRUE)) "\t" else ","
   connection <- textConnection(text)

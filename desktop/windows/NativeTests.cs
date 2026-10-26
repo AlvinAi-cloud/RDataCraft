@@ -76,7 +76,21 @@ internal static class NativeTests
             Checks.Add("Offline examples and analysis help opens");
             await JS(window, "document.querySelector('.modal.show [data-bs-dismiss=modal],.modal.show [data-dismiss=modal]')?.click()");
             await Until(window, "document.querySelector('.modal.show')===null", "Help did not close");
-            await JS(window, "Shiny.setInputValue('advanced_open',1,{priority:'event'})");
+            await JS(window, "document.querySelector('[data-command=power]').click()");
+            await Until(window, "document.getElementById('power_calculate')!==null", "Power toolbar did not open planning");
+            await JS(window, "document.getElementById('power_calculate').click()");
+            await Until(window, "document.getElementById('power_metrics').textContent.includes('64')", "Manual power planning did not return the reference sample size");
+            Checks.Add("Power toolbar opens manual sample-size planning");
+            await JS(window, "document.getElementById('power_use_pilot').click()");
+            await Until(window, "document.getElementById('power_apply_pilot')!==null", "Active-table pilot estimates were not available");
+            await JS(window, "document.getElementById('power_apply_pilot').click()");
+            await Until(window, "document.getElementById('power_design').value==='two.sample' && Number(document.getElementById('power_effect').value)!==0.5", "Pilot estimates did not fill planning inputs");
+            await JS(window, "document.getElementById('power_calculate').click()");
+            await Until(window, "document.getElementById('power_metrics').textContent.includes('Pilot snapshot')", "Pilot context was lost from the result");
+            Checks.Add("Active-table pilot review fills editable planning inputs and retains provenance");
+            await JS(window, "document.querySelector('.modal.show [data-bs-dismiss=modal],.modal.show [data-dismiss=modal]')?.click()");
+            await Until(window, "document.querySelector('.modal.show')===null", "Power dialog did not close");
+            await JS(window, "document.querySelector('[data-command=advanced]').click()");
             await Until(window, "document.getElementById('nav_advanced').classList.contains('active') && document.getElementById('r_run')!==null", "Advanced R did not open");
             await JS(window, "document.getElementById('r_load_template').click()");
             await Until(window, "document.getElementById('r_code').value.includes('summary_table')", "Advanced R template did not load");
@@ -120,7 +134,7 @@ internal static class NativeTests
             Checks.Add("Compact method selector opens a large visible dropdown in the embedded Windows window");
             await JS(window, "document.getElementById('method').selectize.close();document.getElementById('nav_figure').click()");
             await using (var file = File.Create(Path.Combine(folder, "figure.png"))) await window.Web.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, file);
-            File.WriteAllText(Path.Combine(folder, "validation-windows-desktop.json"), JsonSerializer.Serialize(new { version = "0.32", status = "passed", native_window = true, embedded_webview = true, bundled_R = true, external_browser_launched = false, engine_pid = window.EnginePid, checks = Checks }, new JsonSerializerOptions { WriteIndented = true }));
+            File.WriteAllText(Path.Combine(folder, "validation-windows-desktop.json"), JsonSerializer.Serialize(new { version = "0.33", status = "passed", native_window = true, embedded_webview = true, bundled_R = true, external_browser_launched = false, engine_pid = window.EnginePid, checks = Checks }, new JsonSerializerOptions { WriteIndented = true }));
             finished = true; Program.Result = 0;
             window.CloseForTest();
         }
@@ -133,7 +147,7 @@ internal static class NativeTests
         if (finished) return;
         finished = true; Program.Result = 1;
         Directory.CreateDirectory(folder);
-        File.WriteAllText(Path.Combine(folder, "validation-windows-desktop.json"), JsonSerializer.Serialize(new { version = "0.32", status = "failed", error = error.ToString(), checks = Checks }, new JsonSerializerOptions { WriteIndented = true }));
+        File.WriteAllText(Path.Combine(folder, "validation-windows-desktop.json"), JsonSerializer.Serialize(new { version = "0.33", status = "failed", error = error.ToString(), checks = Checks }, new JsonSerializerOptions { WriteIndented = true }));
         foreach (var window in Program.Windows.ToArray()) window.CloseForTest();
     }
 }
