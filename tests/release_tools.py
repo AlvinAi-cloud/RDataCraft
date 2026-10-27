@@ -244,31 +244,46 @@ with tempfile.TemporaryDirectory() as temporary:
         (root / 'dist').mkdir()
         shutil = __import__('shutil')
         shutil.copytree(output, root / 'dist/release')
-        with patch.dict(os.environ, env), patch.object(publish_release.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, '{"draft":false}', '')) as command:
-            try:
-                publish_release.main()
+        with patch.dict(os.environ, env), patch.object(publish_release, 'api', return_value=[dict(tag_name='v'+version, draft=False)]) as remote, patch.object(publish_release.subprocess, 'run') as command:
+            try: publish_release.main()
             except ValueError:
-                check(command.call_count == 1, 'release publication refuses to modify an already published version')
-            else:
-                raise AssertionError('Published release was overwritten')
-        # Explicit publication follows verification of the bytes GitHub received.
-        def publication_fixture(publish, problem=None):
-            state = dict(published=False)
+                check(remote.call_count == 1 and command.call_count == 0, 'release publication refuses to modify an already published version')
+            else: raise AssertionError('Published release was overwritten')
+
+        # Emulate a real unpublished draft: the tag lookup returns 404 and
+        # the numeric release ID remains usable before a tag is published.
+        def publication_fixture(publish, problem=None, existing=False):
+            state = dict(published=False, tag=False, assets_checked=False)
+            release = dict(id=7, tag_name='v'+version, target_commitish=env['GITHUB_SHA'], draft=True)
             def command(args, **kwargs):
                 if args[:2] == ['gh', 'api']:
+                    if problem == 'tag':
+                        return subprocess.CompletedProcess(args, 0, json.dumps(dict(object=dict(type='commit',sha='b'*40))), '')
                     return subprocess.CompletedProcess(args, 1, '', 'HTTP 404')
-                if '--draft=false' in args:
-                    state['published'] = True
                 return subprocess.CompletedProcess(args, 0, '', '')
-            def remote(path, payload=None):
+            def remote(path, payload=None, method='PATCH'):
+                if '/releases/tags/' in path:
+                    raise AssertionError('Unpublished drafts must not be looked up by a published tag URL')
+                if '/releases?' in path: return [release] if existing else []
                 if '/assets?' in path:
-                    values = [dict(name=f.name, size=f.stat().st_size, state='uploaded', digest='sha256:' + release_assets.digest(f)) for f in (root/'dist/release').iterdir() if f.is_file()]
+                    state['assets_checked'] = True
+                    values = [dict(name=f.name,size=f.stat().st_size,state='uploaded',digest='sha256:'+release_assets.digest(f)) for f in (root/'dist/release').iterdir() if f.is_file()]
                     if problem == 'digest': values[0]['digest'] = 'sha256:' + '0'*64
                     if problem == 'missing': values.pop()
                     return values
+                if path.endswith('/git/refs'):
+                    assert method=='POST' and payload==dict(ref='refs/tags/v'+version,sha=env['GITHUB_SHA']) and state['assets_checked']
+                    state['tag'] = True
+                    return dict(object=dict(type='commit',sha=env['GITHUB_SHA']))
                 if '/git/ref/' in path:
-                    return dict(object=dict(type='commit', sha=('b'*40 if problem == 'tag' else env['GITHUB_SHA'])))
-                return dict(id=7, draft=not state['published'])
+                    assert state['tag']
+                    return dict(object=dict(type='commit',sha=env['GITHUB_SHA']))
+                if payload is not None:
+                    if payload.get('draft') is False:
+                        assert state['assets_checked'] and state['tag']
+                        state['published'] = True
+                    release.update(payload)
+                return release
             with patch.dict(os.environ, env), patch.object(publish_release, 'api', side_effect=remote), patch.object(publish_release.subprocess, 'run', side_effect=command):
                 try: publish_release.main(publish=publish)
                 except ValueError:
@@ -277,9 +292,10 @@ with tempfile.TemporaryDirectory() as temporary:
                     if problem: raise AssertionError('Invalid remote release passed publication')
             return state['published']
         check(not publication_fixture(False), 'default release preparation leaves a draft unpublished')
-        check(publication_fixture(True), 'explicit publication verifies uploaded assets and publishes the tested tag')
+        check(publication_fixture(True), 'new draft is verified by numeric ID and published with the tested tag')
+        check(publication_fixture(True,existing=True), 'existing unpublished draft can be completed without a tag lookup')
         for problem in ('digest','missing','tag'):
-            check(not publication_fixture(True, problem), 'publication rejects remote ' + problem + ' mismatch')
+            check(not publication_fixture(True,problem), 'publication rejects remote '+problem+' mismatch')
     finally:
         os.chdir(previous)
 
