@@ -16,6 +16,8 @@ pc_icon <- function(name) {
     project = '<path d="M5 3h10l4 4v14H5zM15 3v5h4M8 12h8M8 16h8"/>')
   htmltools::HTML(paste0('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">', paths[[name]], '</svg>'))
 }
+pc_analysis_choices <- function(layout) c(pc_methods(layout), "Advanced R analysis…" = "advanced_r")
+
 pc_tool <- function(command, label, icon = command) {
   tags$button(type = "button", class = "toolbar-button", `data-command` = command,
               pc_icon(icon), span(label))
@@ -24,7 +26,7 @@ pc_chrome <- function() {
   tagList(
     div(class = "application-bar", div(class = "app-brand", pc_icon("graph"), strong("RDataCraft")),
         span("Scientific plotting & statistics", class = "application-description"),
-        span(if(identical(Sys.getenv("RDATACRAFT_PORTABLE"),"1") && !nzchar(Sys.getenv("RDATACRAFT_NATIVE_HOST"))) "v0.33 · Portable preview" else "v0.33 · Desktop preview", class = "version-label")),
+        span(if(identical(Sys.getenv("RDATACRAFT_PORTABLE"),"1") && !nzchar(Sys.getenv("RDATACRAFT_NATIVE_HOST"))) "v0.34 · Portable preview" else "v0.34 · Desktop preview", class = "version-label")),
     tags$dialog(id = "create_dialog", `aria-labelledby` = "create_heading",
       h2(id = "create_heading", "What would you like to create?"),
       p("A study holds your data tables, linked analyses, graphs, and figure layouts."),

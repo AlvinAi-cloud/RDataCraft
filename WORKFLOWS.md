@@ -118,5 +118,19 @@ Grouped labels and unselected metadata are retained; multiple-variable tables
 require measurement selection. Derived axes reset to valid automatic limits.
 Whole-table replacement validates before committing and is one undoable action.
 
-Extended Mac UI paste/planning checks are advisory. Required numerical, data,
-source, installation and core native checks continue to block a failed release.
+As of v0.34, GitHub no longer runs the recent extended paste/layout and pilot-planning
+UI checks. Numerical, data, source, installation and core native checks remain required.
+
+
+## v0.34 analysis navigation
+
+Advanced R is the last option in Analysis method for every table type and is also
+available in the top toolbar. The redundant lower-left navigation entry is removed.
+Choosing Advanced R opens the editor without changing the table's preset analysis,
+clearing a draft or running code. Return to Analysis to resume the preset.
+
+XY already supports descriptive statistics, Pearson/Spearman correlation,
+regression and AUC. The Analysis page explains those choices. A treatment comparison
+across X/time must respect the experimental unit, matching and repeated measures;
+use a suitable reviewed Advanced R model rather than treating every Y value as an
+independent observation.

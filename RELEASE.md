@@ -1,4 +1,4 @@
-# RDataCraft v0.33 release preparation
+# RDataCraft v0.34 release preparation
 
 Open-source scientific plotting and statistics powered by R, with editable tables,
 curve fitting, PCA and optional AI-assisted analysis.
@@ -7,9 +7,9 @@ curve fitting, PCA and optional AI-assisted analysis.
 
 The existing repository is https://github.com/AlvinAi-cloud/RDataCraft.
 Use its existing GitHub Desktop checkout on **main**. The prepared source-only
-folder is `dist/RDataCraft-0.33-GitHub`; it contains no installers or private studies.
+folder is `dist/RDataCraft-0.34-GitHub`; it contains no installers or private studies.
 Copy its source changes into the existing checkout, review them in GitHub Desktop,
-commit **Prepare RDataCraft v0.33**, then **Push origin**. No new branch is needed.
+commit **Prepare RDataCraft v0.34**, then **Push origin**. No new branch is needed.
 
 ## GitHub creates the three installers
 
@@ -18,14 +18,14 @@ pinned source material and notices, builds Intel Mac, Apple Silicon and Windows
 installers on matching runners, runs the source tests, and exercises the installed
 applications. The Mac tests run from the read-only disk image; Windows tests cover
 setup, the embedded desktop window, bundled R, uninstall and study preservation.
-The required Mac installed-app checks cover core study, multiwindow and graph workflows. Extended paste/layout and pilot-planning checks run as advisory diagnostics; failures remain recorded without becoming false passes. Source tests include numerical power, pilot estimates, transformations and atomic table replacement.
+The required Mac installed-app checks cover core study, multiwindow and graph workflows. Recent extended paste/layout and pilot-planning UI checks are excluded from GitHub runs, including the Windows pilot-planning UI sequence. Their numerical/server tests remain. Source tests include numerical power, pilot estimates, transformations and atomic table replacement.
 
-After every required job passes, the workflow prepares a **draft** v0.33 release
+After every required job passes, the workflow assembles a draft v0.34 release
 with exactly three installer downloads, checksums, the combined validation report
-and corresponding source/build material. Open **Releases**, review the draft and
-choose **Publish release** when ready. Preparing or uploading source locally does
-not publish a release. Draft releases can be updated by later passing main builds;
-a published version is never overwritten. The release tag records the tested commit
+and corresponding source/build material. It verifies GitHub’s uploaded asset
+names, sizes and SHA-256 digests and the tested tag, then publishes the release.
+A failed build or asset mismatch leaves it unpublished. The publication step is
+authorized for this release; a published version is never overwritten. The release tag records the tested commit
 and does not create another development branch.
 
 Do not build the Windows installer on this Mac. Release installers should come
@@ -34,9 +34,9 @@ local DMGs and Windows setup generation are optional and skipped for this releas
 
 After publishing, share these three links:
 
-- [Intel Mac](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.33/RDataCraft-0.33-macos-x86_64.dmg)
-- [Apple Silicon Mac](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.33/RDataCraft-0.33-macos-arm64.dmg)
-- [Windows x64](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.33/RDataCraft-0.33-windows-x64-setup.exe)
+- [Intel Mac](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.34/RDataCraft-0.34-macos-x86_64.dmg)
+- [Apple Silicon Mac](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.34/RDataCraft-0.34-macos-arm64.dmg)
+- [Windows x64](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.34/RDataCraft-0.34-windows-x64-setup.exe)
 
 These URLs become available when the draft is published; their presence here is
 not evidence that the builds have run or passed.

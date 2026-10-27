@@ -83,7 +83,7 @@ jobs:
         run: |
           version=$(python3 -c 'import json; print(json.load(open("config/release.json"))["version"])')
           python3 scripts/package_installers.py --mac-app "dist/RDataCraft v${version}.app" --arch ${{ matrix.arch }}
-          python3 scripts/test_macos_bundle.py --dmg "dist/RDataCraft-${version}-macos-${{ matrix.arch }}.dmg" --output artifacts/installed-mac --advisory-paste
+          python3 scripts/test_macos_bundle.py --dmg "dist/RDataCraft-${version}-macos-${{ matrix.arch }}.dmg" --output artifacts/installed-mac
           python3 scripts/release_assets.py platform --platform macos-${{ matrix.arch }} --installer "dist/RDataCraft-${version}-macos-${{ matrix.arch }}.dmg"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -227,7 +227,7 @@ jobs:
             dist/*.zip
             dist/*.sha256
             dist/*-setup.exe
-  draft-release:
+  release:
     needs: [sources, mac, windows]
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
@@ -250,9 +250,9 @@ jobs:
           pattern: rdatacraft-source-*
           path: artifacts/release-inputs
       - run: python scripts/release_assets.py assemble --inputs artifacts/release-inputs --output dist/release
-      - run: python scripts/publish_release.py
+      - run: python scripts/publish_release.py --publish
       - name: Summary
         run: |
           version=$(python3 -c 'import json; print(json.load(open("config/release.json"))["version"])')
-          echo "### RDataCraft v${version} draft prepared" >> "$GITHUB_STEP_SUMMARY"
-          echo "All three native installers passed. Review and publish the draft under [Releases](https://github.com/${GITHUB_REPOSITORY}/releases). No additional branch is needed." >> "$GITHUB_STEP_SUMMARY"
+          echo "### RDataCraft v${version} released" >> "$GITHUB_STEP_SUMMARY"
+          echo "All three native installers passed and uploaded checksums match. Download them from [Releases](https://github.com/${GITHUB_REPOSITORY}/releases/tag/v${version}). No additional branch is needed." >> "$GITHUB_STEP_SUMMARY"

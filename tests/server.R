@@ -13,6 +13,14 @@ shiny::testServer(app, {
   session$flushReact()
   check(nrow(normalized()$data) == 24, "explicitly loaded session fixture has example data")
   check(is.finite(analysis_state()$value$p), "initial session analysis is available")
+  original_method <- settings()$method
+  original_table <- raw()
+  session$setInputs(method = "advanced_r"); session$flushReact()
+  check(identical(page(), "advanced"), "Advanced R method choice opens the script editor")
+  check(identical(settings()$method, original_method) && identical(raw(), original_table), "Advanced R navigation preserves the preset and observations")
+  check(length(r_analyses()) == 0L && !advanced$busy(), "choosing Advanced R neither runs a script nor creates an analysis")
+  check(!identical(snapshot()$settings$method, "advanced_r"), "saved study contains a real preset rather than a navigation action")
+  session$setInputs(method = original_method, nav_analysis = 1); session$flushReact()
   session$setInputs(data_grid_cell_edit = list(row = 1, col = 0, value = "8.9"))
   session$flushReact()
   check(raw()[1, 1] == "8.9", "editing the grid updates the source table")
@@ -92,3 +100,5 @@ shiny::testServer(app, {
   check(!identical(signature(), saved_signature()), "edits made after a save snapshot remain unsaved")
 })
 cat("\n", checks, " reactive workflow checks passed.\n", sep = "")
+
+for (layout in unname(pc_layouts())) check(identical(unname(tail(pc_analysis_choices(layout), 1)), "advanced_r"), paste(layout, "offers Advanced R last without adding it to numerical presets"))

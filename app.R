@@ -70,7 +70,7 @@ ui <- fluidPage(
       tags$nav(class = "workspace-nav", `aria-label` = "Active table workspace",
                nav_button("nav_data", "D1", "Data"), nav_button("nav_analysis", "R1", "Analysis"),
                nav_button("nav_figure", "G1", "Graph"), nav_button("nav_layout", "L", "Figure layout"),
-               nav_button("nav_project", "P", "Project & sources"), nav_button("nav_advanced", "R+", "Advanced R")),
+               nav_button("nav_project", "P", "Project & sources")),
       div(class = "sidebar-dataset", div(class = "eyebrow", "CURRENT DATASET"),
           uiOutput("dataset_info"), actionButton("edit_data", "Edit data →", class = "text-button")),
       div(class = "sidebar-bottom", div(class = "local-indicator", span(), "Runs on your computer"),
@@ -186,8 +186,9 @@ ui <- fluidPage(
           tabPanel("Analysis", value = "analysis",
             div(class = "page-heading", div(div(class = "eyebrow", "UNDERSTAND THE DIFFERENCE"), h1(textOutput("analysis_heading", inline = TRUE)),
               p("Choose an analysis deliberately. Review its assumptions alongside the result."))),
-            div(class = "card-surface analysis-controls", selectizeInput("method", "Analysis method", pc_methods("column"), selected = "welch", options = list(dropdownParent="body",
+            div(class = "card-surface analysis-controls", selectizeInput("method", "Analysis method", pc_analysis_choices("column"), selected = "welch", options = list(dropdownParent="body",
                   onDropdownOpen=I("function(dropdown) { var box=this.$control[0].getBoundingClientRect(), below=window.innerHeight-box.bottom-12, above=box.top-12, upward=below<240 && above>below, height=Math.max(100,Math.min(420,upward?above:below)); dropdown.addClass('analysis-method-menu'); dropdown.find('.selectize-dropdown-content').css('max-height',height+'px'); if(upward) dropdown.css('top',window.scrollY+box.top-dropdown.outerHeight()); }"))),
+                conditionalPanel("input.layout === 'xy'", p(class="muted", "XY statistics: choose Pearson or Spearman correlation to assess association, regression to model Y versus X, or area under the curve to summarize a series. Comparing treatments across X or time may require a repeated-measures or mixed-effects model; use Advanced R for that design.")),
                 conditionalPanel("['welch','student','paired','mann','signedrank','onesample','linear','pearson','spearman','fourpl','origin','quadratic','cubic','logarithmic','power','exponential','decay','association','michaelis','gaussian'].indexOf(input.method) !== -1 && (input.layout !== 'xy' || input.fit_scope !== 'all' || ['pearson','spearman'].indexOf(input.method) !== -1)", selectInput("group1", "First group / regression series", choices = c("Control", "Treatment A", "Treatment B"))),
                 conditionalPanel("input.layout === 'xy' && ['linear','fourpl','origin','quadratic','cubic','logarithmic','power','exponential','decay','association','michaelis','gaussian'].indexOf(input.method) !== -1",
                   selectInput("fit_scope","Fit series",c("Selected Y series only"="selected","All Y series — separate fit per group"="all")),
@@ -256,7 +257,7 @@ ui <- fluidPage(
                 fileInput("open_project", "Project file", accept = c(".json", ".rdatacraft", ".plotcraft"), placeholder = "Choose a RDataCraft project"),
                 downloadButton("save_project_copy", "Save current project", class = "btn-primary")),
               div(class = "card-surface", h3("About this version"),
-                  p("RDataCraft v0.33 · Scientific plotting and statistics"),
+                  p("RDataCraft v0.34 · Scientific plotting and statistics"),
                   p("R-powered data analysis and publication-ready figures for Mac and Windows."),
                   p("Six table types including PCA, named worksheets, matched and independent group tests, factorial ANOVA, correlation, dose-response fitting, survival analysis, categorical tests, diagnostic graphs, and reproducible reports."),
                   p("Treat each row as an independent experimental unit unless using a paired test. Technical replicates must not be counted as independent biological replicates."),
@@ -273,6 +274,7 @@ ui <- fluidPage(
                 verbatimTextOutput("environment_info"))))))))
 
 server <- function(input, output, session) {
+  preset_method <- reactiveVal(pc_defaults()$method)
   sheets <- reactiveVal(list())
   active_sheet <- reactiveVal("D1")
   restoring_settings <- reactiveVal(NULL)
@@ -474,7 +476,7 @@ server <- function(input, output, session) {
     updateSelectInput(session, "layout", selected = layout)
     updateCheckboxInput(session, "log_x", value = FALSE); updateCheckboxInput(session, "log_y", value = FALSE)
     updateTextInput(session, "title", value = title); updateTextInput(session, "x_label", value = x_label); updateTextInput(session, "y_label", value = y_label)
-    updateSelectInput(session, "method", choices = pc_methods(layout), selected = method)
+    updateSelectInput(session, "method", choices = pc_analysis_choices(layout), selected = method)
   }
   observeEvent(input$sample_column, load_example("examples/treatment.csv", "column", "Treatment response", "Condition", "Response (a.u.)", "welch"))
   observeEvent(input$sample_dose, {
@@ -545,7 +547,7 @@ server <- function(input, output, session) {
     if (is.null(first) || !first %in% n$groups) first <- if (length(n$groups)) n$groups[1] else ""
     if (is.null(second) || !second %in% n$groups) second <- if (length(n$groups)) n$groups[min(2, length(n$groups))] else ""
     updateSelectInput(session, "graph", choices = graphs, selected = graph)
-    updateSelectInput(session, "method", choices = pc_methods(n$layout), selected = method)
+    updateSelectInput(session, "method", choices = pc_analysis_choices(n$layout), selected = method)
     updateSelectInput(session, "transform_control", choices = n$groups)
     updateSelectInput(session, "group1", choices = n$groups, selected = first)
     updateSelectInput(session, "group2", choices = n$groups, selected = second)
@@ -563,6 +565,11 @@ server <- function(input, output, session) {
     defaults <- pc_defaults()
     target <- restoring_settings()
     s <- if (is.null(target)) setNames(lapply(names(defaults), function(k) if (is.null(input[[k]])) defaults[[k]] else input[[k]]), names(defaults)) else target
+    # Advanced R is a navigation action, never a saved preset or an automatic run.
+    if (identical(s$method, "advanced_r")) {
+      previous <- isolate(preset_method())
+      s$method <- if (previous %in% unname(pc_methods(s$layout))) previous else unname(pc_methods(s$layout))[1]
+    }
     s$dpi <- as.numeric(s$dpi)
     for (k in c("width", "height", "font_size", "point_size", "dpi")) validate(need(is.numeric(s[[k]]) && length(s[[k]]) == 1 && is.finite(s[[k]]) && s[[k]] > 0, paste("Enter a positive", k)))
     validate(need(s$width <= 400 && s$height <= 300 && s$dpi <= 600, "Export is limited to 400 × 300 mm at 600 dpi."))
@@ -1223,6 +1230,12 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
     records=r_analyses,set_records=function(x) r_analyses(pc_r_records(x)),
     open_page=function() {removeModal();updateTabsetPanel(session,'workspace',selected='advanced');page('advanced');session$sendCustomMessage('rdatacraft-page','advanced')},
     add_result=function(tab,name) {s<-pc_defaults();s$layout<-'multiple';s$method<-'descriptive';s$graph<-'variables';s$show_p<-FALSE;add_sheet(tab,s,substr(name,1,100))})
+  observeEvent(input$method, {
+    if (identical(input$method, "advanced_r")) {
+      updateSelectInput(session, "method", selected = settings()$method)
+      advanced$open()
+    } else if (input$method %in% unname(pc_methods(input$layout))) preset_method(input$method)
+  }, priority = 100)
   assistant <- pc_assistant_server(input,output,session,open_r=function(r) advanced$draft(r),
     capture=function() list(sheet=active_sheet(),view=active_view(),table=raw(),settings=settings(),name=sheet_name()),
     apply_result=function(result) {

@@ -1,3 +1,11 @@
+# v0.34
+
+- Remove the redundant Advanced R entry from lower-left navigation; retain the toolbar button.
+- Add Advanced R analysis as the final Analysis method choice for every table type. Opening it preserves the preset and never runs a script automatically.
+- Explain the existing XY statistical options and when comparisons across X/time require a model for repeated measurements.
+- Stop running the recent extended paste/layout and pilot-planning UI checks in GitHub, including the new Windows pilot UI sequence. Keep numerical/server, source, installer integrity and core installed-app checks.
+- Build all three native installers from the single main branch. Publish only after required checks pass and uploaded sources, installers and validation files match their checksums.
+
 # v0.33
 
 - Add power/sample-size planning with manual inputs, sensitivity curves, dropout recruitment estimates and CSV export.

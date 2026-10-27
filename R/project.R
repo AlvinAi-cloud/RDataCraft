@@ -7,7 +7,7 @@ pc_project <- function(tab, settings, worksheets = NULL, active = "D1", figure_l
   if (!is.null(worksheets)) uses_replicates <- uses_replicates || any(vapply(worksheets, function(sh)
     identical(sh$settings$layout, "xy") && pc_xy_structure(pc_read_text(sh$data_tsv, "\t"))$n > 1L, logical(1)))
   if (uses_replicates && is.null(worksheets)) {worksheets <- list(D1 = pc_sheet(tab, settings, "Observation table")); active <- "D1"}
-  p <- list(format = "rdatacraft", schema_version = if (is.null(worksheets)) 1L else 3L, app_version = "0.33",
+  p <- list(format = "rdatacraft", schema_version = if (is.null(worksheets)) 1L else 3L, app_version = "0.34",
        saved_at = format(Sys.time(), tz = "UTC", usetz = TRUE),
        data_tsv = pc_table_text(tab), settings = settings,
        environment = list(r_version = as.character(getRversion()),

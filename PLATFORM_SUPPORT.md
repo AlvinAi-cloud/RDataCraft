@@ -8,10 +8,10 @@ The native AppKit host supports both architectures. Build matching R runtimes wi
 
 ```
 python3 scripts/bootstrap.py --arch arm64 --runtime-root runtime-arm64
-python3 scripts/build_desktop.py --arch arm64 --runtime-root runtime-arm64 --output "dist/RDataCraft v0.33 Apple Silicon.app"
+python3 scripts/build_desktop.py --arch arm64 --runtime-root runtime-arm64 --output "dist/RDataCraft v0.34 Apple Silicon.app"
 
 python3 scripts/bootstrap.py --arch x86_64 --runtime-root runtime-intel
-python3 scripts/build_desktop.py --arch x86_64 --runtime-root runtime-intel --output "dist/RDataCraft v0.33.app"
+python3 scripts/build_desktop.py --arch x86_64 --runtime-root runtime-intel --output "dist/RDataCraft v0.34.app"
 ```
 
 Apple Silicon uses ARM R and ARM packages (no Rosetta requirement) and requires macOS 14 or newer with the current R runtime. Intel builds use Intel R/packages and require macOS 13 or newer with the current host toolchain. Build checks reject mismatches; `--allow-rosetta` is an explicit development fallback. Earlier v0.1 was an ARM host with Intel R under Rosetta.
@@ -24,7 +24,7 @@ Each New study opens another window with its own R engine. Closing an edited stu
 
 For source development, install official x64 R and the .NET 10 SDK, then run `Rscript --vanilla scripts/install.R`. The CMD launcher uses the native executable when packaged. Without it, the source launcher retains the optional local browser workflow. PowerShell execution follows the user's normal execution policy; the launcher does not bypass it.
 
-Double-click **Validate RDataCraft.cmd** to run the R regression suites with the bundled Windows engine, without installing Python or Node. It uses synthetic fixtures and writes logs plus `artifacts/validation-native-0.33.json`; it does not open or change user studies. This utility requires a Windows run to provide Windows execution evidence. The Python runner adds the JavaScript checks when Node is available.
+Double-click **Validate RDataCraft.cmd** to run the R regression suites with the bundled Windows engine, without installing Python or Node. It uses synthetic fixtures and writes logs plus `artifacts/validation-native-0.34.json`; it does not open or change user studies. This utility requires a Windows run to provide Windows execution evidence. The Python runner adds the JavaScript checks when Node is available.
 
 Build the portable bundle on Windows after installing matching dependencies:
 

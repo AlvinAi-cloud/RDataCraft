@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <body>
-    <h1>RDataCraft help · v0.33</h1>
+    <h1>RDataCraft help · v0.34</h1>
     <p>Offline instructions for data entry, analysis and figures. In the app, Help provides search and access to the teaching examples.</p>
     <nav>
       <ul>
@@ -85,6 +85,7 @@
       <p>Use an XY table, then choose a regression method in Analyze. Inspect the model equation and choose how replicates enter the fit. Fitting all observations and fitting means answer different weighting questions; do not treat repeated measurements as independent replicates.</p>
       <p>To fit several Y series, set Fit series to All Y series — separate fit per group in Analysis, or use Fit every Y series independently under Figure settings → XY lines &amp; fitted curves. Each group gets its own parameters and curve; these are not shared-parameter or global fits. Mean/error and shaded-band graphs can show the same fitted curves as scatter plots. Choose No connecting lines to hide point-to-point connections while retaining fitted curves. Show fitted curves and Show fitted mean 95% CI control those overlays separately. Error bars summarize observations at each X; a fitted confidence band describes uncertainty in the model mean.</p>
       <p>Review convergence, parameter intervals and a residuals view before interpreting a curve. A four-parameter dose-response fit needs positive concentrations and adequate coverage of both plateaus. Poorly identified parameters can be misleading even when a curve looks smooth.</p>
+      <p>XY tables also offer Pearson and Spearman correlation, descriptive statistics and area under the curve. Correlation tests association; a regression models Y versus X. Treatment comparisons across time or X must account for independent experimental units, matching and repeated measurements; use a suitable reviewed model in Advanced R.</p>
       <p>For a formula, model family or dependency outside the presets, use Advanced R analysis and return coefficients, diagnostics and a figure. The app does not automatically establish that a selected model is scientifically appropriate.</p>
     </section>
     <section id="power">
@@ -129,7 +130,7 @@
       <h3>Advanced R analysis: beyond the presets</h3>
       <p>Write an R script or ask the AI Assistant to draft one. Review the code, data selection and scientific assumptions, then choose Run reviewed script. Drafting, loading and opening a study never execute its code.</p>
       <ol>
-        <li>Open a data table, then Analysis → Advanced R analysis. Load a template or write your script. data is a copied data frame with automatic numeric conversion; data_raw retains the original cell text. Column names stay unchanged.</li>
+        <li>Open a data table, then choose Advanced R analysis at the end of the Analysis method menu, or use Advanced R in the top toolbar. Load a template or write your script. Opening Advanced R does not change the selected preset or run a script. data is a copied data frame with automatic numeric conversion; data_raw retains the original cell text. Column names stay unchanged.</li>
         <li>List any required packages, separated by commas. The app checks your bundled and personal R libraries. Choose Check / install packages to review missing packages and required dependencies from CRAN; installation starts only after Approve &amp; install. The script does not run automatically afterward. stats supports GLMs and many methods beyond the presets. Compatible Mac/Windows binaries install into a library for your user account; bundled app packages and system R are unchanged. Source builds and non-CRAN repositories are not installed by this workflow.</li>
         <li>Assign result &lt;- list(tables=list(Name=data.frame(...)), plot=my_plot, text="Interpretation"). plot can be a ggplot object or a function drawing a base R plot. Return up to ten nonempty tables, each within the 10,000-row / 50-column table limit. Large combined outputs are rejected.</li>
         <li>Run in a separate R process; Stop cancels it. The selected time limit is at most five minutes. Figures export as 3 × 3 inch SVG/PDF; use ggplot theme text size 7 for matching typography. Scripts can override their plot appearance.</li>

@@ -607,7 +607,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         return ready
     }
     @objc func about() {
-        NSApp.orderFrontStandardAboutPanel(options: [.applicationName: "RDataCraft", .applicationVersion: "v0.33 · Development preview", .credits: NSAttributedString(string: "Scientific plotting and statistics\nR-powered data analysis and publication-ready figures.\nAvailable for Mac and Windows.")])
+        NSApp.orderFrontStandardAboutPanel(options: [.applicationName: "RDataCraft", .applicationVersion: "v0.34 · Development preview", .credits: NSAttributedString(string: "Scientific plotting and statistics\nR-powered data analysis and publication-ready figures.\nAvailable for Mac and Windows.")])
     }
     @objc func showExamples() { send(["type":"examples"]) }
     @objc func showHelp() {
@@ -711,7 +711,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         let pilotCapture=try await webView.takeSnapshot(configuration:nil)
         try imageData(pilotCapture).write(to:folder.appendingPathComponent("pilot-planning.png"))
         _ = try await webView.evaluateJavaScript("document.querySelector('#shiny-modal .modal-footer button').click();document.querySelector('[data-command=advanced]').click()")
-        try await waitUntil("document.querySelector('#nav_advanced.active')!==null")
+        try await waitUntil("document.getElementById('r_run')?.closest('.tab-pane')?.classList.contains('active')===true")
         let toolbarCapture=try await webView.takeSnapshot(configuration:nil)
         try imageData(toolbarCapture).write(to:folder.appendingPathComponent("advanced-toolbar.png"))
         return ["table layout menu escapes card boundaries", "native clipboard fills replacement textarea", "whole table replacement applies numeric XY data", "transform menu floats inside viewport", "Y-only transformation preserves X", "power planning calculates 64 observations per group", "XY pilot reports model-specific limitations without substituting a t test", "column pilot prefills ANOVA inputs and retains provenance", "Advanced R toolbar opens its workspace"]
@@ -1028,7 +1028,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         _ = try await webView.evaluateJavaScript("document.getElementById('add_tutorial').click()")
         try await waitUntil("document.getElementById('layout').value==='multiple' && document.getElementById('method').value==='pca' && document.querySelector('#pca_scree tbody tr')!==null && !document.documentElement.classList.contains('shiny-busy')")
         try await waitUntil("document.getElementById('pca_variable_pick').selectize.items.length===5 && !document.getElementById('pca_variable_pick').selectize.items.includes('SampleID') && document.querySelector('#pca_scores .dataTables_info')?.textContent.includes('12 entries')===true")
-        try await waitUntil("document.querySelector('.version-label')?.textContent.includes('v0.33')===true && Object.keys(document.getElementById('graph_view').selectize.options).length===3")
+        try await waitUntil("document.querySelector('.version-label')?.textContent.includes('v0.34')===true && Object.keys(document.getElementById('graph_view').selectize.options).length===3")
         try imageData(try await webView.takeSnapshot(configuration:nil)).write(to:folder.appendingPathComponent("pca-analysis.png"))
         for key in ["scores","loadings","scree","preprocessing"] {
             let file=folder.appendingPathComponent("pca-\(key).csv")
@@ -1043,7 +1043,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         let file=folder.appendingPathComponent("PCA teaching workflow.rdatacraft")
         nextTestDestination=file;saveAs();try await waitForFile(file)
         let saved=try JSONSerialization.jsonObject(with:Data(contentsOf:file)) as? [String:Any]
-        guard saved?["app_version"] as? String == "0.33",let settings=saved?["settings"] as? [String:Any],let selected=settings["pca_variables"] as? String,!selected.contains("SampleID"),selected.contains("CellArea") else {throw HostError.failed("PCA example settings or release version were not saved correctly.")}
+        guard saved?["app_version"] as? String == "0.34",let settings=saved?["settings"] as? [String:Any],let selected=settings["pca_variables"] as? String,!selected.contains("SampleID"),selected.contains("CellArea") else {throw HostError.failed("PCA example settings or release version were not saved correctly.")}
         return ["PCA in the shared Help example selector", "PCA walkthrough visible", "PCA example adds 12 observations", "PCA selects measurements without numeric IDs", "three linked PCA views", "four PCA CSV exports", "PCA scores graph", "PCA settings and version saved"]
     }
     func workflowTest() async {
@@ -1185,7 +1185,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         send(["type":"open","path":backend.appendingPathComponent("examples/RDataCraft examples.rdatacraft").path])
         try await waitUntil("document.querySelector('#data_grid tbody td')!==null && !document.documentElement.classList.contains('shiny-busy')")
         _ = try await webView.evaluateJavaScript("Shiny.setInputValue('advanced_open',1,{priority:'event'})")
-        try await waitUntil("document.getElementById('nav_advanced').classList.contains('active') && document.getElementById('r_run')!==null")
+        try await waitUntil("document.getElementById('r_run')?.closest('.tab-pane')?.classList.contains('active')===true && document.getElementById('r_run')!==null")
         checks.append("Advanced R is available from Analysis and the workspace")
         _ = try await webView.evaluateJavaScript("document.getElementById('r_load_template').click()")
         try await waitUntil("document.getElementById('r_code').value.includes('summary_table')")

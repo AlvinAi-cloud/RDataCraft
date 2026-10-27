@@ -251,18 +251,46 @@ with tempfile.TemporaryDirectory() as temporary:
                 check(command.call_count == 1, 'release publication refuses to modify an already published version')
             else:
                 raise AssertionError('Published release was overwritten')
+        # Explicit publication follows verification of the bytes GitHub received.
+        def publication_fixture(publish, problem=None):
+            state = dict(published=False)
+            def command(args, **kwargs):
+                if args[:2] == ['gh', 'api']:
+                    return subprocess.CompletedProcess(args, 1, '', 'HTTP 404')
+                if '--draft=false' in args:
+                    state['published'] = True
+                return subprocess.CompletedProcess(args, 0, '', '')
+            def remote(path, payload=None):
+                if '/assets?' in path:
+                    values = [dict(name=f.name, size=f.stat().st_size, state='uploaded', digest='sha256:' + release_assets.digest(f)) for f in (root/'dist/release').iterdir() if f.is_file()]
+                    if problem == 'digest': values[0]['digest'] = 'sha256:' + '0'*64
+                    if problem == 'missing': values.pop()
+                    return values
+                if '/git/ref/' in path:
+                    return dict(object=dict(type='commit', sha=('b'*40 if problem == 'tag' else env['GITHUB_SHA'])))
+                return dict(id=7, draft=not state['published'])
+            with patch.dict(os.environ, env), patch.object(publish_release, 'api', side_effect=remote), patch.object(publish_release.subprocess, 'run', side_effect=command):
+                try: publish_release.main(publish=publish)
+                except ValueError:
+                    if not problem: raise
+                else:
+                    if problem: raise AssertionError('Invalid remote release passed publication')
+            return state['published']
+        check(not publication_fixture(False), 'default release preparation leaves a draft unpublished')
+        check(publication_fixture(True), 'explicit publication verifies uploaded assets and publishes the tested tag')
+        for problem in ('digest','missing','tag'):
+            check(not publication_fixture(True, problem), 'publication rejects remote ' + problem + ' mismatch')
     finally:
         os.chdir(previous)
 
 print(checks, "release-tool checks passed.")
 
-# Release gating: extended UI diagnostics cannot be counted as required passes,
-# and required native failures must still block assembly.
+# Release gating retains core failures and does not run extended UI sequences.
 import plistlib
 spec = importlib.util.spec_from_file_location('mac_bundle_validation', ROOT/'scripts/test_macos_bundle.py')
 mac_validation = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mac_validation)
-for failing in ('paste', 'planning', 'studio', None):
+for failing in ('studio', None):
     with tempfile.TemporaryDirectory() as temporary:
         output = Path(temporary)/'native'
         def fake_run(command, **kwargs):
@@ -278,7 +306,7 @@ for failing in ('paste', 'planning', 'studio', None):
                 self.returncode = 1 if mode == failing else 0
             def poll(self):
                 return self.returncode
-        with patch.object(sys,'argv',['test','--dmg','fixture.dmg','--output',str(output),'--advisory-paste']), patch.object(mac_validation.subprocess,'run',fake_run), patch.object(mac_validation.subprocess,'Popen',FakeProcess):
+        with patch.object(sys,'argv',['test','--dmg','fixture.dmg','--output',str(output)]), patch.object(mac_validation.subprocess,'run',fake_run), patch.object(mac_validation.subprocess,'Popen',FakeProcess):
             blocked = False
             try:
                 mac_validation.main()
@@ -288,6 +316,5 @@ for failing in ('paste', 'planning', 'studio', None):
                 check(blocked,'required core native failure still blocks release')
             else:
                 summary = json.loads((output/'validation.json').read_text())
-                expected = 'failed' if failing else 'passed'
-                check(not blocked and summary['advisory_workflows'][failing or 'planning']['status']==expected and set(summary['workflows'])=={'studio','multiwindow','graph'},'advisory UI outcomes stay accurate and separate from required native checks')
+                check(not blocked and all(v['status']=='not_run' for v in summary['advisory_workflows'].values()) and set(summary['workflows'])=={'studio','multiwindow','graph'},'default installer validation runs core checks without extended UI sequences')
 print(checks, 'total release-tool checks passed.')

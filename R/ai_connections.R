@@ -56,7 +56,7 @@ pc_connected_ai <- function(deliver,connection_event=function(...) NULL,helper=p
     }
   }
   send<-function(action,body=list(),callback=function(...) NULL) {
-    if(is.null(worker) || !worker$is_alive()) stop('The bundled AI connection service is unavailable. Rebuild or reinstall RDataCraft v0.33.')
+    if(is.null(worker) || !worker$is_alive()) stop('The bundled AI connection service is unavailable. Rebuild or reinstall RDataCraft v0.34.')
     counter<<-counter+1L;id<-paste0('c',counter);callbacks[[id]]<<-callback
     value<-c(list(id=id,action=action),body)
     worker$write_input(paste0(jsonlite::toJSON(value,auto_unbox=TRUE,null='null',digits=NA),'\n'))
@@ -77,7 +77,7 @@ pc_connected_ai <- function(deliver,connection_event=function(...) NULL,helper=p
   }
   ensure<-function() {
     if(!is.null(worker) && worker$is_alive()) return(invisible(NULL))
-    if(is.null(helper)) stop('This copy does not include the AI connection service. Rebuild or reinstall RDataCraft v0.33.')
+    if(is.null(helper)) stop('This copy does not include the AI connection service. Rebuild or reinstall RDataCraft v0.34.')
     dir.create(profile,recursive=TRUE,showWarnings=FALSE,mode='0700');Sys.chmod(profile,'0700')
     worker<<-processx::process$new(helper,c('--profile',normalizePath(profile,winslash='/',mustWork=TRUE)),stdin='|',stdout='|',stderr='|',cleanup_tree=TRUE)
     generation<<-generation+1L;later::later(local({token<-generation;function() poll(token)}),.1)
