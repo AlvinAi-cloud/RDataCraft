@@ -13,7 +13,7 @@ from runtime_inventory import write_notices
 from build_ai import build as build_ai
 
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = "0.34"
+VERSION = "0.4"
 
 
 def run(*args):
@@ -115,13 +115,17 @@ def main():
     info = {
         "CFBundleName": "RDataCraft", "CFBundleDisplayName": "RDataCraft", "CFBundleExecutable": "RDataCraft",
         "CFBundleIdentifier": "org.rdatacraft.desktop", "CFBundlePackageType": "APPL",
-        "CFBundleShortVersionString": VERSION, "CFBundleVersion": "32.1", "CFBundleIconFile": "RDataCraft.icns",
+        "CFBundleShortVersionString": VERSION, "CFBundleVersion": str(json.loads((ROOT / "config/release.json").read_text())["build"]), "CFBundleIconFile": "RDataCraft.icns",
         "LSMinimumSystemVersion": deployment, "NSHighResolutionCapable": True,
         "NSPrincipalClass": "NSApplication", "NSAppTransportSecurity": {"NSAllowsLocalNetworking": True},
         "NSHumanReadableCopyright": "Copyright © 2026 RDataCraft contributors. GPL-3.0.",
         "CFBundleDocumentTypes": [{"CFBundleTypeName": "RDataCraft Project", "CFBundleTypeRole": "Editor",
-                                   "LSHandlerRank": "Owner", "LSItemContentTypes": ["org.rdatacraft.project"]}],
-        "UTExportedTypeDeclarations": [{"UTTypeIdentifier": "org.rdatacraft.project", "UTTypeDescription": "RDataCraft Project",
+                                   "LSHandlerRank": "Owner", "CFBundleTypeIconFile": "RDataCraftDocument.icns",
+                                   "LSItemContentTypes": ["org.rdatacraft.study", "org.rdatacraft.project"]}],
+        "UTExportedTypeDeclarations": [{"UTTypeIdentifier": "org.rdatacraft.study", "UTTypeDescription": "RDataCraft Study",
+                                         "UTTypeConformsTo": ["public.json"],
+                                         "UTTypeTagSpecification": {"public.filename-extension": ["rdcraft"]}},
+                                       {"UTTypeIdentifier": "org.rdatacraft.project", "UTTypeDescription": "RDataCraft Study (legacy)",
                                          "UTTypeConformsTo": ["public.json"],
                                          "UTTypeTagSpecification": {"public.filename-extension": ["rdatacraft"]}}],
     }
@@ -148,6 +152,8 @@ def main():
             suffix = "@2x" if scale == 2 else ""
             run("sips", "-z", size * scale, size * scale, tooling / "icon.png", "--out", iconset / f"icon_{size}x{size}{suffix}.png")
     run("iconutil", "-c", "icns", iconset, "-o", resources / "RDataCraft.icns")
+    # The same checked-in artwork is available to Windows packaging as an ICO.
+    shutil.copy2(ROOT / "desktop/RDataCraftDocument.icns", resources / "RDataCraftDocument.icns")
     # Finder transfers may leave source directories owner-only. Installed apps
     # must remain readable when copied to Applications by a different account.
     for entry in app.rglob('*'):

@@ -17,6 +17,19 @@ try {
   if (!(Test-Path $engine)) { throw 'The installed bundled R engine is missing.' }
   $native = Join-Path $installPath 'RDataCraft.exe'
   if (!(Test-Path $native)) { throw 'The native Windows executable is missing.' }
+  $documentIcon = Join-Path $installPath 'RDataCraftDocument.ico'
+  if (!(Test-Path $documentIcon)) { throw 'The study document icon is missing.' }
+  if ((Get-FileHash $documentIcon).Hash -ne (Get-FileHash (Join-Path $root 'desktop/windows/RDataCraftDocument.ico')).Hash) { throw 'Installed document artwork differs from the source.' }
+  $progid = "RDataCraft.Study.$version"
+  $classKey = "HKCU:\Software\Classes\$progid"
+  $openCommand = (Get-Item "$classKey\shell\open\command").GetValue('')
+  if ($openCommand -ne ('"' + $native + '" "%1"')) { throw 'Study open command is incorrect.' }
+  $iconCommand = (Get-Item "$classKey\DefaultIcon").GetValue('')
+  if ($iconCommand -ne ('"' + $documentIcon + '",0')) { throw 'Study document icon registration is incorrect.' }
+  foreach ($extension in @('.rdcraft','.rdatacraft')) {
+    $openWith = Get-Item "HKCU:\Software\Classes\$extension\OpenWithProgids"
+    if ($openWith.GetValueNames() -notcontains $progid) { throw "Study registration is missing: $extension" }
+  }
   $nativeReports = Join-Path $reportDirectory 'installed-windows-native'
   $test = Start-Process -FilePath $native -ArgumentList ('--native-test="' + $nativeReports + '"') -PassThru
   if (!$test.WaitForExit(420000)) { $test.Kill(); throw 'The native Windows workflow tests timed out.' }
@@ -37,10 +50,14 @@ try {
   Copy-Item (Join-Path $installPath "artifacts/validation-native-$version.json") (Join-Path $reportDirectory "validation-installed-windows-$version.json")
   $sentinel = Join-Path $installPath 'keep-study.rdatacraft'
   Set-Content -LiteralPath $sentinel -Value '{"original_test_study":true}'
+  $newSentinel = Join-Path $installPath 'keep-study.rdcraft'
+  Set-Content -LiteralPath $newSentinel -Value '{"original_test_study":true}'
   $uninstall = Start-Process -FilePath (Join-Path $installPath 'Uninstall.exe') -ArgumentList @('/S',"_?=$installPath") -PassThru -Wait
   if ($uninstall.ExitCode -ne 0 -or !(Test-Path $sentinel)) { throw 'Uninstallation did not preserve the extra study.' }
+  if (!(Test-Path $newSentinel)) { throw 'Uninstallation did not preserve the new-format study.' }
+  if (Test-Path $classKey) { throw 'Uninstallation left its owned document registration behind.' }
   if (Test-Path $engine) { throw 'Uninstallation left the bundled runtime behind.' }
-  @{version=$version;status='passed';installed_R_tests=$true;extra_study_preserved=$true;native_window_tested=$true;native_checks=$nativeReport.checks.Count;engine_cleanup_verified=$true} |
+  @{version=$version;status='passed';installed_R_tests=$true;extra_study_preserved=$true;document_icon_verified=$true;both_study_types_registered=$true;native_window_tested=$true;native_checks=$nativeReport.checks.Count;engine_cleanup_verified=$true} |
     ConvertTo-Json | Set-Content (Join-Path $reportDirectory "validation-windows-installer-$version.json")
 } finally {
   # This unique fixture directory contains no user-provided study.

@@ -24,7 +24,7 @@ shiny::testServer(app, {
   check(document_dirty() && project_name() == "Newer title", "a delayed save acknowledgement preserves newer title edits")
   session$setInputs(desktop_open_project = list(path = file, nonce = 5)); session$flushReact()
   check(project_name() == "Drug response α" && !document_dirty(), "reopen restores title metadata and clean state")
-  check(pc_study_filename("Study / A: B") == "Study - A- B.rdatacraft", "Save As title suggestion is safe for filenames")
+  check(pc_study_filename("Study / A: B") == "Study - A- B.rdcraft", "Save As title suggestion uses the new safe study filename")
   p <- snapshot(); p$study_name <- list("invalid")
   check(inherits(try(pc_decode_project(p), silent = TRUE), "try-error"), "malformed title metadata is rejected")
 })

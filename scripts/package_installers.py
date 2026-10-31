@@ -11,9 +11,10 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+from document_associations import windows_associations
 
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = "0.34"
+VERSION = "0.4"
 
 
 def checksum(path):
@@ -85,9 +86,9 @@ def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signto
         f'Name "RDataCraft {VERSION}"', f'OutFile "{nsis_quote(output)}"',
         f'InstallDir "$LOCALAPPDATA\\Programs\\RDataCraft-{VERSION}"',
         'RequestExecutionLevel user', 'SetCompressor /FINAL zlib',
-        'VIProductVersion "0.34.0.1"', 'VIAddVersionKey "ProductName" "RDataCraft"',
-        'VIAddVersionKey "FileDescription" "RDataCraft 0.34 development setup"',
-        'VIAddVersionKey "FileVersion" "0.34.0.1"', 'VIAddVersionKey "LegalCopyright" "RDataCraft contributors; GPL-3.0"',
+        'VIProductVersion "0.4.0.1"', 'VIAddVersionKey "ProductName" "RDataCraft"',
+        'VIAddVersionKey "FileDescription" "RDataCraft 0.4 development setup"',
+        'VIAddVersionKey "FileVersion" "0.4.0.1"', 'VIAddVersionKey "LegalCopyright" "RDataCraft contributors; GPL-3.0"',
         '!insertmacro MUI_PAGE_WELCOME', f'!insertmacro MUI_PAGE_LICENSE "{nsis_quote(ROOT / "LICENSE")}"',
         '!insertmacro MUI_PAGE_DIRECTORY', '!insertmacro MUI_PAGE_INSTFILES', '!insertmacro MUI_PAGE_FINISH',
         '!insertmacro MUI_UNPAGE_CONFIRM', '!insertmacro MUI_UNPAGE_INSTFILES', '!insertmacro MUI_LANGUAGE "English"',
@@ -112,6 +113,12 @@ def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signto
         'Section "Uninstall"', '  SetShellVarContext current',
     ]
     if native:
+        if not (bundle/'RDataCraftDocument.ico').is_file():
+            raise SystemExit('The Windows bundle is missing the RDataCraft study document icon.')
+        install_end = lines.index('Section "Uninstall"') - 1
+        lines[install_end:install_end] = windows_associations(VERSION)
+        uninstall_start = lines.index('Section "Uninstall"') + 2
+        lines[uninstall_start:uninstall_start] = windows_associations(VERSION, uninstall=True)
         # Install Microsoft's separately licensed, signed Evergreen component only
         # when absent. It remains shared after RDataCraft is uninstalled.
         section = lines.index('Section "RDataCraft"')
@@ -169,7 +176,7 @@ def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signto
     environment = dict(os.environ, NSISDIR=str(nsis_dir.resolve()))
     subprocess.run([str(compiler.resolve()), '-V2', str(script)], env=environment, check=True)
     checksum(output)
-    (ROOT / 'artifacts/windows-installer-audit-0.34.json').write_text(json.dumps(
+    (ROOT / 'artifacts/windows-installer-audit-0.4.json').write_text(json.dumps(
         dict(audit, installer='NSIS', execution_tested=False, per_user=True,
              setup_and_uninstaller_signatures_verified=bool(certificate),
              uninstall_preserves_extra_files=True, script=str(script.relative_to(ROOT))), indent=2) + '\n')

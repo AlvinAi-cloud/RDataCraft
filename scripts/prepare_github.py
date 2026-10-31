@@ -9,7 +9,7 @@ import zipfile
 from preflight import audit
 
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = "0.34"
+VERSION = "0.4"
 
 
 def main():
@@ -23,7 +23,7 @@ def main():
         if any(p.is_symlink() for p in (ROOT/folder).rglob("*")):
             raise SystemExit("Review and remove symbolic links from public source directories before preparing an upload.")
     destination.mkdir(parents=True)
-    for name in ["app.R", "README.md", "CHANGELOG.md", "LICENSE", "PLATFORM_SUPPORT.md",
+    for name in ["app.R", "README.md", "CHANGELOG.md", "LICENSE", ".gitattributes", "PLATFORM_SUPPORT.md",
                  "WORKFLOWS.md", "RELEASE.md", "dependencies.csv", "dependencies.lock.json", "source-manifest.json",
                  "Launch RDataCraft.command", "Launch RDataCraft.cmd", "Launch RDataCraft.ps1",
                  "Launch RDataCraft portable.command", "Validate RDataCraft.cmd"]:
@@ -35,7 +35,7 @@ def main():
         ".DS_Store\n__pycache__/\n*.pyc\n.Rhistory\n.RData\nRplots.pdf\n"
         "/runtime*/\n/downloads/\n/dist/\n/artifacts/\n/Codex handoff/\n"
         "*.app/\n*.dmg\n*.exe\n*.zip\n.env\n.env.*\n/desktop/windows/bin/\n/desktop/windows/obj/\n/desktop/ai-helper/target/\n/desktop/ai-helper/bin/\n"
-        "*.rdatacraft\n!examples/*.rdatacraft\n*.prism\n*.pzfx\n*.pzf\n!tests/fixtures/*.prism\n!tests/fixtures/*.pzfx\n")
+        "*.rdcraft\n*.rdatacraft\n!examples/*.rdatacraft\n*.prism\n*.pzfx\n*.pzf\n!tests/fixtures/*.prism\n!tests/fixtures/*.pzfx\n")
     (destination / "GITHUB_UPLOAD.md").write_text(f"""# RDataCraft v{VERSION}: GitHub upload
 
 This is the source-only upload folder. Use the existing RDataCraft repository and

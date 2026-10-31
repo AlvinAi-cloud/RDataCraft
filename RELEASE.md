@@ -1,4 +1,4 @@
-# RDataCraft v0.34 release preparation
+# RDataCraft v0.4 release preparation
 
 Open-source scientific plotting and statistics powered by R, with editable tables,
 curve fitting, PCA and optional AI-assisted analysis.
@@ -7,9 +7,9 @@ curve fitting, PCA and optional AI-assisted analysis.
 
 The existing repository is https://github.com/AlvinAi-cloud/RDataCraft.
 Use its existing GitHub Desktop checkout on **main**. The prepared source-only
-folder is `dist/RDataCraft-0.34-GitHub`; it contains no installers or private studies.
+folder is `dist/RDataCraft-0.4-GitHub`; it contains no installers or private studies.
 Copy its source changes into the existing checkout, review them in GitHub Desktop,
-commit **Prepare RDataCraft v0.34**, then **Push origin**. No new branch is needed.
+commit **Prepare RDataCraft v0.4**, then **Push origin**. No new branch is needed.
 
 ## GitHub creates the three installers
 
@@ -20,7 +20,7 @@ applications. The Mac tests run from the read-only disk image; Windows tests cov
 setup, the embedded desktop window, bundled R, uninstall and study preservation.
 The required Mac installed-app checks cover core study, multiwindow and graph workflows. Recent extended paste/layout and pilot-planning UI checks are excluded from GitHub runs, including the Windows pilot-planning UI sequence. Their numerical/server tests remain. Source tests include numerical power, pilot estimates, transformations and atomic table replacement.
 
-After every required job passes, the workflow assembles a draft v0.34 release
+After every required job passes, the workflow assembles a draft v0.4 release
 with exactly three installer downloads, checksums, the combined validation report
 and corresponding source/build material. It verifies GitHub’s uploaded asset
 names, sizes and SHA-256 digests and the tested tag, then publishes the release.
@@ -34,9 +34,9 @@ local DMGs and Windows setup generation are optional and skipped for this releas
 
 After publishing, share these three links:
 
-- [Intel Mac](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.34/RDataCraft-0.34-macos-x86_64.dmg)
-- [Apple Silicon Mac](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.34/RDataCraft-0.34-macos-arm64.dmg)
-- [Windows x64](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.34/RDataCraft-0.34-windows-x64-setup.exe)
+- [Intel Mac](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.4/RDataCraft-0.4-macos-x86_64.dmg)
+- [Apple Silicon Mac](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.4/RDataCraft-0.4-macos-arm64.dmg)
+- [Windows x64](https://github.com/AlvinAi-cloud/RDataCraft/releases/download/v0.4/RDataCraft-0.4-windows-x64-setup.exe)
 
 These URLs become available when the draft is published; their presence here is
 not evidence that the builds have run or passed.

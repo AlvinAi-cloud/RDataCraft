@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <body>
-    <h1>RDataCraft help · v0.34</h1>
+    <h1>RDataCraft help · v0.4</h1>
     <p>Offline instructions for data entry, analysis and figures. In the app, Help provides search and access to the teaching examples.</p>
     <nav>
       <ul>
@@ -56,7 +56,8 @@
         <li>Name the study by clicking its title. Click a data table name in the navigator to rename it.</li>
         <li>Enter observations in Data table. Choose Analyze and select a method appropriate for your experimental design.</li>
         <li>Review the results and assumptions. Open Graph to format a figure, then export SVG, PDF or PNG.</li>
-        <li>Save a .rdatacraft study to keep the data and settings. A figure export does not save the study.</li>
+        <li>Save a .rdcraft study to keep the data and settings. Existing .rdatacraft studies still open. A figure export does not save the study.</li>
+        <li>On Analysis, Results CSV saves the displayed estimates, SEs and separate confidence limits. Curve columns scroll horizontally. Summary CSV saves the current diagnostic or summary table; full coefficients and residuals have their own downloads in Comparisons &amp; model details.</li>
       </ol>
       <p>Examples &amp; analysis guide adds original teaching data as a separate table; your existing observations stay in place.</p>
     </section>
@@ -159,7 +160,7 @@
     </section>
     <section id="saving">
       <h3>Save, reopen &amp; work in several windows</h3>
-      <p>Save a .rdatacraft study to preserve tables, settings, linked views, layouts, imported-file reports and saved Advanced R records. Keep a separate backup before major edits. New study opens a separate desktop window on Mac and Windows, with its own analysis engine. The optional browser interface opens a separate workspace.</p>
+      <p>Save a .rdcraft study to preserve tables, settings, linked views, layouts, imported-file reports and saved Advanced R records. Older .rdatacraft studies remain compatible. Save preserves an opened file’s existing name; Save As defaults to .rdcraft. Keep a separate backup before major edits. New study opens a separate desktop window on Mac and Windows, with its own analysis engine. The optional browser interface opens a separate workspace.</p>
       <p>The desktop apps use native Open and Save dialogs. Save updates the current study; Save as creates another file. Closing an edited window offers Save, Don’t save or Cancel. In the optional browser interface, Save uses browser downloads; check the filename and location.</p>
       <p>Advanced R results retain an input snapshot, code and package versions. Opening a study or loading a saved script never executes it. Use the saved snapshot to reproduce a run, or select the active table to run on current observations.</p>
       <p>SVG/PDF/PNG exports contain the figure. CSV exports contain a table. These exports do not replace saving the complete study.</p>

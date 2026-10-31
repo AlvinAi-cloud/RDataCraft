@@ -70,7 +70,7 @@ final class RDataCraftApp: NSObject, NSApplicationDelegate {
         if !launched {pendingFiles.append(contentsOf:files)}
         else {
             for file in files {
-                if ["json","rdatacraft","plotcraft"].contains(file.pathExtension.lowercased()) {_ = openProjectFile(file)}
+                if ["rdcraft","rdatacraft","json","plotcraft"].contains(file.pathExtension.lowercased()) {_ = openProjectFile(file)}
                 else if let active=activeWindow {active.handleFile(file)}
                 else {_ = openWindow(file:file)}
             }
@@ -451,7 +451,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
     @objc func newProject() { _ = coordinator?.openWindow(newStudy:true) }
     @objc func openProject() {
             let panel = NSOpenPanel(); panel.allowsMultipleSelection = true
-            panel.allowedContentTypes = [.json, UTType(filenameExtension: "rdatacraft") ?? .json, UTType(filenameExtension: "plotcraft") ?? .json]
+            panel.allowedContentTypes = [UTType(filenameExtension: "rdcraft") ?? .json, UTType(filenameExtension: "rdatacraft") ?? .json, .json, UTType(filenameExtension: "plotcraft") ?? .json]
             panel.message = "Open a RDataCraft project"
             panel.beginSheetModal(for: self.window) { result in
                 if result == .OK { for url in panel.urls { _ = self.coordinator?.openProjectFile(url) } }
@@ -474,7 +474,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         }
     }
     func handleFile(_ url: URL) {
-        if ["json","rdatacraft","plotcraft"].contains(url.pathExtension.lowercased()) { requestedProject = url }
+        if ["rdcraft","rdatacraft","json","plotcraft"].contains(url.pathExtension.lowercased()) { requestedProject = url }
         guard ready else { pendingFiles.append(url); return }
         if ["csv", "tsv", "txt", "xlsx"].contains(url.pathExtension.lowercased()) {
             send(["type": "import", "path": url.path]); showData()
@@ -556,7 +556,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         panel.beginSheetModal(for: window) { result in completionHandler(result == .OK ? panel.urls : nil) }
     }
     func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename name: String, completionHandler: @escaping (URL?) -> Void) {
-        let project = name.hasSuffix(".rdatacraft") || name.hasSuffix(".rdatacraft.json")
+        let project = [".rdcraft", ".rdatacraft", ".rdcraft.json", ".rdatacraft.json"].contains(where:name.lowercased().hasSuffix)
         func destination(_ target: URL?) {
             guard let target = target else {
                 forceSaveAs = false; afterSaving = nil
@@ -575,9 +575,10 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         if let target = nextTestDestination { nextTestDestination = nil; destination(target); return }
         if project, !forceSaveAs, let current = currentProject { destination(current); return }
         let panel = NSSavePanel()
-        panel.nameFieldStringValue = project ? (currentProject?.lastPathComponent ?? name) : name
+        let studyName = (currentProject?.lastPathComponent ?? name).replacingOccurrences(of:"\\.(rdcraft|rdatacraft|plotcraft)(\\.json)?$|\\.json$",with:"",options:[.regularExpression,.caseInsensitive]) + ".rdcraft"
+        panel.nameFieldStringValue = project ? studyName : name
         panel.canCreateDirectories = true
-        panel.allowedContentTypes = project ? [UTType(filenameExtension: "rdatacraft") ?? .json, .json] : [UTType(filenameExtension: (name as NSString).pathExtension) ?? .data]
+        panel.allowedContentTypes = project ? [UTType(filenameExtension: "rdcraft") ?? .json] : [UTType(filenameExtension: (name as NSString).pathExtension) ?? .data]
         panel.message = project ? "Save all worksheets, analyses, and figure settings together" : "Export the selected output"
         panel.beginSheetModal(for: window) { result in destination(result == .OK ? panel.url : nil) }
     }
@@ -607,7 +608,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         return ready
     }
     @objc func about() {
-        NSApp.orderFrontStandardAboutPanel(options: [.applicationName: "RDataCraft", .applicationVersion: "v0.34 · Development preview", .credits: NSAttributedString(string: "Scientific plotting and statistics\nR-powered data analysis and publication-ready figures.\nAvailable for Mac and Windows.")])
+        NSApp.orderFrontStandardAboutPanel(options: [.applicationName: "RDataCraft", .applicationVersion: "v0.4 · Development preview", .credits: NSAttributedString(string: "Scientific plotting and statistics\nR-powered data analysis and publication-ready figures.\nAvailable for Mac and Windows.")])
     }
     @objc func showExamples() { send(["type":"examples"]) }
     @objc func showHelp() {
@@ -910,7 +911,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         try await js("document.getElementById('method').selectize.setValue('quadratic');document.getElementById('graph').selectize.setValue('scatter')")
         showAnalysis()
         try await waitUntil("document.querySelector('#parameters_table tbody tr') !== null && !document.documentElement.classList.contains('shiny-busy')")
-        try await waitUntil("document.querySelector('#analysis_metrics').textContent.includes('SSE') && document.getElementById('export_residuals').getAttribute('href')?.includes('/download/') === true")
+        try await waitUntil("document.querySelector('#analysis_metrics').textContent.includes('Residual SD') && document.getElementById('export_residuals').getAttribute('href')?.includes('/download/') === true")
         nextTestDestination=folder.appendingPathComponent("residuals.csv")
         try await js("document.getElementById('export_residuals').click()")
         try await waitForFile(folder.appendingPathComponent("residuals.csv"))
@@ -1010,7 +1011,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         try await Task.sleep(nanoseconds:400_000_000)
         _ = try await webView.evaluateJavaScript("document.getElementById('confirm_delete_table').click()")
         try await waitUntil("document.querySelector('[data-delete-table=D3]')===null && document.querySelectorAll('[data-delete-table]').length===2 && document.querySelectorAll('.layout-panel-hit').length===3")
-        let project=folder.appendingPathComponent("Studio edits.rdatacraft")
+        let project=folder.appendingPathComponent("Studio edits.rdcraft")
         nextTestDestination=project;saveAs();try await waitForFile(project)
         let saved=try JSONSerialization.jsonObject(with:Data(contentsOf:project)) as? [String:Any]
         guard saved?["schema_version"] as? Int == 6,let layout=saved?["figure_layout"] as? [String:Any],layout["arrangement"] as? String == "manual",(layout["labels"] as? String)?.contains("B2")==true,(saved?["worksheets"] as? [String:Any])?.count==2 else {throw HostError.failed("Studio edits were not saved correctly.")}
@@ -1028,7 +1029,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         _ = try await webView.evaluateJavaScript("document.getElementById('add_tutorial').click()")
         try await waitUntil("document.getElementById('layout').value==='multiple' && document.getElementById('method').value==='pca' && document.querySelector('#pca_scree tbody tr')!==null && !document.documentElement.classList.contains('shiny-busy')")
         try await waitUntil("document.getElementById('pca_variable_pick').selectize.items.length===5 && !document.getElementById('pca_variable_pick').selectize.items.includes('SampleID') && document.querySelector('#pca_scores .dataTables_info')?.textContent.includes('12 entries')===true")
-        try await waitUntil("document.querySelector('.version-label')?.textContent.includes('v0.34')===true && Object.keys(document.getElementById('graph_view').selectize.options).length===3")
+        try await waitUntil("document.querySelector('.version-label')?.textContent.includes('v0.4')===true && Object.keys(document.getElementById('graph_view').selectize.options).length===3")
         try imageData(try await webView.takeSnapshot(configuration:nil)).write(to:folder.appendingPathComponent("pca-analysis.png"))
         for key in ["scores","loadings","scree","preprocessing"] {
             let file=folder.appendingPathComponent("pca-\(key).csv")
@@ -1043,7 +1044,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         let file=folder.appendingPathComponent("PCA teaching workflow.rdatacraft")
         nextTestDestination=file;saveAs();try await waitForFile(file)
         let saved=try JSONSerialization.jsonObject(with:Data(contentsOf:file)) as? [String:Any]
-        guard saved?["app_version"] as? String == "0.34",let settings=saved?["settings"] as? [String:Any],let selected=settings["pca_variables"] as? String,!selected.contains("SampleID"),selected.contains("CellArea") else {throw HostError.failed("PCA example settings or release version were not saved correctly.")}
+        guard saved?["app_version"] as? String == "0.4",let settings=saved?["settings"] as? [String:Any],let selected=settings["pca_variables"] as? String,!selected.contains("SampleID"),selected.contains("CellArea") else {throw HostError.failed("PCA example settings or release version were not saved correctly.")}
         return ["PCA in the shared Help example selector", "PCA walkthrough visible", "PCA example adds 12 observations", "PCA selects measurements without numeric IDs", "three linked PCA views", "four PCA CSV exports", "PCA scores graph", "PCA settings and version saved"]
     }
     func workflowTest() async {

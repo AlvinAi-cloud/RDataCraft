@@ -36,6 +36,13 @@ def main():
         expected = json.loads((root / "config/release.json").read_text())["version"]
         if info.get("CFBundleShortVersionString") != expected:
             raise ValueError("Installer version differs from the source checkout.")
+        types = {x['UTTypeIdentifier']: x for x in info.get('UTExportedTypeDeclarations', [])}
+        for identifier, extension in (('org.rdatacraft.study', 'rdcraft'), ('org.rdatacraft.project', 'rdatacraft')):
+            if extension not in types.get(identifier, {}).get('UTTypeTagSpecification', {}).get('public.filename-extension', []):
+                raise ValueError('Installer is missing the study document type: ' + extension)
+        icon = app / 'Contents/Resources/RDataCraftDocument.icns'
+        if not icon.is_file() or icon.read_bytes() != (root / 'desktop/RDataCraftDocument.icns').read_bytes():
+            raise ValueError('Installer document icon differs from the release source.')
         modes = ("studio", "multiwindow", "graph") + (("paste", "planning") if args.advisory_paste else ())
         for mode in modes:
             directory = output / mode
@@ -79,7 +86,7 @@ def main():
                 advisory[mode] = dict(**result, required=False)
             else:
                 reports[mode] = result
-        summary = dict(version=expected, status="passed", read_only_installer=True,
+        summary = dict(version=expected, status="passed", read_only_installer=True, document_icon_verified=True, both_study_types_registered=True,
                        workflows=reports, advisory_workflows=advisory, checks=sum(x["checks"] for x in reports.values()))
         (output / "validation.json").write_text(json.dumps(summary, indent=2) + "\n")
     finally:

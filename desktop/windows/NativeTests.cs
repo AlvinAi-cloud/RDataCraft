@@ -49,7 +49,7 @@ internal static class NativeTests
             await JS(window, "document.getElementById('title').value='Windows desktop test';document.getElementById('title').dispatchEvent(new Event('change',{bubbles:true}));");
             await Wait(() => Task.FromResult(window.Dirty), "Native dirty state did not update");
             Check(!window.ConfirmClose(DialogResult.Cancel) && !window.IsDisposed, "Cancel closing preserves the edited study");
-            string project = Path.Combine(folder, "Native study.rdatacraft");
+            string project = Path.Combine(folder, "Native study.rdcraft");
             window.NextTestDestination = project; window.Save(true);
             await FileReady(project);
             await Wait(() => Task.FromResult(!window.Dirty && window.ProjectPath == project), "Native saved state did not update");
@@ -120,7 +120,7 @@ internal static class NativeTests
             Checks.Add("Compact method selector opens a large visible dropdown in the embedded Windows window");
             await JS(window, "document.getElementById('method').selectize.close();document.getElementById('nav_figure').click()");
             await using (var file = File.Create(Path.Combine(folder, "figure.png"))) await window.Web.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, file);
-            File.WriteAllText(Path.Combine(folder, "validation-windows-desktop.json"), JsonSerializer.Serialize(new { version = "0.34", status = "passed", native_window = true, embedded_webview = true, bundled_R = true, external_browser_launched = false, engine_pid = window.EnginePid, checks = Checks }, new JsonSerializerOptions { WriteIndented = true }));
+            File.WriteAllText(Path.Combine(folder, "validation-windows-desktop.json"), JsonSerializer.Serialize(new { version = "0.4", status = "passed", native_window = true, embedded_webview = true, bundled_R = true, external_browser_launched = false, engine_pid = window.EnginePid, checks = Checks }, new JsonSerializerOptions { WriteIndented = true }));
             finished = true; Program.Result = 0;
             window.CloseForTest();
         }
@@ -133,7 +133,7 @@ internal static class NativeTests
         if (finished) return;
         finished = true; Program.Result = 1;
         Directory.CreateDirectory(folder);
-        File.WriteAllText(Path.Combine(folder, "validation-windows-desktop.json"), JsonSerializer.Serialize(new { version = "0.34", status = "failed", error = error.ToString(), checks = Checks }, new JsonSerializerOptions { WriteIndented = true }));
+        File.WriteAllText(Path.Combine(folder, "validation-windows-desktop.json"), JsonSerializer.Serialize(new { version = "0.4", status = "failed", error = error.ToString(), checks = Checks }, new JsonSerializerOptions { WriteIndented = true }));
         foreach (var window in Program.Windows.ToArray()) window.CloseForTest();
     }
 }

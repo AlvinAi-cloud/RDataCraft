@@ -1,3 +1,12 @@
+# v0.4
+
+- Present Method & assumptions above Analysis results. Fitted curves occupy columns in a compact table with horizontal scrolling and a fixed parameter column.
+- Include response-scale Bottom, Top and EC50, confidence intervals and SEs for EC50 and the Hill coefficient. Do not infer concentration units.
+- Export the displayed results as CSV, retaining numerical precision and separate confidence-limit rows. Adapt Summary & diagnostics and Comparisons & model details to fitted curves, statistical comparisons, counts, survival and PCA.
+- Keep full coefficient uncertainty, residual observations, multiple-comparison corrections and factor-effect tables available with appropriate CSV exports.
+- Default new study filenames to .rdcraft while retaining .rdatacraft compatibility. Supply a document icon and file associations in Mac and Windows packaging.
+- Build and test Intel Mac, Apple Silicon and Windows installers through GitHub Actions from main; publish only matching, validated assets.
+
 # v0.34
 
 - Remove the redundant Advanced R entry from lower-left navigation; retain the toolbar button.

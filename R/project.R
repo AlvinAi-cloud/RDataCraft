@@ -7,7 +7,7 @@ pc_project <- function(tab, settings, worksheets = NULL, active = "D1", figure_l
   if (!is.null(worksheets)) uses_replicates <- uses_replicates || any(vapply(worksheets, function(sh)
     identical(sh$settings$layout, "xy") && pc_xy_structure(pc_read_text(sh$data_tsv, "\t"))$n > 1L, logical(1)))
   if (uses_replicates && is.null(worksheets)) {worksheets <- list(D1 = pc_sheet(tab, settings, "Observation table")); active <- "D1"}
-  p <- list(format = "rdatacraft", schema_version = if (is.null(worksheets)) 1L else 3L, app_version = "0.34",
+  p <- list(format = "rdatacraft", schema_version = if (is.null(worksheets)) 1L else 3L, app_version = "0.4",
        saved_at = format(Sys.time(), tz = "UTC", usetz = TRUE),
        data_tsv = pc_table_text(tab), settings = settings,
        environment = list(r_version = as.character(getRversion()),
@@ -142,7 +142,7 @@ pc_signature <- function(tab, settings, worksheets = NULL, active = "D1", figure
   jsonlite::toJSON(payload, auto_unbox = TRUE, digits = 15, na = "null")
 }
 
-pc_project_name <- function(path) sub("\\.(rdatacraft|plotcraft)(\\.json)?$|\\.json$", "", basename(path), ignore.case = TRUE)
+pc_project_name <- function(path) sub("\\.(rdcraft|rdatacraft|plotcraft)(\\.json)?$|\\.json$", "", basename(path), ignore.case = TRUE)
 
 
 pc_write_project <- function(project, file) {
@@ -158,4 +158,4 @@ pc_study_name <- function(name) {
     stop("Enter a study name of 1–100 characters, without line breaks.", call. = FALSE)
   trimws(name)
 }
-pc_study_filename <- function(name) paste0(gsub('[/:*?"<>|\\\\]', "-", pc_study_name(name)), ".rdatacraft")
+pc_study_filename <- function(name) paste0(gsub('[/:*?"<>|\\\\]', "-", pc_study_name(name)), ".rdcraft")

@@ -84,6 +84,7 @@ pc_regression <- function(n,method,group,options=list()) {
     pc_metric("Replicates / weighting",paste(prep$mode,prep$weighting,sep=" / ")),pc_metric("Residual degrees of freedom",df),
     pc_metric("SSE (original Y scale)",pc_fmt(sse)),pc_metric("RMSE (original Y scale)",pc_fmt(sqrt(sse/df))),pc_metric("R squared (1 − SSE/SST)",pc_fmt(1-sse/sst)),
     pc_metric("Weighted SSE",pc_fmt(sum(a$.weight*resid^2))),pc_metric("AIC",pc_fmt(AIC(fit))))
+  if(is.finite(r$p)) r$metrics<-rbind(r$metrics,pc_metric("P value (slope = 0)",pc_fmt(r$p)))
   r$notes <- c(paste("Least squares on the original Y scale.",equation),
     if(inherits(fit,"lm")) "Parameter t intervals and a 95% confidence band for the fitted mean are shown. This is not a prediction band." else "Parameter intervals are approximate local t/Wald intervals. No nonlinear curve confidence or prediction band is implied.",
     "Fits assume independent observations. Technical repeats are not independent biological replicates. Inspect residuals and parameter uncertainty; R squared alone does not establish model adequacy.",

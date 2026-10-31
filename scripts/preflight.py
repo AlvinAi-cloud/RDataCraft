@@ -49,7 +49,7 @@ def audit(source):
             findings.append(f"Unreviewed example: {label}")
         if file.suffix.lower() == ".prism" and relative.parts[:2] != ("tests", "fixtures"):
             findings.append(f"Non-fixture Prism study: {label}")
-        if file.suffix.lower() == ".rdatacraft":
+        if file.suffix.lower() in {".rdcraft", ".rdatacraft"}:
             if relative.parts[0] != "examples" or relative.name not in EXAMPLES:
                 findings.append(f"Unreviewed study: {label}")
             if json.loads(data).get("prism_sources"):

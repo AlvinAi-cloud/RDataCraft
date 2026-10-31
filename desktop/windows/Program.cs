@@ -153,7 +153,7 @@ internal sealed class StudyWindow : Form
         Item(help, "Examples & analysis guide", Keys.F1, () => Command("help"));
         Item(help, "Show engine log", Keys.None, () => Process.Start(new ProcessStartInfo("notepad.exe") { ArgumentList = { logPath }, UseShellExecute = false }));
         Item(help, "About RDataCraft", Keys.None, () => MessageBox.Show(this,
-            "RDataCraft v0.34\nScientific data analysis and publication-ready figures, powered by R.\n\nGPL-3.0. Third-party notices are included in the application folder.", "About RDataCraft", MessageBoxButtons.OK, MessageBoxIcon.Information));
+            "RDataCraft v0.4\nScientific data analysis and publication-ready figures, powered by R.\n\nGPL-3.0. Third-party notices are included in the application folder.", "About RDataCraft", MessageBoxButtons.OK, MessageBoxIcon.Information));
         return bar;
     }
 
@@ -324,7 +324,7 @@ internal sealed class StudyWindow : Form
 
     private void OpenDialog()
     {
-        using var dialog = new OpenFileDialog { Title = "Open study", Filter = "RDataCraft studies|*.rdatacraft;*.plotcraft;*.json|Prism projects|*.prism;*.pzfx;*.pzf|All files|*.*" };
+        using var dialog = new OpenFileDialog { Title = "Open study", Filter = "RDataCraft studies|*.rdcraft;*.rdatacraft;*.plotcraft;*.json|Prism projects|*.prism;*.pzfx;*.pzf|All files|*.*" };
         if (dialog.ShowDialog(this) == DialogResult.OK) { if (HasDocument) Program.Open(dialog.FileName); else _ = OpenFile(dialog.FileName); }
     }
     private async void ImportDialog()
@@ -347,7 +347,7 @@ internal sealed class StudyWindow : Form
             if (!Trusted(e.DownloadOperation.Uri)) { Log("Download rejected: untrusted origin."); e.Cancel = true; return; }
             string filename = Path.GetFileName(e.ResultFilePath);
             Log("Download requested: " + filename);
-            bool project = filename.EndsWith(".rdatacraft", StringComparison.OrdinalIgnoreCase);
+            bool project = filename.EndsWith(".rdcraft", StringComparison.OrdinalIgnoreCase) || filename.EndsWith(".rdatacraft", StringComparison.OrdinalIgnoreCase);
             string? destination = NextTestDestination; NextTestDestination = null;
             if (destination == null && project && !forceSaveAs) destination = ProjectPath;
             forceSaveAs = false;

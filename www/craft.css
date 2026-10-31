@@ -411,3 +411,34 @@ body[data-runtime="desktop"] .welcome-prism {display:none}
 .power-controls>.shiny-panel-conditional.shiny-conditional--shown{display:contents}
 @media(max-width:700px){.power-controls{grid-template-columns:1fr}}
 #replace_status{margin-top:12px}
+/* Approved results layout only: local scrolling with a fixed measure column. */
+#analysis_metrics{min-width:0}
+#analysis_metrics .curve-results-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;padding-bottom:8px}
+#analysis_metrics .curve-results-table{border-collapse:separate;border-spacing:0;table-layout:fixed;width:max-content;min-width:100%;margin:0}
+#analysis_metrics .curve-results-table th,#analysis_metrics .curve-results-table td{min-width:190px;width:190px;text-align:center;vertical-align:middle;border-bottom:1px solid var(--line);padding:12px 16px!important;font-variant-numeric:tabular-nums;background:var(--paper)}
+#analysis_metrics .curve-results-table tr:nth-child(even) td,#analysis_metrics .curve-results-table tr:nth-child(even) th{background:var(--surface-soft)}
+#analysis_metrics .curve-results-table th:first-child{position:sticky;left:0;z-index:2;text-align:left;min-width:240px;width:240px;box-shadow:1px 0 0 var(--line);font-weight:500}
+#analysis_metrics .curve-results-table thead th{background:var(--chrome);font-weight:600}
+#analysis_metrics .curve-series-name,#analysis_metrics .curve-estimate{display:block;overflow-wrap:anywhere}
+#analysis_metrics .curve-fit-status{display:block;font-size:12.584px;font-weight:400;color:var(--accent);margin-top:6px}
+#analysis_metrics .curve-fit-failed{display:block;font-size:12.584px;color:#9a3024;margin-top:6px}
+#analysis_metrics .curve-fit-reason{display:block;font-size:12.584px;font-weight:400;color:var(--muted);white-space:normal;margin-top:4px}
+#analysis_metrics .curve-ci,#analysis_metrics .curve-ci-label{display:block;font-size:12.584px;color:var(--muted);font-weight:400;margin-top:4px}
+#analysis_metrics .curve-se-row th,#analysis_metrics .curve-se-row td{color:var(--text-secondary)}
+#analysis_metrics .curve-se-row th:first-child{padding-left:28px!important}
+#analysis_metrics .curve-results-note{font-size:12.584px;margin:12px 0 0}
+
+/* Analysis summaries and details share the results table's local scrolling. */
+#descriptive_table,#model_details{min-width:0}
+#descriptive_table .result-table-scroll,#model_details .result-table-scroll{max-width:100%;max-height:440px;overflow:auto;overscroll-behavior:contain;margin:12px 0}
+#descriptive_table .result-table,#model_details .result-table{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;margin:0}
+#descriptive_table .result-table th,#descriptive_table .result-table td,#model_details .result-table th,#model_details .result-table td{background:var(--paper);border-bottom:1px solid var(--line);padding:10px 16px!important;vertical-align:middle;font-variant-numeric:tabular-nums;max-width:340px;min-width:140px;overflow-wrap:anywhere}
+#descriptive_table .result-table tr:nth-child(even)>*,#model_details .result-table tr:nth-child(even)>*{background:var(--surface-soft)}
+#descriptive_table .result-table thead th,#model_details .result-table thead th{background:var(--chrome);position:sticky;top:0;z-index:2;font-weight:600}
+#descriptive_table .result-table th:first-child,#model_details .result-table th:first-child{position:sticky;left:0;z-index:1;text-align:left;min-width:220px;font-weight:500;box-shadow:1px 0 0 var(--line)}
+#descriptive_table .result-table thead th:first-child,#model_details .result-table thead th:first-child{z-index:3}
+#descriptive_table .result-table-wide td,#model_details .result-table-wide td{text-align:center;min-width:190px}
+#descriptive_table .result-table-wide thead th:not(:first-child),#model_details .result-table-wide thead th:not(:first-child){text-align:center}
+#descriptive_table details,#model_details details{margin:18px 0}
+#model_downloads{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.analysis-details h4{font-size:14.52px;margin:20px 0 10px}

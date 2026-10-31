@@ -1,2 +1,6 @@
-# Auto detect text files and perform LF normalization
+# Normalize source text while preserving native icons and study archives as binary.
 * text=auto
+*.icns binary
+*.ico binary
+*.png binary
+*.prism binary

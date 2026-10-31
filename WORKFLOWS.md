@@ -122,7 +122,7 @@ As of v0.34, GitHub no longer runs the recent extended paste/layout and pilot-pl
 UI checks. Numerical, data, source, installation and core native checks remain required.
 
 
-## v0.34 analysis navigation
+## Analysis navigation
 
 Advanced R is the last option in Analysis method for every table type and is also
 available in the top toolbar. The redundant lower-left navigation entry is removed.
@@ -134,3 +134,31 @@ regression and AUC. The Analysis page explains those choices. A treatment compar
 across X/time must respect the experimental unit, matching and repeated measures;
 use a suitable reviewed Advanced R model rather than treating every Y value as an
 independent observation.
+
+
+## v0.4 results and study files
+
+Method & assumptions precedes Analysis results. Regression tables place each fitted
+curve in a column; scroll horizontally while parameter labels remain fixed.
+Results CSV exports numerical estimates, SEs and separate confidence limits. EC50
+uses the entered X scale without an inferred unit. Its SE uses the delta method;
+the displayed Hill coefficient and its SE use the model's natural-logistic scale.
+
+For fitting, Summary & diagnostics contains residual degrees of freedom, SSE,
+weighted SSE and AIC when supplied by the engine. Source observation summaries
+are expandable and pool each series across X. Compare AIC only for the same
+observations, response scale and weights. For other analyses the summary follows
+the actual result: group descriptions, factorial cells, counts, AUC, normality,
+survival or selected PCA variables. Summary CSV follows the displayed main table.
+
+Comparisons remain one row per comparison, with adjusted and unadjusted P values
+identified. Factor effects, expected counts and numbers at risk appear only when
+the analysis supplies them. Complete fitted coefficients include SEs and intervals
+in an expandable table. Residual observations have a scrollable table and a CSV
+containing every fitted observation/mean. Analysis JSON and Analysis report retain
+the full analysis records.
+
+New study filenames default to `.rdcraft`. `.rdatacraft` remains readable, and
+Save preserves an existing filename. Save As suggests `.rdcraft`. Desktop packages
+include document icons and associations for both formats; Windows respects any
+protected default-app choice already selected by the user.

@@ -26,7 +26,7 @@ if (Sys.getenv("RDATACRAFT_DESKTOP") == "1") {
     later::later(watch_parent, 2)
   }
 }
-cat("\n  RDataCraft 0.34\n  Open http://127.0.0.1:", port,
+cat("\n  RDataCraft 0.4\n  Open http://127.0.0.1:", port,
     "\n  Keep this window open. Press Control+C to stop.\n\n", sep = "")
 shiny::runApp(root, host = "127.0.0.1", port = port,
               launch.browser = !"--no-browser" %in% args, display.mode = "normal")

@@ -1,4 +1,4 @@
-# RDataCraft v0.34: GitHub upload
+# RDataCraft v0.4: GitHub upload
 
 This is the source-only upload folder. Use the existing RDataCraft repository and
 its single main branch in GitHub Desktop; do not create another repository.
@@ -6,7 +6,7 @@ Review and commit the updated source, then Push origin.
 
 GitHub Actions builds and tests Intel Mac, Apple Silicon and Windows installers
 on their matching runners. After every required job passes, it assembles
-v0.34 with three installer downloads, validation, checksums and corresponding
+v0.4 with three installer downloads, validation, checksums and corresponding
 source/build material. It verifies uploaded asset hashes and the tested tag, then
 publishes the release. No local Windows packaging is needed. See RELEASE.md.
 

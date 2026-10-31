@@ -19,6 +19,7 @@ Rplots.pdf
 /desktop/windows/obj/
 /desktop/ai-helper/target/
 /desktop/ai-helper/bin/
+*.rdcraft
 *.rdatacraft
 !examples/*.rdatacraft
 *.prism

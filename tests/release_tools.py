@@ -19,6 +19,7 @@ import fetch_windows_components
 from sign_macos import binary_paths
 from unittest.mock import patch
 import package_installers
+from document_associations import windows_associations
 from fetch_sources import download
 from package_portable import verify_windows_runtime
 import struct
@@ -30,6 +31,21 @@ def check(value, label):
         raise AssertionError(label)
     checks += 1
     print("PASS:", label)
+
+association_install = '\n'.join(windows_associations('0.4'))
+association_remove = '\n'.join(windows_associations('0.4',uninstall=True))
+check(all(ext in association_install and ext in association_remove for ext in ('.rdcraft','.rdatacraft')),
+      'future Windows setup registers both study extensions and removes its own registrations')
+check('RDataCraftDocument.ico' in association_install and '"%1' in association_install.replace('$\\"','"'),
+      'Windows study association uses the document icon and quotes the opened filename')
+check('UserChoice' not in association_install and '${If} $0 ==' in association_remove,
+      'Windows registration preserves protected user choices and checks ownership before uninstall cleanup')
+check((ROOT/'desktop/RDataCraftDocument.icns').read_bytes()[:4]==b'icns' and
+      (ROOT/'desktop/windows/RDataCraftDocument.ico').read_bytes()[:4]==b'\x00\x00\x01\x00',
+      'Mac and Windows document icon assets have valid native container headers')
+check('RDataCraftDocument.ico' in (ROOT/'desktop/windows/RDataCraft.csproj').read_text() and
+      'CFBundleTypeIconFile' in (ROOT/'scripts/build_desktop.py').read_text(),
+      'both native build recipes carry their document icon')
 
 with tempfile.TemporaryDirectory() as temporary:
     root = Path(temporary)
@@ -313,7 +329,13 @@ for failing in ('studio', None):
             if command[1] == 'attach':
                 app = output/'mounted/Fixture.app/Contents'
                 app.mkdir(parents=True)
-                (app/'Info.plist').write_bytes(plistlib.dumps({'CFBundleShortVersionString':json.loads((ROOT/'config/release.json').read_text())['version']}))
+                (app/'Info.plist').write_bytes(plistlib.dumps({
+                    'CFBundleShortVersionString':json.loads((ROOT/'config/release.json').read_text())['version'],
+                    'UTExportedTypeDeclarations':[
+                        {'UTTypeIdentifier':identifier,'UTTypeTagSpecification':{'public.filename-extension':[ext]}}
+                        for identifier,ext in [('org.rdatacraft.study','rdcraft'),('org.rdatacraft.project','rdatacraft')]]}))
+                (app/'Resources').mkdir()
+                (app/'Resources/RDataCraftDocument.icns').write_bytes((ROOT/'desktop/RDataCraftDocument.icns').read_bytes())
         class FakeProcess:
             def __init__(self, command, **kwargs):
                 mode = command[1].split('-test=')[0][2:]

@@ -20,6 +20,7 @@ source("R/advanced_r_server.R",local=TRUE)
 source("R/help.R",local=TRUE)
 source("R/power.R",local=TRUE)
 source("R/power_pilot.R",local=TRUE)
+source("R/analysis_display.R",local=TRUE)
 options(shiny.maxRequestSize = 32 * 1024^2)
 
 nav_button <- function(id, number, label) actionButton(id,
@@ -211,16 +212,19 @@ ui <- fluidPage(
                 checkboxInput("pca_labels","Label score points with sample names",FALSE)),
               actionButton("add_pca_views","Add three linked PCA graph views",class="btn-outline-secondary"),
               p(class="muted","Group labels only color points; they do not affect the fit. Scores and loadings use the two selected components. Scree shows all components."))),
-            div(class = "analysis-layout", div(class = "card-surface", h3("Analysis results"), uiOutput("analysis_status"), tableOutput("analysis_metrics")),
-                div(class = "card-surface assumptions", h3("Method & assumptions"), uiOutput("analysis_notes"))),
+            div(class = "card-surface assumptions", h3("Method & assumptions"), uiOutput("analysis_notes")),
+            div(class = "card-surface analysis-results", div(class="section-heading",h3("Analysis results"),downloadButton("export_analysis_table","Results CSV",class="btn-outline-secondary")), uiOutput("analysis_status"), uiOutput("analysis_metrics")),
             div(class = "card-surface", div(class = "section-heading", h3("Summary & diagnostics"), div(downloadButton("export_report", "Analysis report", class = "btn-outline-secondary"), downloadButton("export_summary", "Summary CSV", class = "btn-outline-secondary"), downloadButton("export_results", "Analysis JSON", class = "btn-outline-secondary"))),
-                p(class = "muted", "Column/XY means use Student’s t 95% intervals. Survival estimates, AUC, and diagnostic summaries follow the chosen analysis."), tableOutput("descriptive_table")),
+                uiOutput("descriptive_table")),
             conditionalPanel("input.layout === 'multiple' && input.method === 'pca'",div(class="card-surface pca-results",h3("PCA results"),
               h4("Explained variance"),downloadButton("export_pca_scree","Variance CSV",class="btn-outline-secondary"),tableOutput("pca_scree"),
               h4("Observation scores"),downloadButton("export_pca_scores","Scores CSV",class="btn-outline-secondary"),DT::DTOutput("pca_scores"),
               h4("Variable loadings (eigenvector coefficients)"),downloadButton("export_pca_loadings","Loadings CSV",class="btn-outline-secondary"),DT::DTOutput("pca_loadings"),
               h4("Centering and scaling"),downloadButton("export_pca_preprocessing","Preprocessing CSV",class="btn-outline-secondary"),tableOutput("pca_preprocessing"))),
-            div(class = "card-surface", h3("Comparisons & model details"), p("P values marked as adjusted belong to the displayed comparison family. Only Tukey intervals are simultaneous; other comparison intervals are individual 95% intervals."), downloadButton("export_comparisons", "Comparisons CSV", class = "btn-outline-secondary"), downloadButton("export_residuals", "Fit residuals CSV", class="btn-outline-secondary"), tableOutput("comparison_table"), tableOutput("effects_table"), tableOutput("parameters_table"), tableOutput("fit_status_table"), tableOutput("risk_table"))),
+            div(class = "card-surface analysis-details", h3("Comparisons & model details"),
+                uiOutput("model_downloads"),uiOutput("model_details"),
+                conditionalPanel("output.has_fit_residuals",tags$details(tags$summary("Residual observations"),
+                  p(class="muted","One row per fitted observation or fitted mean, according to the replicate setting. Residual = observed − fitted. Scroll to inspect observations; the CSV includes every fitted row."),DT::DTOutput("residual_details"))))),
           tabPanel("Layout", value = "layout",
             div(class = "page-heading", div(div(class = "eyebrow", "ASSEMBLE A FIGURE"), h1("Figure layout"), p("Arrange linked graph views into labeled panels. Source edits update every panel."))),
             div(class = "card-surface layout-controls",
@@ -254,10 +258,10 @@ ui <- fluidPage(
               p("Save your original table, analysis settings, and figure styling together."))),
             div(class = "analysis-layout", div(class = "card-surface", h3("Open a saved project"),
                 p("RDataCraft projects are readable JSON files. Opening one replaces the current table and settings."),
-                fileInput("open_project", "Project file", accept = c(".json", ".rdatacraft", ".plotcraft"), placeholder = "Choose a RDataCraft project"),
+                fileInput("open_project", "Project file", accept = c(".rdcraft", ".rdatacraft", ".json", ".plotcraft"), placeholder = "Choose a RDataCraft project"),
                 downloadButton("save_project_copy", "Save current project", class = "btn-primary")),
               div(class = "card-surface", h3("About this version"),
-                  p("RDataCraft v0.34 · Scientific plotting and statistics"),
+                  p("RDataCraft v0.4 · Scientific plotting and statistics"),
                   p("R-powered data analysis and publication-ready figures for Mac and Windows."),
                   p("Six table types including PCA, named worksheets, matched and independent group tests, factorial ANOVA, correlation, dose-response fitting, survival analysis, categorical tests, diagnostic graphs, and reproducible reports."),
                   p("Treat each row as an independent experimental unit unless using a paired test. Technical replicates must not be counted as independent biological replicates."),
@@ -1102,9 +1106,26 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
     status <- state$value$fit_status
     if (!is.null(status) && any(status$status != "Fitted")) div(class="analysis-error",strong("Some series were not fitted: "),paste(status$series[status$status != "Fitted"],collapse=", "),". Open Analysis for the reason for each series.")
   })
-  output$analysis_metrics <- renderTable({ req(analysis_state()$value); analysis_state()$value$metrics }, colnames = FALSE, striped = FALSE, bordered = FALSE, spacing = "m")
+  output$analysis_metrics <- renderUI({ req(analysis_state()$value); pc_analysis_results_ui(analysis_state()$value,normalized(),settings()) })
   output$analysis_notes <- renderUI({ state <- analysis_state(); if (is.null(state$value)) p("Adjust the selected groups or table to run the analysis.") else tags$ul(lapply(state$value$notes, tags$li)) })
-  output$descriptive_table <- renderTable({ state <- analysis_state(); if (!is.null(state$value)) state$value$summary else pc_summary(normalized()) }, digits = 4, na = "—", striped = TRUE)
+  output$descriptive_table <- renderUI({ state <- analysis_state(); if (!is.null(state$value)) pc_summary_results_ui(state$value,normalized(),settings()) else pc_result_table_ui(pc_transpose_results(pc_summary(normalized())),"Source observation summary",TRUE) })
+  output$model_details <- renderUI({req(analysis_state()$value);pc_model_details_ui(analysis_state()$value,normalized(),settings())})
+  output$has_fit_residuals <- reactive({z<-analysis_state()$value$diagnostics;!is.null(z) && nrow(z)>0L})
+  outputOptions(output,"has_fit_residuals",suspendWhenHidden=FALSE)
+  output$model_downloads <- renderUI({
+    r<-analysis_state()$value;req(r)
+    tagList(if(nrow(r$comparisons)>0L) downloadButton("export_comparisons","Comparisons CSV",class="btn-outline-secondary"),
+      if(!is.null(r$parameters) && nrow(r$parameters)) downloadButton("export_parameters","Coefficients CSV",class="btn-outline-secondary"),
+      if(!is.null(r$effects) && nrow(r$effects)) downloadButton("export_effects","Factor effects CSV",class="btn-outline-secondary"),
+      if(!is.null(r$at_risk) && nrow(r$at_risk)) downloadButton("export_risk","At risk CSV",class="btn-outline-secondary"),
+      if(!is.null(r$expected) && nrow(r$expected)) downloadButton("export_expected","Expected counts CSV",class="btn-outline-secondary"),
+      if(!is.null(r$diagnostics) && nrow(r$diagnostics)) downloadButton("export_residuals","Fit residuals CSV",class="btn-outline-secondary"))
+  })
+  output$residual_details <- DT::renderDT({
+    req(analysis_state()$value$diagnostics);tab<-analysis_state()$value$diagnostics
+    names(tab)<-pc_result_labels(names(tab))
+    DT::datatable(tab,rownames=FALSE,options=list(scrollX=TRUE,scrollY="300px",paging=FALSE,deferRender=TRUE)) |> DT::formatSignif(columns=which(vapply(tab,is.numeric,logical(1))),digits=5)
+  },server=TRUE)
   observeEvent(input$add_pca_views,tryCatch({
     if(settings()$layout!="multiple") stop("Choose a Multiple variables table first.")
     all<-view_book();if(length(all)>9L) stop("Make room for three more views; each table supports up to twelve.")
@@ -1119,11 +1140,6 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
   output$pca_preprocessing <- renderTable({req(analysis_state()$value$pca);analysis_state()$value$pca$preprocessing},digits=6,striped=TRUE)
   for(key in c("scores","loadings")) local({k<-key;output[[paste0("pca_",k)]]<-DT::renderDT({req(analysis_state()$value$pca);DT::datatable(analysis_state()$value$pca[[k]],rownames=FALSE,options=list(pageLength=10,scrollX=TRUE))},server=TRUE)})
   for(key in c("scores","loadings","scree","preprocessing")) local({k<-key;output[[paste0("export_pca_",k)]]<-downloadHandler(filename=function() paste0("rdatacraft-pca-",k,".csv"),content=function(file) {req(analysis_state()$value$pca);write.csv(analysis_state()$value$pca[[k]],file,row.names=FALSE,na="")},contentType="text/csv")})
-  output$risk_table <- renderTable({ req(analysis_state()$value); analysis_state()$value$at_risk }, digits = 4, na = "—")
-  output$effects_table <- renderTable({ req(analysis_state()$value); analysis_state()$value$effects }, digits = 6, na = "—")
-  output$fit_status_table <- renderTable({ req(analysis_state()$value); analysis_state()$value$fit_status }, striped = TRUE)
-  output$parameters_table <- renderTable({ req(analysis_state()$value); analysis_state()$value$parameters }, digits = 6, na = "—")
-  output$comparison_table <- renderTable({ req(analysis_state()$value); analysis_state()$value$comparisons }, digits = 6, na = "—", striped = TRUE)
   output$environment_info <- renderText(paste(R.version.string, paste("ggplot2", packageVersion("ggplot2")), paste("survival", packageVersion("survival")), sep = "\n"))
   save_handler <- function() downloadHandler(filename = function() pc_study_filename(project_name()), content = function(file) {
     pc_write_project(snapshot(), file)
@@ -1176,6 +1192,20 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
     if(identical(query$rdatacraft_new_study,"1")) create_blank_study()
   },once=TRUE)
   output$export_data <- downloadHandler(filename = "rdatacraft-data.csv", content = function(file) write.csv(raw(), file, row.names = FALSE, na = ""), contentType = "text/csv")
+  output$export_analysis_table <- downloadHandler(filename="rdatacraft-analysis-results.csv",content=function(file) {
+    state<-analysis_state();if(!is.null(state$error)) stop(state$error)
+    write.csv(pc_analysis_results_csv(state$value,normalized(),settings()),file,row.names=FALSE,na="",fileEncoding="UTF-8")
+  },contentType="text/csv")
+  output$export_parameters <- downloadHandler(filename="rdatacraft-model-coefficients.csv",content=function(file) {
+    req(analysis_state()$value$parameters)
+    write.csv(pc_parameters_csv(analysis_state()$value,normalized(),settings()),file,row.names=FALSE,na="",fileEncoding="UTF-8")
+  },contentType="text/csv")
+  for(key in c("effects","risk","expected")) local({id<-key;k<-switch(id,effects="effects",risk="at_risk",expected="expected")
+    output[[paste0("export_",id)]]<-downloadHandler(filename=paste0("rdatacraft-",id,".csv"),content=function(file) {
+      req(analysis_state()$value[[k]]);tab<-if(k=="expected") pc_expected_counts(analysis_state()$value) else analysis_state()$value[[k]]
+      write.csv(tab,file,row.names=FALSE,na="",fileEncoding="UTF-8")
+    },contentType="text/csv")
+  })
   output$export_residuals <- downloadHandler(filename="rdatacraft-fit-residuals.csv",content=function(file) {
     state<-analysis_state();if(is.null(state$value$diagnostics)) stop("Choose a fitted regression model first.")
     write.csv(state$value$diagnostics,file,row.names=FALSE,na="")
@@ -1196,7 +1226,7 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
   }, contentType = "text/html")
   output$export_summary <- downloadHandler(filename = "rdatacraft-summary.csv", content = function(file) {
     state <- analysis_state(); if (!is.null(state$error)) stop(state$error)
-    write.csv(state$value$summary, file, row.names = FALSE, na = "")
+    write.csv(pc_summary_results_csv(state$value,normalized(),settings()), file, row.names = FALSE, na = "",fileEncoding="UTF-8")
   }, contentType = "text/csv")
   output$export_comparisons <- downloadHandler(filename = "rdatacraft-comparisons.csv", content = function(file) {
     state <- analysis_state(); if (!is.null(state$error)) stop(state$error)
