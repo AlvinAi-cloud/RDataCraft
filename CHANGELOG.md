@@ -1,5 +1,7 @@
 # v0.4
 
+- Add checksum-verified mirror fallback for GnuPG dependency sources so an unavailable canonical host does not prevent installer builds.
+
 - Present Method & assumptions above Analysis results. Fitted curves occupy columns in a compact table with horizontal scrolling and a fixed parameter column.
 - Include response-scale Bottom, Top and EC50, confidence intervals and SEs for EC50 and the Hill coefficient. Do not infer concentration units.
 - Export the displayed results as CSV, retaining numerical precision and separate confidence-limit rows. Adapt Summary & diagnostics and Comparisons & model details to fitted curves, statistical comparisons, counts, survival and PCA.

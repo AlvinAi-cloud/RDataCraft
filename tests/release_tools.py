@@ -32,6 +32,32 @@ def check(value, label):
     checks += 1
     print("PASS:", label)
 
+from release_native.download_native import archive_urls,fetch as fetch_native_archive
+record={'url':'https://gnupg.org/ftp/gcrypt/libgcrypt/fixture.tar.bz2','archive':'fixture.tar.bz2','sha256':hashlib.sha256(b'pinned source').hexdigest()}
+check(len(archive_urls(record))==3 and all(u.startswith('https://') for u in archive_urls(record)),
+      'GnuPG source archives have two HTTPS mirror fallbacks without changing their checksum pin')
+with tempfile.TemporaryDirectory() as folder:
+    attempts=[]
+    def fixture_curl(command,**kwargs):
+        attempts.append(command[-1])
+        if len(attempts)==1:return subprocess.CompletedProcess(command,22)
+        Path(command[command.index('-o')+1]).write_bytes(b'pinned source')
+        return subprocess.CompletedProcess(command,0)
+    with patch('release_native.download_native.subprocess.run',fixture_curl):
+        fetch_native_archive(record,Path(folder))
+    check(len(attempts)==2 and (Path(folder)/record['archive']).read_bytes()==b'pinned source',
+          'an unavailable canonical source falls back to a checksum-verified mirror')
+with tempfile.TemporaryDirectory() as folder:
+    def changed_curl(command,**kwargs):
+        Path(command[command.index('-o')+1]).write_bytes(b'changed archive')
+        return subprocess.CompletedProcess(command,0)
+    blocked=False
+    with patch('release_native.download_native.subprocess.run',changed_curl):
+        try:fetch_native_archive(record,Path(folder))
+        except ValueError:blocked=True
+    check(blocked and not (Path(folder)/record['archive']).exists(),
+          'a changed source archive still blocks the release instead of being accepted')
+
 association_install = '\n'.join(windows_associations('0.4'))
 association_remove = '\n'.join(windows_associations('0.4',uninstall=True))
 check(all(ext in association_install and ext in association_remove for ext in ('.rdcraft','.rdatacraft')),
