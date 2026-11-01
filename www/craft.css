@@ -442,3 +442,4 @@ body[data-runtime="desktop"] .welcome-prism {display:none}
 #descriptive_table details,#model_details details{margin:18px 0}
 #model_downloads{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
 .analysis-details h4{font-size:14.52px;margin:20px 0 10px}
+#model_details .xy-pointwise-results .result-table th:first-child{min-width:100px}

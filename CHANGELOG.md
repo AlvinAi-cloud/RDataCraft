@@ -1,3 +1,14 @@
+# v0.41
+
+- Honor Show individual observations on column and XY point graphs, including paired views; retain summary markers and error bars when observations are hidden.
+- Draw individual observations in lighter series colors, below full-strength summary markers and intervals. Preserve summary markers when customizing individual symbols.
+- Expand categorical palette presets to nine: RDataCraft, Colorblind accessible, Monochrome, Vivid, Ocean, Warm, Earth, Pastel and High contrast. Use the same presets in Figure settings and direct data formatting.
+- Keep Show fitted curves under Figure settings → XY lines & fitted curves. Hiding the curve also hides its fitted band and retains the analysis and observation error bars.
+- Hide comparison-P controls and label formatting when the analysis has no finite comparison P values, including in direct graph formatting.
+- Add optional observed-replicate Welch comparisons at each X value with Holm/Bonferroni/no adjustment, significant-only numeric or star labels, CSV and report results. Fits remain independent. Enabled comparisons save with schema 13.
+- Add contribution guidelines, a community Code of Conduct, AI co-contributor credit and real desktop screenshots in the README.
+- Prepare the single main branch and matching GitHub-built Intel Mac, Apple Silicon and Windows installers; publish only after required validation and uploaded asset verification pass.
+
 # v0.4
 
 - Add checksum-verified mirror fallback for GnuPG dependency sources so an unavailable canonical host does not prevent installer builds.

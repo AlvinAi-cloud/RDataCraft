@@ -10,7 +10,7 @@
       ["x_tick_step","X tick interval (blank = automatic)"],["y_tick_step","Y tick interval (blank = automatic)"],["x_tick_angle","X tick label angle (degrees)","number",0,90,15],["ref_x","X reference line (blank = hidden)"],["ref_y","Y reference line (blank = hidden)"],
       ["x_axis_length","X axis length (mm; 0 = automatic)","number",0,350,.1],["y_axis_length","Y axis length (mm; 0 = automatic)","number",0,250,.1],
       ["axis_color","Axis color","color"],["axis_line_width","Axis width (mm)","number",0.1,3,0.05],["axis_tick_size","Tick text size (pt; 0 = automatic)","number",0,48,1]],
-    data: [["palette","Palette","select",{craft:"RDataCraft",accessible:"Colorblind accessible",monochrome:"Monochrome"}],
+    data: [["palette","Palette","select",{}],
       ["point_size","Symbol size","number",1,6,0.2],["point_shape","Symbol","select",{0:"Automatic",16:"Circle",15:"Square",17:"Triangle",18:"Diamond",1:"Open circle"}],
       ["line_width","Curve width (mm; 0 = automatic)","number",0,4,0.1],
       ["xy_connections","XY connecting lines","select",{auto:"Automatic for graph type",none:"No connecting lines",connect:"Connect points in X order"}],
@@ -65,7 +65,7 @@
     const settings = source.settings;
     const styles = Object.assign(Object.create(null), JSON.parse(settings.series_styles || "{}"));
     const series = source.series || [];
-    const palettes = {craft:["#247763","#D6A64D","#6B9CC3","#A18AB9","#D18491","#5FA88F"],accessible:["#0072B2","#D55E00","#009E73","#CC79A7","#E69F00","#56B4E9","#000000"],monochrome:["#233C49","#536C79","#849AA5","#B6C5CC","#D6E0E5"]};
+    const palettes = source.palettes || {craft:["#247763"]};
     if (kind === "data" && settings.layout !== "contingency") {
       const label = document.createElement("label"), scope = document.createElement("select");
       label.textContent = "Apply appearance to"; scope.className = "form-control"; scope.id = "graph_series_scope";
@@ -75,7 +75,7 @@
     const individual = kind === "data" && seriesName;
     if (kind === "data") dialog.querySelector("h2").textContent = individual ? "Data appearance · " + seriesName : "Data appearance · all series";
     const index = Math.max(0,series.indexOf(seriesName)), palette = palettes[settings.palette] || palettes.craft;
-    const baseStyle = {color:palette[index%palette.length],point_size:settings.point_size,point_shape:settings.point_shape || (settings.layout === "column" ? 21 : 19),line_width:settings.line_width || .75,line_type:"solid"};
+    const baseStyle = {color:source.colors?.[seriesName] || palette[index%palette.length],point_size:settings.point_size,point_shape:settings.point_shape || (settings.layout === "column" ? 21 : 19),line_width:settings.line_width || .75,line_type:"solid"};
     const seriesFields = [["color","Series color","color"],["point_shape","Symbol","select",{16:"Circle",15:"Square",17:"Triangle",18:"Diamond",1:"Open circle",21:"Filled circle",22:"Filled square",24:"Filled triangle"}],
       ["point_size","Symbol size","number",1,6,.2],["line_width","Line width (mm)","number",.1,4,.1],
       ["line_type","Line pattern","select",{solid:"Solid",dashed:"Dashed",dotted:"Dotted",dotdash:"Dot dash",longdash:"Long dash",twodash:"Two dash"}]];
@@ -86,6 +86,7 @@
       if (individual && layout === "survival" && ["point_shape","point_size"].includes(key)) continue;
       if (key === "log_x" && layout !== "xy") continue;
       if (key.startsWith("xy_") && (layout !== "xy" || settings.graph === "residual")) continue;
+      if (["show_p","annotation"].includes(key) && !source.comparison_p_available) continue;
       if (key === "log_y" && !["column","xy","grouped"].includes(layout)) continue;
       if (["x_min","x_max","x_tick_step","ref_x"].includes(key) && !["xy","survival","multiple"].includes(layout) && !["histogram","ecdf","qq","density"].includes(settings.graph)) continue;
       if (["y_min","y_max","y_tick_step","ref_y"].includes(key) && ["heatmap","groupheat"].includes(settings.graph)) continue;
@@ -94,7 +95,8 @@
       let field;
       if(type === "select") {
         field = document.createElement("select");
-        for(const [value,text] of Object.entries(a)) {const option=document.createElement("option");option.value=value;option.textContent=text;field.append(option);}
+        const choices = key === "palette" ? source.palette_choices || {craft:"RDataCraft",accessible:"Colorblind accessible",monochrome:"Monochrome"} : a;
+        for(const [value,text] of Object.entries(choices)) {const option=document.createElement("option");option.value=value;option.textContent=text;field.append(option);}
       } else {field=document.createElement("input");field.type=type;}
       field.dataset.setting=key; field.className=type === "checkbox" ? "" : "form-control";
       const value = individual ? (styles[seriesName]?.[key] ?? baseStyle[key]) : kind === "labels" ? source.labels[key] || "" : settings[key];

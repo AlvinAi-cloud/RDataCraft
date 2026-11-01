@@ -9,7 +9,7 @@ import zipfile
 from preflight import audit
 
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = "0.4"
+VERSION = "0.41"
 
 
 def main():
@@ -19,16 +19,16 @@ def main():
     destination = args.output.resolve() if args.output else ROOT / "dist" / f"RDataCraft-{VERSION}-GitHub"
     if destination.exists():
         raise SystemExit("Choose a clean GitHub destination; existing files are not overwritten.")
-    for folder in ["R", "www", "config", "desktop", "scripts", "tests", "examples", "licenses", ".github"]:
+    for folder in ["R", "www", "config", "desktop", "scripts", "tests", "examples", "licenses", "docs", ".github"]:
         if any(p.is_symlink() for p in (ROOT/folder).rglob("*")):
             raise SystemExit("Review and remove symbolic links from public source directories before preparing an upload.")
     destination.mkdir(parents=True)
-    for name in ["app.R", "README.md", "CHANGELOG.md", "LICENSE", ".gitattributes", "PLATFORM_SUPPORT.md",
+    for name in ["app.R", "README.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "CONTRIBUTORS.md", "CHANGELOG.md", "LICENSE", ".gitattributes", "PLATFORM_SUPPORT.md",
                  "WORKFLOWS.md", "RELEASE.md", "dependencies.csv", "dependencies.lock.json", "source-manifest.json",
                  "Launch RDataCraft.command", "Launch RDataCraft.cmd", "Launch RDataCraft.ps1",
                  "Launch RDataCraft portable.command", "Validate RDataCraft.cmd"]:
         shutil.copy2(ROOT / name, destination / name)
-    for name in ["R", "www", "config", "desktop", "scripts", "tests", "examples", "licenses", ".github"]:
+    for name in ["R", "www", "config", "desktop", "scripts", "tests", "examples", "licenses", "docs", ".github"]:
         shutil.copytree(ROOT / name, destination / name, symlinks=True,
                         ignore=shutil.ignore_patterns(".DS_Store", "__pycache__", "*.pyc", "cache", "bin", "obj", "target"))
     (destination / ".gitignore").write_text(

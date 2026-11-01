@@ -122,14 +122,15 @@ ui <- fluidPage(
               tags$aside(id="figure_settings",class = "inspector", div(class = "inspector-title", h3("Figure settings"), span("01")),
                 field_section("Labels", textInput("title", "Figure title", "Treatment response"),
                               textInput("x_label", "X axis", "Condition"), textInput("y_label", "Y axis", "Response (a.u.)")),
-                field_section("Appearance", selectInput("palette", "Color palette", c("RDataCraft" = "craft", "Colorblind accessible" = "accessible", "Monochrome" = "monochrome")),
+                field_section("Appearance", selectInput("palette", "Color palette", pc_palette_choices()),
                               uiOutput("palette_swatches"),
                               conditionalPanel("['column','xy','grouped'].indexOf(input.layout) !== -1", selectInput("error", "Mean interval (bars / shading)", c("Standard error (SEM)" = "sem", "Standard deviation (SD)" = "sd", "95% confidence interval" = "ci", "None" = "none")),
-                              checkboxInput("show_points", "Show individual observations", TRUE)),
-                              checkboxInput("show_p", "Show comparison P values", TRUE),
+                              conditionalPanel("['points','bar','box','violin','paired','mean','median','violinbox','scatter','line','xymean','xyband','step','area','groupbar','grouppoints','groupbox','groupviolin','interaction'].indexOf(input.graph) !== -1",
+                                checkboxInput("show_points", "Show individual observations", TRUE))),
+                              conditionalPanel("output.has_graph_comparison_p === 'true'",checkboxInput("show_p", "Show comparison P values", TRUE)),
                               selectInput("legend_position", "Legend", c("Automatic" = "auto", "Top" = "top", "Bottom" = "bottom", "Left" = "left", "Right" = "right", "Hidden" = "none")),
                               checkboxInput("grid_lines", "Show major grid lines", FALSE),
-                              selectInput("annotation", "P-value labels", c("Numeric P (below 10⁻⁶: P < 10⁻⁶)" = "p", "Significance stars (ns, *, **, ***, ****)" = "stars")),
+                              conditionalPanel("output.has_graph_comparison_p === 'true'",selectInput("annotation", "P-value labels", c("Numeric P (below 10⁻⁶: P < 10⁻⁶)" = "p", "Significance stars (ns, *, **, ***, ****)" = "stars"))),
                               div(class = "two-fields", numericInput("font_size", "Text size (pt)", 7, 4, 24), numericInput("point_size", "Point size", 2.8, 1, 6, 0.2))),
                 conditionalPanel("input.layout === 'xy' && input.graph !== 'residual'",
                   field_section("XY lines & fitted curves",
@@ -140,6 +141,17 @@ ui <- fluidPage(
                     actionButton("xy_fit_all", "Fit every Y series independently", class="btn-outline-secondary"),
                     tags$button(type="button", class="btn btn-outline-secondary", `data-command`="analysis", "Choose model / series…"),
                     p(class="muted", "Mean error bars and fitted confidence bands describe different quantities. Fitting uses the replicate and weighting choices in Analysis."))),
+                conditionalPanel("input.layout === 'xy' && input.graph !== 'residual'",
+                  field_section("X-value comparisons",
+                    checkboxInput("xy_compare","Calculate comparison P values at each X",FALSE),
+                    conditionalPanel("input.xy_compare",
+                      selectInput("xy_compare_group1","First Y series",c("Automatic: first series"="")),
+                      selectInput("xy_compare_group2","Second Y series",c("Automatic: second series"="")),
+                      p(class="muted","Independent, two-sided Welch t tests on observed replicates at matching X values. Each group needs at least two replicates per X. These tests do not compare fitted curves or estimate a treatment-by-time interaction."),
+                      selectInput("xy_compare_correction","Correction across X values",c("Holm (family-wise error)"="holm","Bonferroni (family-wise error)"="bonferroni","None (unadjusted P values)"="none")),
+                      checkboxInput("xy_compare_significant_only","Only label significant X values (P ≤ 0.05)",TRUE),
+                      p(class="muted","Choose numeric P values or stars under Appearance → P-value labels. Paired/matched and longitudinal models require a suitable Advanced R analysis."),
+                      uiOutput("xy_comparison_status"),downloadButton("export_xy_point_csv","Time-point CSV",class="btn-outline-secondary")))),
                 field_section("Axes & export", conditionalPanel("['column','xy','grouped'].indexOf(input.layout) !== -1", checkboxInput("log_y", "Logarithmic Y axis", FALSE)),
                               conditionalPanel("input.layout === 'xy'", checkboxInput("log_x", "Logarithmic X axis", FALSE)),
                               p(class = "muted", "Blank range limits use automatic scaling. Ranges crop the view; analysis still uses all source observations."),
@@ -261,7 +273,7 @@ ui <- fluidPage(
                 fileInput("open_project", "Project file", accept = c(".rdcraft", ".rdatacraft", ".json", ".plotcraft"), placeholder = "Choose a RDataCraft project"),
                 downloadButton("save_project_copy", "Save current project", class = "btn-primary")),
               div(class = "card-surface", h3("About this version"),
-                  p("RDataCraft v0.4 · Scientific plotting and statistics"),
+                  p("RDataCraft v0.41 · Scientific plotting and statistics"),
                   p("R-powered data analysis and publication-ready figures for Mac and Windows."),
                   p("Six table types including PCA, named worksheets, matched and independent group tests, factorial ANOVA, correlation, dose-response fitting, survival analysis, categorical tests, diagnostic graphs, and reproducible reports."),
                   p("Treat each row as an independent experimental unit unless using a paired test. Technical replicates must not be counted as independent biological replicates."),
@@ -555,6 +567,15 @@ server <- function(input, output, session) {
     updateSelectInput(session, "transform_control", choices = n$groups)
     updateSelectInput(session, "group1", choices = n$groups, selected = first)
     updateSelectInput(session, "group2", choices = n$groups, selected = second)
+    for(i in 1:2) {
+      key<-paste0("xy_compare_group",i)
+      chosen<-if(!is.null(restore)) restore[[key]] else isolate(input[[key]])
+      if(is.null(chosen)) chosen<-""
+      automatic<-if(length(n$groups)>=i) n$groups[i] else "choose a series"
+      choices<-c(setNames("",paste0("Automatic: ",automatic)),setNames(n$groups,n$groups))
+      if(nzchar(chosen) && !chosen %in% n$groups) choices<-c(choices,setNames(chosen,paste0("Missing series: ",chosen)))
+      updateSelectInput(session,key,choices=choices,selected=chosen)
+    }
     if (!is.null(restore)) {
       restore$method <- method; restore$graph <- graph; restore$group1 <- first; restore$group2 <- second
       restoring_settings(restore); pending(NULL)
@@ -654,7 +675,7 @@ server <- function(input, output, session) {
     for (key in names(s)) {
       v <- s[[key]]
       if (key %in% c("layout", "method", "graph", "error", "palette", "dpi", "group1", "group2", "correction", "annotation", "legend_position", "pca_missing", "pca_label_column", "pca_group_column")) updateSelectInput(session, key, selected = v)
-      else if (key %in% c("fit_weight","fit_replicates","fit_scope","xy_connections")) updateSelectInput(session,key,selected=v)
+      else if (key %in% c("fit_weight","fit_replicates","fit_scope","xy_connections","xy_compare_group1","xy_compare_group2","xy_compare_correction")) updateSelectInput(session,key,selected=v)
       else if (is.logical(v)) updateCheckboxInput(session, key, value = v)
       else if (is.numeric(v)) updateNumericInput(session, key, value = v)
       else updateTextInput(session, key, value = v)
@@ -1064,6 +1085,16 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
     tryCatch(list(value = pc_analyze(n, s$method, s$group1, s$group2, s), error = NULL),
              error = function(e) list(value = NULL, error = conditionMessage(e)))
   })
+  xy_comparison_state<-reactive(tryCatch(list(value=pc_xy_comparisons(normalized(),settings()),error=NULL),error=function(e) list(value=NULL,error=conditionMessage(e))))
+  graph_analysis<-reactive(pc_xy_attach_comparisons(analysis_state()$value,xy_comparison_state()$value))
+  output$has_graph_comparison_p <- renderText(if(settings()$graph!="residual" && pc_comparison_p_available(graph_analysis())) "true" else "false")
+  outputOptions(output,"has_graph_comparison_p",suspendWhenHidden=FALSE)
+  output$xy_comparison_status<-renderUI({
+    state<-xy_comparison_state()
+    if(!is.null(state$error)) return(div(class="analysis-error",state$error))
+    r<-state$value;if(is.null(r)) return(NULL)
+    p(class="muted",paste0(r$tested," / ",r$family_size," X values tested; ",sum(r$table$p<=.05,na.rm=TRUE)," significant after ",r$correction_label,". Full results and unavailable-test reasons are in Comparisons & model details and the CSV."))
+  })
   observe({
     s <- settings()
     session$sendCustomMessage("rdatacraft-figure-size", list(width = s$width / 25.4, height = s$height / 25.4))
@@ -1071,7 +1102,8 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
   output$figure <- renderImage({
     s <- settings(); file <- tempfile(fileext = ".svg")
     tryCatch({
-      writeLines(pc_graph_svg(pc_plot(normalized(), s, analysis_state()$value),s,c(graph_context(),list(table=raw()))),file,useBytes=TRUE)
+      a<-graph_analysis()
+      writeLines(pc_graph_svg(pc_plot(normalized(), s, a),s,c(graph_context(),list(table=raw(),comparison_p_available=s$graph!="residual" && pc_comparison_p_available(a)))),file,useBytes=TRUE)
       list(src = file, contentType = "image/svg+xml", alt = s$title)
     }, error = function(e) {unlink(file); validate(need(FALSE, conditionMessage(e)))})
   }, deleteFile = TRUE)
@@ -1089,7 +1121,7 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
     else if(n$layout=="survival") "Step curves show Kaplan–Meier estimates; + marks right-censored subjects."
     else if(n$layout=="contingency") "Counts and population proportions; inference uses the original count table."
     else if(n$layout=="xy") "Regression uses the original data scale. Repeated X values are averaged for the mean/error graph."
-    else if(s$graph %in% c("box","violin","violinbox","groupbox","groupviolin")) "Distribution and individual observations"
+    else if(s$graph %in% c("box","violin","violinbox","groupbox","groupviolin")) if(s$show_points) "Distribution and individual observations" else "Distribution summary"
     else paste("Arithmetic mean",switch(s$error,sd="± SD",sem="± SEM",ci="with 95% CI",none="")),
     if(s$show_p && s$log_y) " · P-value brackets hidden on logarithmic axes." else "")})
   output$figure_metrics <- renderUI({
@@ -1109,7 +1141,7 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
   output$analysis_metrics <- renderUI({ req(analysis_state()$value); pc_analysis_results_ui(analysis_state()$value,normalized(),settings()) })
   output$analysis_notes <- renderUI({ state <- analysis_state(); if (is.null(state$value)) p("Adjust the selected groups or table to run the analysis.") else tags$ul(lapply(state$value$notes, tags$li)) })
   output$descriptive_table <- renderUI({ state <- analysis_state(); if (!is.null(state$value)) pc_summary_results_ui(state$value,normalized(),settings()) else pc_result_table_ui(pc_transpose_results(pc_summary(normalized())),"Source observation summary",TRUE) })
-  output$model_details <- renderUI({req(analysis_state()$value);pc_model_details_ui(analysis_state()$value,normalized(),settings())})
+  output$model_details <- renderUI({r<-analysis_state()$value;tagList(if(!is.null(r)) pc_model_details_ui(r,normalized(),settings()),pc_xy_comparison_results_ui(xy_comparison_state()$value))})
   output$has_fit_residuals <- reactive({z<-analysis_state()$value$diagnostics;!is.null(z) && nrow(z)>0L})
   outputOptions(output,"has_fit_residuals",suspendWhenHidden=FALSE)
   output$model_downloads <- renderUI({
@@ -1119,7 +1151,8 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
       if(!is.null(r$effects) && nrow(r$effects)) downloadButton("export_effects","Factor effects CSV",class="btn-outline-secondary"),
       if(!is.null(r$at_risk) && nrow(r$at_risk)) downloadButton("export_risk","At risk CSV",class="btn-outline-secondary"),
       if(!is.null(r$expected) && nrow(r$expected)) downloadButton("export_expected","Expected counts CSV",class="btn-outline-secondary"),
-      if(!is.null(r$diagnostics) && nrow(r$diagnostics)) downloadButton("export_residuals","Fit residuals CSV",class="btn-outline-secondary"))
+      if(!is.null(r$diagnostics) && nrow(r$diagnostics)) downloadButton("export_residuals","Fit residuals CSV",class="btn-outline-secondary"),
+      if(!is.null(xy_comparison_state()$value)) downloadButton("export_xy_point_csv_analysis","Time-point CSV",class="btn-outline-secondary"))
   })
   output$residual_details <- DT::renderDT({
     req(analysis_state()$value$diagnostics);tab<-analysis_state()$value$diagnostics
@@ -1192,6 +1225,12 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
     if(identical(query$rdatacraft_new_study,"1")) create_blank_study()
   },once=TRUE)
   output$export_data <- downloadHandler(filename = "rdatacraft-data.csv", content = function(file) write.csv(raw(), file, row.names = FALSE, na = ""), contentType = "text/csv")
+  for(key in c("export_xy_point_csv","export_xy_point_csv_analysis")) local({id<-key
+    output[[id]]<-downloadHandler(filename="rdatacraft-xy-timepoint-comparisons.csv",content=function(file) {
+      state<-xy_comparison_state();if(!is.null(state$error)) stop(state$error);req(state$value)
+      write.csv(state$value$table,file,row.names=FALSE,na="",fileEncoding="UTF-8")
+    },contentType="text/csv")
+  })
   output$export_analysis_table <- downloadHandler(filename="rdatacraft-analysis-results.csv",content=function(file) {
     state<-analysis_state();if(!is.null(state$error)) stop(state$error)
     write.csv(pc_analysis_results_csv(state$value,normalized(),settings()),file,row.names=FALSE,na="",fileEncoding="UTF-8")
@@ -1212,7 +1251,7 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
   },contentType="text/csv")
   output$export_results <- downloadHandler(filename = "rdatacraft-analysis.json", content = function(file) {
     result <- analysis_state(); if (!is.null(result$error)) stop(result$error)
-    payload <- pc_public_result(result$value)
+    payload <- pc_public_result(graph_analysis())
     jsonlite::write_json(list(analysis = payload, project = snapshot()), file,
                          auto_unbox = TRUE, pretty = TRUE, na = "null", digits = 15)
   }, contentType = "application/json")
@@ -1222,7 +1261,7 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
     ggplot2::ggsave(figure, pc_plot(normalized(), s, state$value), device = svglite::svglite, width = s$width, height = s$height, units = "mm", bg = "white")
     svg <- paste(readLines(figure, warn = FALSE), collapse = "\n")
     svg <- sub("(?s)^.*?(<svg)", "\\1", svg, perl = TRUE)
-    writeLines(pc_report(state$value, raw(), s, figure_svg = svg), file, useBytes = TRUE)
+    writeLines(pc_report(graph_analysis(), raw(), s, figure_svg = svg), file, useBytes = TRUE)
   }, contentType = "text/html")
   output$export_summary <- downloadHandler(filename = "rdatacraft-summary.csv", content = function(file) {
     state <- analysis_state(); if (!is.null(state$error)) stop(state$error)
@@ -1245,7 +1284,7 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
     output[[paste0("export_", fmt)]] <- downloadHandler(filename = function() paste0("rdatacraft-figure.", fmt),
       content = function(file) {
         s <- settings(); state <- analysis_state()
-        if (!is.null(state$error) && s$show_p && s$method != "descriptive") stop("Resolve the analysis error or turn off P-value annotations before exporting.")
+        if (!is.null(state$error) && s$show_p && s$method != "descriptive") stop("Resolve the analysis error before exporting this graph.")
         device <- switch(fmt, svg = svglite::svglite, pdf = pc_pdf_device, png = pc_png_device)
         ggplot2::ggsave(file, pc_plot(normalized(), s, state$value), device = device,
                         width = s$width, height = s$height, units = "mm", dpi = s$dpi, bg = "white")

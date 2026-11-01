@@ -7,7 +7,7 @@ from pathlib import Path
 from runtime_inventory import manifest as runtime_manifest, write_notices
 from build_ai import build as build_ai
 ROOT=Path(__file__).resolve().parent.parent
-VERSION='0.4'
+VERSION='0.41'
 
 def portable_arch(system, arch):
     arch={'amd64':'x86_64','x64':'x86_64','aarch64':'arm64'}.get(arch.lower(),arch.lower())
@@ -93,10 +93,10 @@ def main():
     ai_target="x86_64-pc-windows-msvc" if system=="Windows" else ("aarch64-apple-darwin" if arch=="arm64" else "x86_64-apple-darwin")
     ai_output=build_ai(target=ai_target)
     destination.mkdir(parents=True)
-    for name in ['app.R','README.md','PLATFORM_SUPPORT.md','WORKFLOWS.md','RELEASE.md','LICENSE','CHANGELOG.md','dependencies.csv','dependencies.lock.json','source-manifest.json',
+    for name in ['app.R','README.md','CONTRIBUTING.md','CODE_OF_CONDUCT.md','CONTRIBUTORS.md','PLATFORM_SUPPORT.md','WORKFLOWS.md','RELEASE.md','LICENSE','CHANGELOG.md','dependencies.csv','dependencies.lock.json','source-manifest.json',
                  'Launch RDataCraft.cmd','Launch RDataCraft.ps1','Validate RDataCraft.cmd','Launch RDataCraft portable.command']:
         shutil.copy2(ROOT/name,destination/name)
-    for name in ['R','www','config','scripts','examples','licenses','tests']:
+    for name in ['R','www','config','scripts','examples','licenses','docs','tests']:
         shutil.copytree(ROOT/name,destination/name,symlinks=True,ignore=shutil.ignore_patterns('__pycache__','*.pyc','.DS_Store'))
     shutil.copytree(ROOT/'desktop/ai-helper',destination/'desktop/ai-helper',ignore=shutil.ignore_patterns('target','bin'))
     shutil.copytree(ai_output,destination/'desktop/ai-helper/bin',dirs_exist_ok=True)

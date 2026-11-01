@@ -41,9 +41,9 @@ pc_plot_raw <- function(normalized, settings, analysis = NULL) {
     p <- ggplot2::ggplot(z, ggplot2::aes(x = condition, y = mean, color = group, fill = group, group = group))
     if (s$graph == "groupbar") p <- p + ggplot2::geom_col(position = position, width = 0.65, alpha = 0.25, linewidth = 0.6)
     if (s$graph == "interaction") p <- p + ggplot2::geom_line(position = position, linewidth = 0.75)
+    if (s$show_points) p <- p + pc_observation_points(data = d, ggplot2::aes(y = value), position = ggplot2::position_jitterdodge(jitter.width = 0.12, dodge.width = 0.72, seed = 42), size = s$point_size * 0.85)
     if (s$error != "none") p <- p + ggplot2::geom_errorbar(ggplot2::aes(ymin = mean - margin, ymax = mean + margin), position = position, width = 0.12, na.rm = TRUE)
-    p <- p + ggplot2::geom_point(position = position, size = s$point_size + 0.3)
-    if (s$show_points && s$graph != "interaction") p <- p + ggplot2::geom_point(data = d, ggplot2::aes(y = value), position = ggplot2::position_jitterdodge(jitter.width = 0.12, dodge.width = 0.72, seed = 42), size = s$point_size * 0.85, alpha = 0.8)
+    p <- p + pc_summary_points(position = position, size = s$point_size + 0.3)
     if (s$show_p && !is.null(analysis) && nrow(analysis$comparisons)) p <- p + ggplot2::labs(caption = "Corrected within-level comparisons and confidence intervals: see Analysis results")
   } else if (n$layout == "xy") {
     if (s$graph == "residual") {
@@ -66,10 +66,10 @@ pc_plot_raw <- function(normalized, settings, analysis = NULL) {
         z$segment <- interaction(z$group,ave(!is.finite(z$margin),z$group,FUN=cumsum),drop=TRUE)
         p <- p + ggplot2::geom_ribbon(data=z[is.finite(z$margin),],ggplot2::aes(ymin=mean-margin,ymax=mean+margin,fill=group,group=segment),colour=NA,alpha=.2,show.legend=FALSE) + ggplot2::scale_fill_manual(values=colors)
       }
+      if (s$show_points) p <- p + pc_observation_points(data = d, ggplot2::aes(y = value), size = s$point_size * 0.7, show.legend = FALSE)
       if (pc_xy_connects(s)) p <- p + ggplot2::geom_line(linewidth = 0.7)
-      p <- p + ggplot2::geom_point(size = s$point_size)
+      p <- p + pc_summary_points(size = s$point_size)
       if (s$graph != "xyband" && s$error != "none") p <- p + ggplot2::geom_errorbar(ggplot2::aes(ymin = mean - margin, ymax = mean + margin), width = diff(range(d$x)) * 0.012, na.rm = TRUE)
-      if (s$show_points) p <- p + ggplot2::geom_point(data = d, ggplot2::aes(y = value), size = s$point_size * 0.7, alpha = 0.45, show.legend = FALSE)
       if (s$graph == "xyband") p <- p + ggplot2::labs(caption=pc_xy_band_caption(n,s))
     }
   } else {
@@ -117,8 +117,11 @@ StatStepribbon <- ggplot2::ggproto("StatStepribbon", ggplot2::Stat,
 
 
 pc_plot <- function(normalized, settings, analysis = NULL) {
+  pointwise<-pc_xy_comparisons(normalized,settings)
+  analysis<-pc_xy_attach_comparisons(analysis,pointwise)
   p <- pc_plot_raw(normalized, settings, analysis)
   p <- pc_xy_fitted_curves(p, normalized, settings, analysis)
+  p <- pc_xy_comparison_layers(p,normalized,settings,pointwise,analysis)
   p <- pc_format_details(pc_format_axes(p, normalized, settings), normalized, settings)
   if(normalized$layout!="multiple") p <- pc_format_series(p,normalized,settings)
   pc_validate_axis_lengths(p,settings)

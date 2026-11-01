@@ -58,8 +58,8 @@ with tempfile.TemporaryDirectory() as folder:
     check(blocked and not (Path(folder)/record['archive']).exists(),
           'a changed source archive still blocks the release instead of being accepted')
 
-association_install = '\n'.join(windows_associations('0.4'))
-association_remove = '\n'.join(windows_associations('0.4',uninstall=True))
+association_install = '\n'.join(windows_associations('0.41'))
+association_remove = '\n'.join(windows_associations('0.41',uninstall=True))
 check(all(ext in association_install and ext in association_remove for ext in ('.rdcraft','.rdatacraft')),
       'future Windows setup registers both study extensions and removes its own registrations')
 check('RDataCraftDocument.ico' in association_install and '"%1' in association_install.replace('$\\"','"'),

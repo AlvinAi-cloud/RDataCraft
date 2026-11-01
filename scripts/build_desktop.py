@@ -13,7 +13,7 @@ from runtime_inventory import write_notices
 from build_ai import build as build_ai
 
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = "0.4"
+VERSION = "0.41"
 
 
 def run(*args):
@@ -83,9 +83,9 @@ def main():
     backend = resources / "RDataCraft"
     macos.mkdir(parents=True, exist_ok=True)
     backend.mkdir(parents=True, exist_ok=True)
-    for name in ("app.R", "README.md", "PLATFORM_SUPPORT.md", "WORKFLOWS.md", "RELEASE.md", "LICENSE", "CHANGELOG.md", "dependencies.csv", "dependencies.lock.json", "source-manifest.json"):
+    for name in ("app.R", "README.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "CONTRIBUTORS.md", "PLATFORM_SUPPORT.md", "WORKFLOWS.md", "RELEASE.md", "LICENSE", "CHANGELOG.md", "dependencies.csv", "dependencies.lock.json", "source-manifest.json"):
         shutil.copy2(ROOT / name, backend / name)
-    for name in ("R", "www", "config", "scripts", "tests", "examples", "licenses", "runtime", "desktop"):
+    for name in ("R", "www", "config", "scripts", "tests", "examples", "licenses", "docs", "runtime", "desktop"):
         if name == "runtime":
             shutil.copytree(runtime, backend / name, symlinks=True,
                             ignore=shutil.ignore_patterns(".DS_Store", "__pycache__", "*.pyc"))

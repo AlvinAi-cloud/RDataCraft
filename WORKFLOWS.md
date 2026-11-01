@@ -162,3 +162,25 @@ New study filenames default to `.rdcraft`. `.rdatacraft` remains readable, and
 Save preserves an existing filename. Save As suggests `.rdcraft`. Desktop packages
 include document icons and associations for both formats; Windows respects any
 protected default-app choice already selected by the user.
+
+## XY comparisons at each X in v0.41
+
+Open Graph → Figure settings → X-value comparisons and enable the calculation.
+Choose two different Y series. Independent, two-sided Welch t tests use raw
+replicates at identical numeric X values, with at least two observations per
+series per X. Repeated X rows and replicate subcolumns are supported. Holm is
+the default correction across all entered X values; Bonferroni and no correction
+are explicit alternatives. Missing/non-estimable tests have no P value, remain
+in the correction family and are documented in the results.
+
+Appearance controls numeric or star labels. Only significant X values are
+labeled by default; turn that option off to include nonsignificant labels.
+Fitted-curve display and these comparisons are independent. Comparisons & model
+details and Time-point CSV retain raw/adjusted P values, counts, mean differences
+and individual 95% confidence intervals. The tests do not compare fitted curves
+or estimate treatment-by-time interactions. Use a suitable Advanced R analysis
+for matched observations, repeated measurements or longitudinal models.
+
+Comparison-enabled studies use schema 13 and require v0.41 or later. The nine
+palette presets use the same colors in Figure settings and direct formatting.
+Comparison-P controls are hidden when no finite comparison P values exist.

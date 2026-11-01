@@ -1,0 +1,71 @@
+app<-source('app.R')$value
+checks<-0L
+check<-function(x,label){if(!isTRUE(x))stop('FAIL: ',label,call.=FALSE);checks<<-checks+1L;cat('PASS:',label,'\n')}
+near<-function(x,y)isTRUE(all.equal(as.numeric(x),as.numeric(y),tolerance=1e-10))
+x<-rep(1:4,each=3)
+tab<-pc_check_table(data.frame(X=x,A=c(1,2,3,2,3,4,3,4,5,4,5,6),B=c(1.1,2.1,3.1,8,9,10,10,11,12,4.1,5.1,6.1)))
+n<-pc_normalize(tab,'xy');s<-pc_defaults();s$layout<-'xy';s$graph<-'xymean';s$method<-'linear';s$group1<-'A';s$group2<-'B';s$xy_connections<-'none';s$xy_compare<-TRUE;s$annotation<-'stars'
+r<-pc_xy_comparisons(n,s)
+for(i in 1:4){
+ z<-n$data[n$data$x==i,];tt<-t.test(z$value[z$group=='A'],z$value[z$group=='B'])
+ check(near(r$table$p_raw[i],tt$p.value) && near(r$table$ci_low[i],tt$conf.int[1]) && near(r$table$df[i],tt$parameter),paste('X',i,'matches independent R Welch inference'))
+}
+check(near(r$table$p,p.adjust(r$table$p_raw,'holm',n=4)),'Holm correction is applied across the full X family')
+check(all(r$table$n1==3 & r$table$n2==3),'repeated X rows supply observed replicates')
+a<-pc_analyze(n,'linear','A','B',s);copy<-a
+is_label<-function(p)which(vapply(p$layers,function(l)inherits(l$geom,'GeomText'),logical(1)))
+p<-pc_plot(n,s,a);labels<-p$layers[[is_label(p)]]$data
+check(identical(labels$x,c(2,3)) && identical(labels$label,c('**','**')),'only corrected significant X values receive stars by default')
+check(all(labels$y>vapply(labels$x,function(x)max(n$data$value[n$data$x==x]),numeric(1))),'X-value annotations appear above the observations')
+check(identical(a,copy),'X comparisons do not mutate the fitted model or its parameters')
+check(!length(is_label(pc_plot(n,modifyList(s,list(show_p=FALSE)),a))),'the P-value checkbox hides labels while retaining computed tests')
+check(length(is_label(pc_plot(n,modifyList(s,list(xy_show_fit=FALSE)),a)))==1,'hiding fitted curves retains X-value comparison labels')
+all_labels<-pc_plot(n,modifyList(s,list(xy_compare_significant_only=FALSE)),a)
+check(nrow(all_labels$layers[[is_label(all_labels)]]$data)==4,'nonsignificant X values can also be labeled')
+numeric<-pc_plot(n,modifyList(s,list(annotation='p')),a)
+check(all(grepl('adj. p',numeric$layers[[is_label(numeric)]]$data$label,fixed=TRUE)),'numeric labels identify adjusted P values')
+for(correction in c('bonferroni','none'))check(near(pc_xy_comparisons(n,modifyList(s,list(xy_compare_correction=correction)))$table$p,p.adjust(r$table$p_raw,correction,n=4)),paste(correction,'matches R p.adjust'))
+missing<-tab;missing[4:6,'B']<-NA_character_;rm<-pc_xy_comparisons(pc_normalize(missing,'xy'),s)
+check(rm$table$status[2]=='Not tested' && is.na(rm$table$p[2]) && rm$table$n2[2]==0,'unavailable observations have no invented P value')
+ok<-is.finite(rm$table$p_raw)
+check(near(rm$table$p[ok],p.adjust(rm$table$p_raw[ok],'holm',n=4)),'untestable X values remain in the correction family')
+both_missing<-tab;both_missing[4:6,c('A','B')]<-NA_character_
+rb<-pc_xy_comparisons(pc_normalize(both_missing,'xy'),s)
+check(rb$family_size==4L && rb$table$n1[2]==0 && rb$table$n2[2]==0 && is.na(rb$table$p[2]),'entered X values with no observations in either series remain visible and in the family')
+unequal<-tab;unequal[4,'B']<-NA_character_;un<-pc_normalize(unequal,'xy');ru<-pc_xy_comparisons(un,s)
+tt<-t.test(c(2,3,4),c(9,10))
+check(ru$table$n2[2]==2 && near(ru$table$p_raw[2],tt$p.value) && near(ru$table$df[2],tt$parameter),'unequal observed sample sizes retain the correct Welch uncertainty')
+one<-pc_check_table(data.frame(X=1:4,A=1:4,B=2:5));ro<-pc_xy_comparisons(pc_normalize(one,'xy'),s)
+check(all(is.na(ro$table$p)) && ro$tested==0L,'single means without observed replicates cannot create significance tests')
+constant<-pc_normalize(pc_check_table(data.frame(X=rep(1,3),A=rep(2,3),B=rep(4,3))),'xy')
+check(pc_xy_comparisons(constant,s)$table$status=='Not tested','non-estimable zero-variance tests are reported without fabricated values')
+wide<-pc_check_table(data.frame(X=1:4,'A [rep 1]'=c(1,2,3,4),'A [rep 2]'=c(2,3,4,5),'A [rep 3]'=c(3,4,5,6),'B [rep 1]'=c(1.1,8,10,4.1),'B [rep 2]'=c(2.1,9,11,5.1),'B [rep 3]'=c(3.1,10,12,6.1),check.names=FALSE))
+check(near(pc_xy_comparisons(pc_normalize(wide,'xy'),s)$table$p,r$table$p),'side-by-side replicate subcolumns and repeated X rows give the same results')
+check(near(pc_xy_comparisons(n,modifyList(s,list(fit_replicates='mean')))$table$p,r$table$p),'fitting means never substitutes fitted values for test replicates')
+check(is.null(pc_xy_comparisons(n,modifyList(s,list(xy_compare=FALSE)))),'pointwise inference is opt-in')
+check(inherits(try(pc_xy_comparisons(n,modifyList(s,list(xy_compare_group1='missing'))),silent=TRUE),'try-error'),'missing configured series cannot silently select another pair')
+project<-pc_project(tab,s);loaded<-pc_decode_project(project)
+check(project$schema_version==13L && loaded$settings$xy_compare && loaded$settings$xy_compare_correction=='holm','enabled X comparisons save with explicit schema support')
+renamed<-tab;names(renamed)[2]<-'Renamed'
+configured<-modifyList(s,list(xy_compare_group1='A',xy_compare_group2='B'));renamed_settings<-pc_rename_header_settings(configured,tab,renamed)
+check(renamed_settings$xy_compare_group1=='Renamed' && renamed_settings$xy_compare_group2=='B','column renaming preserves the selected comparison identities')
+attached<-pc_xy_attach_comparisons(a,r)
+check(pc_comparison_p_available(attached) && identical(attached$parameters,a$parameters),'valid X comparisons enable P controls without replacing fit inference')
+check(grepl('Comparisons at each X value',pc_report(attached,tab,s),fixed=TRUE),'HTML reports include the full X-value tests')
+shiny::testServer(app,{
+ raw(tab);document_open(TRUE);do.call(session$setInputs,s);session$flushReact()
+ check(xy_comparison_state()$value$tested==4L && identical(output$has_graph_comparison_p,'true'),'the live server computes X tests and enables appropriate P controls')
+ saved<-read.csv(output$export_xy_point_csv,check.names=FALSE)
+ check(near(saved$p,r$table$p) && all(saved$n1==3),'CSV exports full-precision P values and source sample sizes')
+ check(grepl('Comparisons at each X value',output$model_details$html,fixed=TRUE),'Analysis model details include the pointwise results')
+ session$setInputs(xy_compare=FALSE);session$flushReact()
+ check(is.null(xy_comparison_state()$value) && identical(output$has_graph_comparison_p,'false'),'turning comparisons off removes their P controls while preserving the fit')
+})
+dir.create('artifacts/xy-comparisons-041',recursive=TRUE,showWarnings=FALSE)
+for(fmt in c('svg','pdf','png')){
+ file<-paste0('artifacts/xy-comparisons-041/significant-X.',fmt)
+ ggplot2::ggsave(file,p,device=switch(fmt,svg=svglite::svglite,pdf=pc_pdf_device,png=pc_png_device),width=100,height=90,units='mm',dpi=160)
+ check(file.info(file)$size>1000,paste('X significance labels export as',fmt))
+}
+pc_write_project(project,'artifacts/xy-comparisons-041/XY significance review.rdcraft')
+cat(checks,'X-value comparison checks passed.\n')

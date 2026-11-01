@@ -182,6 +182,7 @@ pc_normalize <- function(tab, layout = "column", allow_empty = FALSE, allow_inco
   data$group <- factor(data$group, levels = groups)
   list(data = data, groups = groups, missing = missing, layout = layout,
        rows = nrow(tab), x_label = if (layout == "xy") names(tab)[1] else "Group",
+       x_values = if (layout == "xy") values[[1]] else numeric(),
        replicates = if (layout == "xy") xy$n else 1L)
 }
 

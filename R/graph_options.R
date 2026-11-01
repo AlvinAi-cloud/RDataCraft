@@ -53,13 +53,14 @@ pc_plot_additional <- function(n,s,analysis=NULL) {
         data.frame(group=g,value=m,low=q[1],high=q[2])
       })); z$group <- factor(z$group,levels=n$groups)
       if(s$log_y && any(z$low<=0,na.rm=TRUE)) stop("An interval crosses zero; use a linear Y axis.",call.=FALSE)
-      p <- ggplot2::ggplot(z,ggplot2::aes(x=group,y=value,color=group,fill=group)) + ggplot2::geom_errorbar(ggplot2::aes(ymin=low,ymax=high),width=.16,na.rm=TRUE) + ggplot2::geom_point(size=s$point_size+1)
-      if (s$show_points) p <- p + ggplot2::geom_point(data=d,position=ggplot2::position_jitter(width=.1,height=0,seed=42),size=s$point_size,alpha=.55)
+      p <- ggplot2::ggplot(z,ggplot2::aes(x=group,y=value,color=group,fill=group))
+      if (s$show_points) p <- p + pc_observation_points(data=d,position=ggplot2::position_jitter(width=.1,height=0,seed=42),size=s$point_size)
+      p <- p + ggplot2::geom_errorbar(ggplot2::aes(ymin=low,ymax=high),width=.16,na.rm=TRUE) + pc_summary_points(size=s$point_size+1)
       p <- p + ggplot2::labs(caption=if(graph=="median") "Median and interquartile range (25th–75th percentiles)" else NULL)
     } else if(graph=="violinbox") {
       if(any(table(d$group)<2)) stop("Violin plots need at least two observations per group.",call.=FALSE)
       p <- p + ggplot2::geom_violin(trim=TRUE,alpha=.18,width=.8) + ggplot2::geom_boxplot(width=.16,outlier.shape=NA,alpha=.5)
-      if(s$show_points) p <- p + ggplot2::geom_point(position=ggplot2::position_jitter(width=.08,height=0,seed=42),size=s$point_size,alpha=.7)
+      if(s$show_points) p <- p + pc_observation_points(position=ggplot2::position_jitter(width=.08,height=0,seed=42),size=s$point_size)
     } else if(graph=="density") {
       if(any(table(d$group)<2)) stop("Density curves need at least two observations per group.",call.=FALSE)
       if(s$log_y || s$log_x) stop("Use linear axes for density distributions.",call.=FALSE)
@@ -75,7 +76,7 @@ pc_plot_additional <- function(n,s,analysis=NULL) {
       p <- p + ggplot2::geom_area(position="identity",alpha=.2)
       if(pc_xy_connects(s)) p <- p + ggplot2::geom_line(linewidth=.7)
     } else if(pc_xy_connects(s)) p <- p + ggplot2::geom_step(direction="hv",linewidth=.75)
-    if(s$show_points) p <- p + ggplot2::geom_point(size=s$point_size)
+    if(s$show_points) p <- p + pc_observation_points(data=d,size=s$point_size)
     p <- p + ggplot2::labs(caption="Mean response at each X; source replicates remain unchanged")
   } else {
     if(graph=="groupheat") {
@@ -87,8 +88,8 @@ pc_plot_additional <- function(n,s,analysis=NULL) {
       if(graph=="groupviolin") {
         if(any(table(d$condition,d$group)<2)) stop("Grouped violins need at least two observations per factor combination.",call.=FALSE)
         p <- p + ggplot2::geom_violin(position=ggplot2::position_dodge(.8),alpha=.2,trim=TRUE)
-      } else p <- p + ggplot2::geom_boxplot(position=ggplot2::position_dodge(.8),width=.65,outlier.shape=if(s$show_points) NA else 19,alpha=.22)
-      if(s$show_points) p <- p + ggplot2::geom_point(position=ggplot2::position_jitterdodge(jitter.width=.1,dodge.width=.8,seed=42),size=s$point_size,alpha=.8)
+      } else p <- p + ggplot2::geom_boxplot(position=ggplot2::position_dodge(.8),width=.65,outlier.shape=NA,alpha=.22)
+      if(s$show_points) p <- p + pc_observation_points(position=ggplot2::position_jitterdodge(jitter.width=.1,dodge.width=.8,seed=42),size=s$point_size)
     }
   }
   if(n$layout=="column" && graph!="density" && isTRUE(s$show_p) && !s$log_y && !is.null(analysis) && nrow(analysis$comparisons)) {

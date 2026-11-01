@@ -42,7 +42,7 @@ pc_format_series <- function(plot, n, s) {
     # Preserve mean markers, censor crosses, pair connectors and annotation layers.
     has_group <- if (is.data.frame(layer$data)) "group" %in% names(layer$data) else isTRUE(layer$inherit.aes) && is.data.frame(plot$data) && "group" %in% names(plot$data)
     if (!has_group) next
-    if (inherits(layer$geom,"GeomPoint") && !identical(layer$aes_params$shape,95) && n$layout != "survival") {
+    if (inherits(layer$geom,"GeomPoint") && !identical(layer$pc_role,"summary") && !identical(layer$aes_params$shape,95) && n$layout != "survival") {
       points_mapped <- TRUE
       layer$mapping$shape <- ggplot2::aes(shape = group)$shape
       layer$mapping$size <- ggplot2::aes(size = group)$size

@@ -98,7 +98,7 @@ pc_format_axes <- function(plot, normalized, settings) {
   if (isTRUE(settings$override_y_title)) plot <- plot + ggplot2::labs(y = settings$y_label)
   for (i in seq_along(plot$layers)) {
     layer <- plot$layers[[i]]
-    if (!is.null(settings$point_shape) && settings$point_shape > 0 && inherits(layer$geom, "GeomPoint") && !identical(layer$aes_params$shape, 95))
+    if (!is.null(settings$point_shape) && settings$point_shape > 0 && inherits(layer$geom, "GeomPoint") && !identical(layer$pc_role,"summary") && !identical(layer$aes_params$shape, 95))
       plot$layers[[i]]$aes_params$shape <- settings$point_shape
     if (!is.null(settings$line_width) && settings$line_width > 0 && (inherits(layer$geom, "GeomLine") || inherits(layer$geom, "GeomStep")))
       plot$layers[[i]]$aes_params$linewidth <- settings$line_width
