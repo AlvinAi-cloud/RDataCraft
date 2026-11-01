@@ -64,7 +64,8 @@ def main(publish=False):
                 raise ValueError('Refusing to move the draft tag to a divergent commit.')
             api(f'repos/{repo}/git/refs/tags/{tag}', dict(sha=sha, force=False))
     notes = Path('artifacts/release-notes.md')
-    notes.write_text(
+    # Binary UTF-8 keeps LF line endings identical on Windows and Unix hosts.
+    notes.write_bytes((
         f'RDataCraft {tag}\n\n'
         'R-powered scientific plotting and statistics for Mac and Windows.\n\n'
         'This release fixes individual-observation visibility and draws raw points in lighter series colors, '
@@ -88,7 +89,7 @@ def main(publish=False):
         'Studies using the XY display options introduced in v0.32 require v0.32 or later. Corresponding source, dependency notices, '
         'SHA-256 checksums and the matching validation report accompany these installers. '
         'Live AI-provider account access and vector paste into external design apps are not certified by these automated tests.\n\n'
-        f'Built from `{sha}`.\n', encoding='utf-8')
+        f'Built from `{sha}`.\n').encode('utf-8'))
     payload = dict(tag_name=tag, target_commitish=sha, name='RDataCraft ' + tag,
                    body=notes.read_text(encoding='utf-8'), draft=True)
     if existing is None:

@@ -1,6 +1,6 @@
 # v0.41
 
-- Write and read release notes explicitly as UTF-8 so Windows source validation handles Unicode independently of its default text encoding. Cover the legacy Windows cp1252 locale in release-publication tests.
+- Write release notes as UTF-8 bytes with LF line endings and read explicitly as UTF-8, independent of Windows text defaults. Cover both the legacy cp1252 locale and CRLF translation in release-publication tests.
 - Make native graph validation wait for the applied palette, symbol, interval and current graph token; palette names in the preset inventory cannot falsely signal that formatting has finished.
 - Honor Show individual observations on column and XY point graphs, including paired views; retain summary markers and error bars when observations are hidden.
 - Draw individual observations in lighter series colors, below full-strength summary markers and intervals. Preserve summary markers when customizing individual symbols.

@@ -299,10 +299,13 @@ with tempfile.TemporaryDirectory() as temporary:
             release = dict(id=7, tag_name='v'+version, target_commitish=env['GITHUB_SHA'], draft=True)
             original_open = Path.open
             def windows_text_open(path, mode='r', *args, **kwargs):
-                # Reproduce a Windows legacy text locale on every test host.
-                # Explicit UTF-8 must protect both the write and the read.
-                if path.name == 'release-notes.md' and 'b' not in mode and kwargs.get('encoding') in (None, 'locale'):
-                    kwargs['encoding'] = 'cp1252'
+                # Reproduce both a Windows legacy locale and CRLF translation.
+                # UTF-8 bytes and decoded text must match on every test host.
+                if path.name == 'release-notes.md' and 'b' not in mode:
+                    if kwargs.get('encoding') in (None, 'locale'):
+                        kwargs['encoding'] = 'cp1252'
+                    if any(flag in mode for flag in ('w', 'a', 'x')) and kwargs.get('newline') is None:
+                        kwargs['newline'] = '\r\n'
                 return original_open(path, mode, *args, **kwargs)
             def command(args, **kwargs):
                 if args[:2] == ['gh', 'api']:
@@ -346,8 +349,9 @@ with tempfile.TemporaryDirectory() as temporary:
         check(not publication_fixture(False), 'default release preparation leaves a draft unpublished')
         check(publication_fixture(True), 'new draft is verified by numeric ID and published with the tested tag')
         check(publication_fixture(True,existing=True), 'existing unpublished draft can be completed without a tag lookup')
-        check((root/'artifacts/release-notes.md').read_bytes().decode('utf-8').find('\u2192') >= 0,
-              'release notes retain Unicode through UTF-8 write/read under a Windows cp1252 default')
+        note_bytes = (root/'artifacts/release-notes.md').read_bytes()
+        check('\u2192' in note_bytes.decode('utf-8') and b'\r' not in note_bytes,
+              'release notes retain exact UTF-8 and LF bytes under Windows cp1252 and CRLF defaults')
         for problem in ('digest','missing','tag'):
             check(not publication_fixture(True,problem), 'publication rejects remote '+problem+' mismatch')
     finally:
