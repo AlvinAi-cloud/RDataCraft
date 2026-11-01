@@ -1,6 +1,7 @@
 # v0.41
 
 - Write and read release notes explicitly as UTF-8 so Windows source validation handles Unicode independently of its default text encoding. Cover the legacy Windows cp1252 locale in release-publication tests.
+- Make native graph validation wait for the applied palette, symbol, interval and current graph token; palette names in the preset inventory cannot falsely signal that formatting has finished.
 - Honor Show individual observations on column and XY point graphs, including paired views; retain summary markers and error bars when observations are hidden.
 - Draw individual observations in lighter series colors, below full-strength summary markers and intervals. Preserve summary markers when customizing individual symbols.
 - Expand categorical palette presets to nine: RDataCraft, Colorblind accessible, Monochrome, Vivid, Ocean, Warm, Earth, Pastel and High contrast. Use the same presets in Figure settings and direct data formatting.
