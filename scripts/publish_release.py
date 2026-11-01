@@ -88,9 +88,9 @@ def main(publish=False):
         'Studies using the XY display options introduced in v0.32 require v0.32 or later. Corresponding source, dependency notices, '
         'SHA-256 checksums and the matching validation report accompany these installers. '
         'Live AI-provider account access and vector paste into external design apps are not certified by these automated tests.\n\n'
-        f'Built from `{sha}`.\n')
+        f'Built from `{sha}`.\n', encoding='utf-8')
     payload = dict(tag_name=tag, target_commitish=sha, name='RDataCraft ' + tag,
-                   body=notes.read_text(), draft=True)
+                   body=notes.read_text(encoding='utf-8'), draft=True)
     if existing is None:
         release = api(f'repos/{repo}/releases', payload, method='POST')
     else:

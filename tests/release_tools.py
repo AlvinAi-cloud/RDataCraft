@@ -297,6 +297,13 @@ with tempfile.TemporaryDirectory() as temporary:
         def publication_fixture(publish, problem=None, existing=False):
             state = dict(published=False, tag=False, assets_checked=False)
             release = dict(id=7, tag_name='v'+version, target_commitish=env['GITHUB_SHA'], draft=True)
+            original_open = Path.open
+            def windows_text_open(path, mode='r', *args, **kwargs):
+                # Reproduce a Windows legacy text locale on every test host.
+                # Explicit UTF-8 must protect both the write and the read.
+                if path.name == 'release-notes.md' and 'b' not in mode and kwargs.get('encoding') in (None, 'locale'):
+                    kwargs['encoding'] = 'cp1252'
+                return original_open(path, mode, *args, **kwargs)
             def command(args, **kwargs):
                 if args[:2] == ['gh', 'api']:
                     if problem == 'tag':
@@ -321,12 +328,15 @@ with tempfile.TemporaryDirectory() as temporary:
                     assert state['tag']
                     return dict(object=dict(type='commit',sha=env['GITHUB_SHA']))
                 if payload is not None:
+                    if 'body' in payload:
+                        assert 'Figure settings \u2192 XY lines & fitted curves' in payload['body']
+                        assert payload['body'] == (root/'artifacts/release-notes.md').read_bytes().decode('utf-8')
                     if payload.get('draft') is False:
                         assert state['assets_checked'] and state['tag']
                         state['published'] = True
                     release.update(payload)
                 return release
-            with patch.dict(os.environ, env), patch.object(publish_release, 'api', side_effect=remote), patch.object(publish_release.subprocess, 'run', side_effect=command):
+            with patch.dict(os.environ, env), patch.object(publish_release, 'api', side_effect=remote), patch.object(publish_release.subprocess, 'run', side_effect=command), patch.object(Path, 'open', windows_text_open):
                 try: publish_release.main(publish=publish)
                 except ValueError:
                     if not problem: raise
@@ -336,6 +346,8 @@ with tempfile.TemporaryDirectory() as temporary:
         check(not publication_fixture(False), 'default release preparation leaves a draft unpublished')
         check(publication_fixture(True), 'new draft is verified by numeric ID and published with the tested tag')
         check(publication_fixture(True,existing=True), 'existing unpublished draft can be completed without a tag lookup')
+        check((root/'artifacts/release-notes.md').read_bytes().decode('utf-8').find('\u2192') >= 0,
+              'release notes retain Unicode through UTF-8 write/read under a Windows cp1252 default')
         for problem in ('digest','missing','tag'):
             check(not publication_fixture(True,problem), 'publication rejects remote '+problem+' mismatch')
     finally:
