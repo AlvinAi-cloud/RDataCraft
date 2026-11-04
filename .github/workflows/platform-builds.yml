@@ -14,7 +14,7 @@ on:
     branches: [main]
 concurrency:
   group: rdatacraft-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   sources:
     runs-on: ubuntu-24.04
@@ -251,12 +251,12 @@ jobs:
       - run: rustup update stable --no-self-update
       - run: python scripts/build_ai.py --test
       - run: python scripts/build_ai.py
-      - name: Check the AI bridge with synthetic providers
-        run: python tests/ai_bridge.py --helper artifacts/ai-helper/x86_64/rdatacraft-ai
       - name: Build the app R library against Ubuntu R
         env:
           MAKEFLAGS: -j2
         run: Rscript --vanilla scripts/install.R
+      - name: Check the AI bridge with synthetic providers
+        run: python tests/ai_bridge.py --helper artifacts/ai-helper/x86_64/rdatacraft-ai
       - run: ./scripts/rscript.sh scripts/collect_licenses.R
       - run: python scripts/fetch_sources.py
       - run: python scripts/package_linux.py
