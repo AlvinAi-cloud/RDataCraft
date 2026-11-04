@@ -4,7 +4,7 @@ import json,os,platform,shutil,subprocess,sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 VERSION=json.loads((ROOT/'config/release.json').read_text())['version']
-DEPENDENCIES=['libc6 (>= 2.39)','libstdc++6','libgcc-s1','r-base-core (>= 4.3.3)','r-base-core (<< 4.4)','r-recommended','python3','python3-gi','python3-gi-cairo','gir1.2-gtk-3.0','gir1.2-webkit2-4.1','xdg-utils','fonts-dejavu-core','libcurl4t64','libxml2','libfontconfig1','libfreetype6','libharfbuzz0b','libfribidi0','libpng16-16t64','libjpeg-turbo8','libtiff6','libcairo2','libssl3t64']
+DEPENDENCIES=['libc6 (>= 2.39)','libstdc++6','libgcc-s1','libuv1t64','r-base-core (>= 4.3.3)','r-base-core (<< 4.4)','r-recommended','python3','python3-gi','python3-gi-cairo','gir1.2-gtk-3.0','gir1.2-webkit2-4.1','xdg-utils','fonts-dejavu-core','libcurl4t64','libxml2','libfontconfig1','libfreetype6','libharfbuzz0b','libfribidi0','libpng16-16t64','libjpeg-turbo8','libtiff6','libcairo2','libssl3t64']
 
 def main():
  if platform.system()!='Linux' or platform.machine()!='x86_64':raise SystemExit('Build the Ubuntu installer on an Ubuntu amd64 runner.')
