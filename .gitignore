@@ -9,6 +9,7 @@ Rplots.pdf
 /dist/
 /artifacts/
 /Codex handoff/
+*.deb
 *.app/
 *.dmg
 *.exe

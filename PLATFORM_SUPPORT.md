@@ -8,10 +8,10 @@ The native AppKit host supports both architectures. Build matching R runtimes wi
 
 ```
 python3 scripts/bootstrap.py --arch arm64 --runtime-root runtime-arm64
-python3 scripts/build_desktop.py --arch arm64 --runtime-root runtime-arm64 --output "dist/RDataCraft v0.41 Apple Silicon.app"
+python3 scripts/build_desktop.py --arch arm64 --runtime-root runtime-arm64 --output "dist/RDataCraft.app"
 
 python3 scripts/bootstrap.py --arch x86_64 --runtime-root runtime-intel
-python3 scripts/build_desktop.py --arch x86_64 --runtime-root runtime-intel --output "dist/RDataCraft v0.41.app"
+python3 scripts/build_desktop.py --arch x86_64 --runtime-root runtime-intel --output "dist/RDataCraft.app"
 ```
 
 Apple Silicon uses ARM R and ARM packages (no Rosetta requirement) and requires macOS 14 or newer with the current R runtime. Intel builds use Intel R/packages and require macOS 13 or newer with the current host toolchain. Build checks reject mismatches; `--allow-rosetta` is an explicit development fallback. Earlier v0.1 was an ARM host with Intel R under Rosetta.
@@ -24,7 +24,7 @@ Each New study opens another window with its own R engine. Closing an edited stu
 
 For source development, install official x64 R and the .NET 10 SDK, then run `Rscript --vanilla scripts/install.R`. The CMD launcher uses the native executable when packaged. Without it, the source launcher retains the optional local browser workflow. PowerShell execution follows the user's normal execution policy; the launcher does not bypass it.
 
-Double-click **Validate RDataCraft.cmd** to run the R regression suites with the bundled Windows engine, without installing Python or Node. It uses synthetic fixtures and writes logs plus `artifacts/validation-native-0.41.json`; it does not open or change user studies. This utility requires a Windows run to provide Windows execution evidence. The Python runner adds the JavaScript checks when Node is available.
+Double-click **Validate RDataCraft.cmd** to run the R regression suites with the bundled Windows engine, without installing Python or Node. It uses synthetic fixtures and writes logs plus `artifacts/validation-native-0.42.json`; it does not open or change user studies. This utility requires a Windows run to provide Windows execution evidence. The Python runner adds the JavaScript checks when Node is available.
 
 Build the portable bundle on Windows after installing matching dependencies:
 
@@ -41,3 +41,22 @@ The assistant's offline tools run on all three targets. The connected assistant 
 `.github/workflows/platform-builds.yml` defines separate Apple Silicon, Intel and Windows build/test jobs. Each job installs native packages, runs the complete numerical/workflow suite and packages its own artifact. It is a build recipe until it has actually run; a workflow file alone does not certify Windows or Intel hardware. Check the accompanying examination report for the platforms actually exercised in this session. Public distribution would additionally require Apple notarization and Windows code signing, which are not performed without the developer's signing credentials.
 
 Windows packages contain an x64 GUI executable and bundled Windows R. The host can be cross-compiled, but its embedded-window tests must run on Windows. Windows ARM is not included in the verified target set.
+
+## Ubuntu 24.04 LTS amd64 (v0.5)
+
+Download `RDataCraft-ubuntu-amd64.deb` and install through the Ubuntu package
+installer or `sudo apt install ./RDataCraft-ubuntu-amd64.deb`. Internet access is
+needed to resolve Ubuntu dependencies. Start RDataCraft from the applications menu
+or `rdatacraft`; it uses its own GTK/WebKit window and opens no external browser
+for the scientific workspace. File associations cover `.rdcraft` and `.rdatacraft`.
+
+The package includes the app and its R library; Ubuntu manages the compatible R
+4.3 engine, GTK and WebKit. It does not overwrite system R or silently build source
+packages from the app. Advanced R supports included or separately available packages;
+optional package installation in the app currently applies to Mac and Windows.
+Use SVG/PDF file export for vector transfer. Ubuntu ARM, 22.04 and other Linux
+distributions are not validated targets for this package.
+
+Build and validate with the Ubuntu job in `.github/workflows/platform-builds.yml`.
+The installer test runs its native UI from the actual read-only `/opt/rdatacraft`
+installation; a separate writable copy runs the numerical regression suite.

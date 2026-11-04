@@ -119,7 +119,8 @@ pc_r_runner <- function(root=getwd(),timeout=120) {
     finish()
   }
   cancel<-function() {if(is.null(worker)) NULL else finish('cancelled','Stopped by the user. No source observations were changed.')}
-  list(start=start,poll=poll,cancel=cancel,busy=function() !is.null(worker),cleanup=cleanup)
+  progress<-function() {if(is.null(worker)) return(NULL);list(seconds=as.numeric(difftime(Sys.time(),started,units='secs')),limit=limit,console=paste(pc_r_log(file.path(folder,'console.txt')),pc_r_log(file.path(folder,'process.log')),sep='\n'))}
+  list(start=start,poll=poll,cancel=cancel,busy=function() !is.null(worker),cleanup=cleanup,progress=progress)
 }
 pc_r_templates <- function() list(
  summary=list(title='Custom summaries and intervals',packages='',code='# data is an independent copy of the selected input table.\n# Convert or reshape explicitly when the study design requires it.\nnumeric_columns <- data[vapply(data, is.numeric, logical(1))]\nif (!length(numeric_columns)) stop("Choose a table with numeric measurements.")\nsummary_table <- do.call(rbind, lapply(names(numeric_columns), function(name) {\n  x <- stats::na.omit(numeric_columns[[name]])\n  data.frame(Variable=name, N=length(x), Mean=mean(x), SD=stats::sd(x))\n}))\nresult <- list(tables=list(Summary=summary_table),\n  plot=ggplot2::ggplot(summary_table, ggplot2::aes(x=Variable, y=Mean)) +\n    ggplot2::geom_point() + ggplot2::labs(title="Custom R summary"),\n  text="Descriptive results; no inferential test was selected.")'),

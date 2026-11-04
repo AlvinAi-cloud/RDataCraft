@@ -12,6 +12,11 @@ check(!dir.exists(user) && !'rdatacraftfixture' %in% loadedNamespaces(),'checkin
 check(!pc_pkg_script_info('message("install.packages(ignored)")')$installs && pc_pkg_script_info('utils::install.packages("x")')$installs,'installation detection distinguishes code from quoted text')
 check(fails(pc_r_script('install.packages("x");result<-list()')) && fails(pc_r_script('BiocManager::install("x")')),'analysis scripts direct package installation to the separate approval workflow')
 check(fails(pc_r_packages('https://example.com/code.R')) && fails(pc_r_packages('../anything')),'package requests accept names rather than arbitrary URLs or paths')
+if(identical(Sys.info()[['sysname']],'Linux')) {
+ check(fails(pc_pkg_type()),'Ubuntu refuses unapproved source builds rather than advertising binary package installation')
+ check(!dir.exists(user),'unsupported Ubuntu package installation leaves the user library unchanged')
+ restore_env();cat(checks,'checks passed; binary installation integration applies to Mac and Windows only.\n');quit(save='no',status=0)
+}
 # Build two original pure-R binary fixtures locally; no external packages are installed.
 installed<-file.path(fixture,'build-library');dir.create(installed,showWarnings=FALSE)
 make_package<-function(name,imports='',code) {

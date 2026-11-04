@@ -184,3 +184,42 @@ for matched observations, repeated measurements or longitudinal models.
 Comparison-enabled studies use schema 13 and require v0.41 or later. The nine
 palette presets use the same colors in Figure settings and direct formatting.
 Comparison-P controls are hidden when no finite comparison P values exist.
+
+## AI and Advanced R in v0.42
+
+The assistant keeps the conversation visible above the composer and reviewed
+operations below it. Each area scrolls independently. Send (or Cmd/Ctrl+Enter)
+submits the current message and sharing choice together. Values stay local unless
+**Include active table values and calculated results** is checked. Opening another
+study cancels pending replies, clears session history and turns value sharing off.
+
+For custom methods, ask for an R draft, then choose **Open in Advanced R**.
+The editor selects a snapshot of the table used to draft the script. Its input
+summary identifies the table and dimensions. Uncheck **Use the loaded draft /
+analysis input snapshot** to run against the active table instead. Historical
+results remain snapshots; they are not silently recomputed when data change.
+
+**Check script** checks R syntax and required-package availability without execution.
+It does not validate the scientific method or establish that code is safe. Check /
+install packages presents the exact missing-package proposal for approval; installing
+never runs the script. **Run reviewed script** executes locally, with live elapsed
+time/console and Stop. Templates and saved scripts cannot replace an editor draft
+while its R process is running.
+
+**Ask AI for help** opens a message containing the editor script and, when relevant,
+a bounded excerpt of the selected failed result. Review it before pressing Send.
+The assistant context still describes the active table; a message warns if the
+editor is using a saved snapshot that may differ. No account connection or model
+inference is required to use templates, script checks or R execution.
+
+## Updates and independent panels in v0.5
+
+AI account/model settings live in **AI → Accounts and Models…**. A disconnected
+assistant explains that path. Opening AI Assistant keeps Figure settings visible,
+tiled to its left; the Figure settings button independently controls that panel.
+
+**Check for Updates…** queries the latest stable public GitHub release only on
+request, compares it with the installed version and offers the matching installer.
+It sends no observations, AI credentials or file paths and installs nothing by
+itself. Download, close the app and install the update. Legacy version-named apps
+may need a one-time manual removal after verifying the new stable-name app.

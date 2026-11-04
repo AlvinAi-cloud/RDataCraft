@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <body>
-    <h1>RDataCraft help · v0.41</h1>
+    <h1>RDataCraft help · v0.5</h1>
     <p>Offline instructions for data entry, analysis and figures. In the app, Help provides search and access to the teaching examples.</p>
     <nav>
       <ul>
@@ -40,6 +40,9 @@
         </li>
         <li>
           <a href="#assistant">AI Assistant &amp; data privacy</a>
+        </li>
+        <li>
+          <a href="#updates">Check for Updates</a>
         </li>
         <li>
           <a href="#saving">Save, reopen &amp; work in several windows</a>
@@ -148,7 +151,7 @@
       <p class="inline-note">Review code before running: custom R runs locally with your account permissions. The separate process protects the app session from ordinary errors; it is not an operating-system security sandbox. Do not run untrusted code.</p>
       <p>Open examples/Advanced R teaching example.rdatacraft for original count and independent-group data with three saved drafts. No script runs when you open it.</p>
       <p>Examples: the summary template returns means and SD; custom rank comparison returns a rank test and interval; the GLM template fits count responses while accounting for treatment and batch. Edit its formula and verify dispersion/design assumptions. Mixed-effects or other package methods become available after you approve installation of compatible packages. Stop can cancel downloading or staging; incomplete app-managed changes are rolled back. Approvals apply only to the displayed list and are never saved as blanket permission.</p>
-      <p>AI workflow: request an Advanced R script, review the proposed script in the assistant, choose Open in Advanced R, then review and run. The AI never executes the proposed script automatically.</p>
+      <p>AI workflow: request an Advanced R script, review the proposed script in the assistant, choose Open in Advanced R, then review and run. The draft keeps its original table as an input snapshot. Uncheck the snapshot option to use the active table instead. Check script validates syntax and package availability without execution. Ask AI for help opens a draft message for you to review and send. The AI never executes the proposed script automatically.</p>
     </section>
     <section id="recovery">
       <h3>Package installation recovery</h3>
@@ -160,10 +163,17 @@
     </section>
     <section id="assistant">
       <h3>AI Assistant &amp; data privacy</h3>
-      <p>The assistant’s local tools work without a model. Open AI → Accounts and Models to connect your own ChatGPT account or an OpenAI, Claude, Gemini or compatible API service. Codex is not required. ChatGPT plan access depends on account eligibility and consent. Send shares your message, column names, graph settings and recent conversation. Table values and computed results are included only when Share active table values and computed results is checked. Review your data-sharing requirements before sending.</p>
+      <p>The assistant’s local tools work without a model. Open AI → Accounts and Models to connect your own ChatGPT account or an OpenAI, Claude, Gemini or compatible API service. Codex is not required. ChatGPT plan access depends on account eligibility and consent. Send shares your message, column names, graph settings and recent conversation. Table values and computed results are included only when Include active table values and calculated results is checked. Review your data-sharing requirements before sending.</p>
+      <p>Configure connections through AI → Accounts and Models…. Figure settings and AI Assistant remain visible side by side, with independent toolbar controls.</p>
+      <p>Conversation, the message composer and Operations &amp; results scroll independently. Cmd/Ctrl+Enter sends the current message. Opening another study clears the conversation, stops pending replies and turns table-value sharing off. Ask AI for help in Advanced R opens a draft message; review and Send explicitly.</p>
       <p>A model response is a proposal. Review the preview before applying supported changes to a new table copy. Advanced R proposals open as drafts; only Run reviewed script executes code. Missing packages require a separate Approve &amp; install action.</p>
       <p>Custom R and downloaded packages run with your account permissions. Process separation handles ordinary errors and Stop/time limits; it is not an operating-system security sandbox. Review code and its scientific assumptions before execution.</p>
       <p>Choose a model in Accounts and Models and use Test connection without sharing study data. API services use your own key and may charge separately from website subscriptions. Saved connections are local to RDataCraft and excluded from projects. Disconnect for now retains them; Forget saved API connection removes the saved API key. Sign out selected account removes its ChatGPT session and attempts remote revocation. Offline graph and statistical workflows remain available.</p>
+    </section>
+    <section id="updates">
+      <h3>Check for Updates</h3>
+      <p>Choose Check for Updates in the Mac application menu or Windows/Ubuntu Help menu. It is also available in this Help center. The check is explicit and sends no study data or AI credentials. Download the matching installer, close RDataCraft and install the update. Nothing installs automatically.</p>
+      <p>Ubuntu 24.04 LTS amd64 uses a .deb package with Ubuntu-managed R 4.3 and an included R package library. Use the system package installer or apt to resolve dependencies. Ubuntu optional package installation inside Advanced R is not supported yet; source builds are not started automatically. Use SVG/PDF file export for vector transfer.</p>
     </section>
     <section id="saving">
       <h3>Save, reopen &amp; work in several windows</h3>

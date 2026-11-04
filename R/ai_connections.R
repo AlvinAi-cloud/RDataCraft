@@ -39,7 +39,7 @@ pc_ai_response_text <- function(value) {
 pc_connected_ai <- function(deliver,connection_event=function(...) NULL,helper=pc_ai_helper(),profile=pc_ai_profile()) {
   worker<-NULL;callbacks<-list();counter<-0L;generation<-0L;request_id<-NULL;connected<-NULL;model<-'';account_id<-NULL;connection_info<-NULL;restoring<-FALSE;queued<-list();discovery_seq<-0L
   status_text<-function() {
-    if(is.null(connected)) 'Choose Accounts and Models to connect your own AI provider. Local tools work offline.' else paste('Connected ·',connected,'·',if(nzchar(model)) model else 'choose a model')
+    if(is.null(connected)) 'No provider connected · set up through AI → Accounts and Models… Local tools work offline.' else paste('Connected ·',connected,'·',if(nzchar(model)) model else 'choose a model')
   }
   receive<-function(message) {
     cb<-callbacks[[message$id]];callbacks[[message$id]]<<-NULL
@@ -56,7 +56,7 @@ pc_connected_ai <- function(deliver,connection_event=function(...) NULL,helper=p
     }
   }
   send<-function(action,body=list(),callback=function(...) NULL) {
-    if(is.null(worker) || !worker$is_alive()) stop('The bundled AI connection service is unavailable. Rebuild or reinstall RDataCraft v0.41.')
+    if(is.null(worker) || !worker$is_alive()) stop('The bundled AI connection service is unavailable. Rebuild or reinstall RDataCraft v0.5.')
     counter<<-counter+1L;id<-paste0('c',counter);callbacks[[id]]<<-callback
     value<-c(list(id=id,action=action),body)
     worker$write_input(paste0(jsonlite::toJSON(value,auto_unbox=TRUE,null='null',digits=NA),'\n'))
@@ -77,7 +77,7 @@ pc_connected_ai <- function(deliver,connection_event=function(...) NULL,helper=p
   }
   ensure<-function() {
     if(!is.null(worker) && worker$is_alive()) return(invisible(NULL))
-    if(is.null(helper)) stop('This copy does not include the AI connection service. Rebuild or reinstall RDataCraft v0.41.')
+    if(is.null(helper)) stop('This copy does not include the AI connection service. Rebuild or reinstall RDataCraft v0.5.')
     dir.create(profile,recursive=TRUE,showWarnings=FALSE,mode='0700');Sys.chmod(profile,'0700')
     worker<<-processx::process$new(helper,c('--profile',normalizePath(profile,winslash='/',mustWork=TRUE)),stdin='|',stdout='|',stderr='|',cleanup_tree=TRUE)
     generation<<-generation+1L;later::later(local({token<-generation;function() poll(token)}),.1)
@@ -101,7 +101,7 @@ pc_connected_ai <- function(deliver,connection_event=function(...) NULL,helper=p
     tryCatch({
       ensure()
       if(restoring) stop('Reconnecting your saved AI account. Please wait briefly and send again.')
-      if(is.null(connected) || !nzchar(model)) stop('Open Accounts and Models, connect a provider and choose a model before sending.')
+      if(is.null(connected) || !nzchar(model)) stop('Open AI → Accounts and Models…, connect a provider and choose a model before sending.')
       if(!is.null(request_id)) stop('Another assistant request is running.')
       current<-body$id;request_id<<-current
       payload<-jsonlite::toJSON(list(user_request=body$prompt,context=body$context,recent_conversation=body$history),auto_unbox=TRUE,null='null')

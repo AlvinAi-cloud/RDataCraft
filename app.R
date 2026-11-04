@@ -18,6 +18,7 @@ source("R/ai_connections.R",local=TRUE)
 source("R/assistant_server.R",local=TRUE)
 source("R/advanced_r_server.R",local=TRUE)
 source("R/help.R",local=TRUE)
+source("R/updates.R",local=TRUE)
 source("R/power.R",local=TRUE)
 source("R/power_pilot.R",local=TRUE)
 source("R/analysis_display.R",local=TRUE)
@@ -273,7 +274,7 @@ ui <- fluidPage(
                 fileInput("open_project", "Project file", accept = c(".rdcraft", ".rdatacraft", ".json", ".plotcraft"), placeholder = "Choose a RDataCraft project"),
                 downloadButton("save_project_copy", "Save current project", class = "btn-primary")),
               div(class = "card-surface", h3("About this version"),
-                  p("RDataCraft v0.41 · Scientific plotting and statistics"),
+                  p("RDataCraft v0.5 · Scientific plotting and statistics"),
                   p("R-powered data analysis and publication-ready figures for Mac and Windows."),
                   p("Six table types including PCA, named worksheets, matched and independent group tests, factorial ANOVA, correlation, dose-response fitting, survival analysis, categorical tests, diagnostic graphs, and reproducible reports."),
                   p("Treat each row as an independent experimental unit unless using a paired test. Technical replicates must not be counted as independent biological replicates."),
@@ -1181,7 +1182,7 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
   outputOptions(output, "save_project", suspendWhenHidden = FALSE)
   outputOptions(output, "save_project_copy", suspendWhenHidden = FALSE)
   restore_project <- function(p, name, path = "") {
-    advanced$reset();r_analyses(pc_r_records(p$r_analyses))
+    advanced$reset();assistant$reset();r_analyses(pc_r_records(p$r_analyses))
     document_open(TRUE);prism_sources(pc_prism_archives(p$prism_sources));import_reports(pc_import_reports(p$import_reports))
     grid_generation(isolate(grid_generation()) + 1L)
     book <- p$worksheets
@@ -1292,12 +1293,14 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
     outputOptions(output, paste0("export_", fmt), suspendWhenHidden = FALSE)
   })
 
+  pc_updates_server(input,output,session)
   pc_power_server(input,output,session,capture=function() list(open=document_open(),table=raw(),settings=settings(),name=sheet_name()))
 
   advanced <- pc_r_server(input,output,session,
     capture=function() list(open=document_open(),table=raw(),name=sheet_name()),
     records=r_analyses,set_records=function(x) r_analyses(pc_r_records(x)),
     open_page=function() {removeModal();updateTabsetPanel(session,'workspace',selected='advanced');page('advanced');session$sendCustomMessage('rdatacraft-page','advanced')},
+    ask_ai=function(prompt) assistant$compose(prompt),
     add_result=function(tab,name) {s<-pc_defaults();s$layout<-'multiple';s$method<-'descriptive';s$graph<-'variables';s$show_p<-FALSE;add_sheet(tab,s,substr(name,1,100))})
   observeEvent(input$method, {
     if (identical(input$method, "advanced_r")) {
@@ -1306,7 +1309,7 @@ conditionalPanel("input.prism_override",uiOutput("prism_rebuild_controls")),chec
     } else if (input$method %in% unname(pc_methods(input$layout))) preset_method(input$method)
   }, priority = 100)
   assistant <- pc_assistant_server(input,output,session,open_r=function(r) advanced$draft(r),
-    capture=function() list(sheet=active_sheet(),view=active_view(),table=raw(),settings=settings(),name=sheet_name()),
+    capture=function() list(open=document_open(),sheet=active_sheet(),view=active_view(),table=raw(),settings=settings(),name=sheet_name()),
     apply_result=function(result) {
       before <- layout_settings()
       add_sheet(result$table,result$settings,result$name,result$views,result$active_view)

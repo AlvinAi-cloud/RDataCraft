@@ -129,18 +129,32 @@ pc_ai_local_plan <- function(kind,s) {
   if(kind=="summary") return(list(answer="Descriptive statistics are calculated locally by R. This does not select a hypothesis test or infer the experimental design.",operations=list(op("analysis","Descriptive summary",list(method="descriptive")))))
   stop("Choose a supported local tool.")
 }
-pc_assistant_ui <- function() shiny::tags$aside(id="assistant_panel",class="assistant-panel",hidden=NA,`aria-label`="AI Workspace",`aria-busy`="false",
-  shiny::div(class="assistant-heading",shiny::h2("AI Workspace"),shiny::tags$button(id="assistant_close",type="button",`aria-label`="Hide AI assistant","×")),
-  shiny::div(class="assistant-scroll",
-    shiny::div(class="assistant-connection",shiny::strong("Internal AI operations"),shiny::textOutput("assistant_status"),shiny::actionButton("assistant_connection","Accounts and Models…",class="btn-outline-secondary")),
-    shiny::tags$section(`aria-label`="Message input",shiny::h3("Message input"),shiny::textAreaInput("assistant_prompt",NULL,placeholder="Describe a graph, analysis, or figure layout…",rows=4,width="100%"),
-      shiny::checkboxInput("assistant_share","Share active table values and computed results",FALSE),
-      shiny::p(class="assistant-note","Send shares your message, column names, graph settings and recent conversation with the connected model. Table values are included only when checked."),
-      shiny::tags$details(shiny::tags$summary("Active context and prompt templates"),shiny::textOutput("assistant_context"),
-        lapply(c("Improve graph"="Make this graph clearer for a publication. Keep the data and analysis unchanged.","Explain analysis"="Explain the current analysis and its assumptions. Ask me about the study design if needed.","Arrange a figure"="Create two useful graph views of this table and arrange them as a two-panel figure."),function(prompt) shiny::tags$button(type="button",class="btn btn-outline-secondary assistant-template",`data-ai-prompt`=prompt,names(c("Improve graph"="Make this graph clearer for a publication. Keep the data and analysis unchanged.","Explain analysis"="Explain the current analysis and its assumptions. Ask me about the study design if needed.","Arrange a figure"="Create two useful graph views of this table and arrange them as a two-panel figure."))[match(prompt,c("Make this graph clearer for a publication. Keep the data and analysis unchanged.","Explain the current analysis and its assumptions. Ask me about the study design if needed.","Create two useful graph views of this table and arrange them as a two-panel figure."))]))),
-      shiny::div(class="assistant-actions",shiny::actionButton("assistant_send","Send",class="btn-primary"),shiny::actionButton("assistant_stop","Stop",disabled="disabled",class="btn-outline-secondary")),
-      shiny::p(class="assistant-note","Review previews before applying. For methods beyond presets, request an Advanced R script; review and run it separately. Save the study to keep applied results.")),
-    shiny::tags$section(`aria-label`="Operations and results",shiny::h3("Operations and results"),shiny::uiOutput("assistant_operations")),
-    shiny::tags$section(`aria-label`="Conversation history",shiny::h3("Conversation history"),shiny::uiOutput("assistant_history"),shiny::actionButton("assistant_clear","Clear conversation",class="btn-outline-secondary"),shiny::p(class="assistant-note","Conversation stays in this session and is excluded from saved projects.")),
-    shiny::tags$section(`aria-label`="Local tools",shiny::h3("Local tools · no model required"),
-      lapply(c("Check data"="check","Descriptive summary"="summary","Clean figure"="polish","Compare SD / SEM"="band"),function(kind) shiny::tags$button(type="button",class="btn btn-outline-secondary assistant-template",`data-ai-local`=kind,names(c("Check data"="check","Descriptive summary"="summary","Clean figure"="polish","Compare SD / SEM"="band"))[match(kind,c("check","summary","polish","band"))])))))
+pc_assistant_ui <- function() {
+  prompts<-c('Improve graph'='Make this graph clearer for a publication. Keep the data and analysis unchanged.',
+    'Explain analysis'='Explain the current analysis and its assumptions. Ask me about the study design if needed.',
+    'Draft R analysis'='Draft an Advanced R analysis for this active table. Ask me about the study design and outcome before choosing a method. Return a reviewable script, with required packages listed separately.',
+    'Arrange figure'='Create two useful graph views of this table and arrange them as a two-panel figure.')
+  shiny::tags$aside(id='assistant_panel',class='assistant-panel',hidden=NA,`aria-label`='AI Assistant',`aria-busy`='false',
+    shiny::div(class='assistant-heading',shiny::h2('AI Assistant'),shiny::tags$button(id='assistant_close',type='button',`aria-label`='Hide AI assistant','×')),
+    shiny::div(class='assistant-workspace',
+      shiny::tags$section(class='assistant-conversation',`aria-label`='Conversation',shiny::h3('Conversation'),
+        shiny::div(id='assistant_history_scroll',class='assistant-region-scroll',shiny::uiOutput('assistant_history'))),
+      shiny::tags$section(class='assistant-composer',`aria-label`='Message',
+        shiny::div(class='assistant-composer-fields',
+          shiny::textOutput('assistant_context'),
+          shiny::textAreaInput('assistant_prompt',NULL,placeholder='Ask about this table, improve a graph, or draft an R analysis…',rows=3,width='100%'),
+          shiny::checkboxInput('assistant_share','Include active table values and calculated results',FALSE),
+          shiny::tags$details(shiny::tags$summary('Context & quick prompts'),
+            shiny::p(class='assistant-note','Your message, column names, graph settings and recent conversation go to your connected model. Values are included only when checked. Conversation is session-only; opening a different study clears it.'),
+            shiny::div(class='assistant-quick-prompts',lapply(names(prompts),function(label) shiny::tags$button(type='button',class='btn btn-outline-secondary assistant-template',`data-ai-prompt`=prompts[[label]],label))))),
+        shiny::div(class='assistant-actions',shiny::tags$button(id='assistant_send',type='button',class='btn btn-primary','Send'),
+          shiny::actionButton('assistant_stop','Stop',disabled='disabled'),shiny::actionButton('assistant_clear','Clear conversation')),
+        shiny::p(class='assistant-note assistant-shortcut','⌘ / Ctrl + Enter to send · Review changes before applying')),
+      shiny::tags$section(class='assistant-review',`aria-label`='Operations & results',shiny::h3('Operations & results'),
+        shiny::div(class='assistant-region-scroll',
+          shiny::div(class='assistant-connection',shiny::textOutput('assistant_connection_summary')),
+          shiny::div(role='status',`aria-live`='polite',shiny::textOutput('assistant_status')),
+          shiny::uiOutput('assistant_operations'),
+          shiny::tags$details(class='assistant-local-tools',shiny::tags$summary('Local tools · no model required'),
+            lapply(c('Check data'='check','Descriptive summary'='summary','Clean figure'='polish','Compare SD / SEM'='band'),function(kind) shiny::tags$button(type='button',class='btn btn-outline-secondary assistant-template',`data-ai-local`=kind,c(check='Check data',summary='Descriptive summary',polish='Clean figure',band='Compare SD / SEM')[[kind]])))))))
+}

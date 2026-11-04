@@ -82,9 +82,9 @@ jobs:
       - name: Package and exercise the read-only Mac installer
         run: |
           version=$(python3 -c 'import json; print(json.load(open("config/release.json"))["version"])')
-          python3 scripts/package_installers.py --mac-app "dist/RDataCraft v${version}.app" --arch ${{ matrix.arch }}
-          python3 scripts/test_macos_bundle.py --dmg "dist/RDataCraft-${version}-macos-${{ matrix.arch }}.dmg" --output artifacts/installed-mac
-          python3 scripts/release_assets.py platform --platform macos-${{ matrix.arch }} --installer "dist/RDataCraft-${version}-macos-${{ matrix.arch }}.dmg"
+          python3 scripts/package_installers.py --mac-app "dist/RDataCraft.app" --arch ${{ matrix.arch }}
+          python3 scripts/test_macos_bundle.py --dmg "dist/RDataCraft-macos-${{ matrix.arch }}.dmg" --output artifacts/installed-mac
+          python3 scripts/release_assets.py platform --platform macos-${{ matrix.arch }} --installer "dist/RDataCraft-macos-${{ matrix.arch }}.dmg"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: rdatacraft-release-macos-${{ matrix.arch }}
@@ -189,9 +189,9 @@ jobs:
           python scripts/package_installers.py --windows-bundle $bundle.FullName --makensis "$nsis/makensis.exe" --nsis-dir $nsis --webview-installer artifacts/release-tools/webview2/MicrosoftEdgeWebView2RuntimeInstallerX64.exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $version = (Get-Content config/release.json -Raw | ConvertFrom-Json).version
-          ./scripts/test_windows_installer.ps1 -Installer "dist/RDataCraft-$version-windows-x64-setup.exe"
+          ./scripts/test_windows_installer.ps1 -Installer "dist/RDataCraft-windows-x64-setup.exe"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python scripts/release_assets.py platform --platform windows-x64 --installer "dist/RDataCraft-$version-windows-x64-setup.exe"
+          python scripts/release_assets.py platform --platform windows-x64 --installer "dist/RDataCraft-windows-x64-setup.exe"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: rdatacraft-release-windows-x64
@@ -227,8 +227,64 @@ jobs:
             dist/*.zip
             dist/*.sha256
             dist/*-setup.exe
+  ubuntu:
+    needs: sources
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Install Ubuntu desktop and R build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y r-base-core r-base-dev r-recommended python3-gi python3-gi-cairo gir1.2-gtk-3.0 gir1.2-webkit2-4.1 xvfb xauth xdg-utils fonts-dejavu-core libcurl4-openssl-dev libssl-dev libxml2-dev libfontconfig1-dev libfreetype6-dev libharfbuzz-dev libfribidi-dev libpng-dev libjpeg-dev libtiff-dev libcairo2-dev
+          Rscript --vanilla -e 'stopifnot(getRversion() >= "4.3.3", getRversion() < "4.4")'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: rdatacraft-native-notices
+          path: licenses
+      - run: rustup update stable --no-self-update
+      - run: python scripts/build_ai.py --test
+      - run: python scripts/build_ai.py
+      - name: Check the AI bridge with synthetic providers
+        run: python tests/ai_bridge.py --helper artifacts/ai-helper/x86_64/rdatacraft-ai
+      - name: Build the app R library against Ubuntu R
+        env:
+          MAKEFLAGS: -j2
+        run: Rscript --vanilla scripts/install.R
+      - run: ./scripts/rscript.sh scripts/collect_licenses.R
+      - run: python scripts/fetch_sources.py
+      - run: python scripts/package_linux.py
+      - run: python scripts/test_linux_installer.py
+      - run: python scripts/release_assets.py platform --platform ubuntu-amd64 --installer dist/RDataCraft-ubuntu-amd64.deb
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rdatacraft-release-ubuntu-amd64
+          path: artifacts/release-ready/ubuntu-amd64/*
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rdatacraft-source-ubuntu-amd64
+          path: artifacts/release-source-parts/*
+          if-no-files-found: error
+      - name: Upload Ubuntu diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rdatacraft-validation-ubuntu-amd64
+          path: |
+            artifacts/installed-linux/*
+            artifacts/validation-*.json
+            artifacts/v*-*.log
+            dependencies.lock.json
+          if-no-files-found: warn
   release:
-    needs: [sources, mac, windows]
+    needs: [sources, mac, windows, ubuntu]
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -255,4 +311,4 @@ jobs:
         run: |
           version=$(python3 -c 'import json; print(json.load(open("config/release.json"))["version"])')
           echo "### RDataCraft v${version} released" >> "$GITHUB_STEP_SUMMARY"
-          echo "All three native installers passed and uploaded checksums match. Download them from [Releases](https://github.com/${GITHUB_REPOSITORY}/releases/tag/v${version}). No additional branch is needed." >> "$GITHUB_STEP_SUMMARY"
+          echo "All four platform installers passed and uploaded checksums match. Download them from [Releases](https://github.com/${GITHUB_REPOSITORY}/releases/tag/v${version}). No additional branch is needed." >> "$GITHUB_STEP_SUMMARY"

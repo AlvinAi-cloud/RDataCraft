@@ -1,3 +1,37 @@
+# v0.5
+
+- Move account setup access to the native AI menu; disconnected assistant guidance
+  explains where to connect. The assistant contains no Accounts and Models button.
+- Keep Figure settings visible beside AI Assistant. Both panels retain independent
+  show/hide controls, and the graph viewport makes room for them.
+- Add an explicit Check for Updates menu with matching official installer links,
+  historical version-number ordering, asynchronous checks and no automatic install.
+- Add an Ubuntu 24.04 LTS amd64 .deb with a native GTK/WebKit desktop window,
+  document associations/icons, native open/save, independent study windows and R.
+  Ubuntu manages its R 4.3 runtime; the app includes its R package library. Use
+  SVG/PDF export for vector transfer. In-app optional package installation remains
+  a Mac/Windows feature; source builds are not silently enabled on Ubuntu.
+- Include the v0.42 assistant and Advanced R improvements: reviewed input snapshots,
+  atomic prompt/script submission, script checks, live progress and AI-help drafts.
+- Use stable installer filenames and require all four matching platform validations,
+  source records and uploaded hashes before public release.
+
+# v0.42 — local preview
+
+- Adopt the current PlasmidCraft assistant pattern: separate scrolling conversation,
+  bounded composer with fixed actions, and reviewed operations/results.
+- Send current prompt text and the explicit data-sharing choice together. Clear
+  session conversation and cancel pending replies when another study is opened.
+- Pin an AI R draft to its original input snapshot; allow an explicit switch to
+  the active table. Add nonexecuting script/package checks, live run progress,
+  and an AI-help draft that is never sent automatically.
+- Keep template/saved-draft changes and deletion unavailable during R execution.
+- Use version-free Mac app and installer names for future releases. Windows uses
+  stable installation/association identities and its prior file-aware uninstaller
+  for future in-place upgrades. Existing pre-0.42 version-named installs are separate.
+- Preserve graph, table, analysis and document format behavior. No release upload
+  or installer generation is part of this local preview.
+
 # v0.41
 
 - Write release notes as UTF-8 bytes with LF line endings and read explicitly as UTF-8, independent of Windows text defaults. Cover both the legacy cp1252 locale and CRLF translation in release-publication tests.

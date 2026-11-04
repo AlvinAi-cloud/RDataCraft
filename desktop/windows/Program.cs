@@ -151,9 +151,10 @@ internal sealed class StudyWindow : Form
         { string command = "export-" + format; Item(export, "Figure as " + format.ToUpper() + "…", Keys.None, () => Command(command)); }
         var help = Menu("&Help");
         Item(help, "Examples & analysis guide", Keys.F1, () => Command("help"));
+        Item(help, "Check for Updates…", Keys.None, () => Command("check-updates"));
         Item(help, "Show engine log", Keys.None, () => Process.Start(new ProcessStartInfo("notepad.exe") { ArgumentList = { logPath }, UseShellExecute = false }));
         Item(help, "About RDataCraft", Keys.None, () => MessageBox.Show(this,
-            "RDataCraft v0.41\nScientific data analysis and publication-ready figures, powered by R.\n\nGPL-3.0. Third-party notices are included in the application folder.", "About RDataCraft", MessageBoxButtons.OK, MessageBoxIcon.Information));
+            "RDataCraft v0.5\nScientific data analysis and publication-ready figures, powered by R.\n\nGPL-3.0. Third-party notices are included in the application folder.", "About RDataCraft", MessageBoxButtons.OK, MessageBoxIcon.Information));
         return bar;
     }
 

@@ -9,7 +9,7 @@ import zipfile
 from preflight import audit
 
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = "0.41"
+VERSION = "0.5"
 
 
 def main():
@@ -34,7 +34,7 @@ def main():
     (destination / ".gitignore").write_text(
         ".DS_Store\n__pycache__/\n*.pyc\n.Rhistory\n.RData\nRplots.pdf\n"
         "/runtime*/\n/downloads/\n/dist/\n/artifacts/\n/Codex handoff/\n"
-        "*.app/\n*.dmg\n*.exe\n*.zip\n.env\n.env.*\n/desktop/windows/bin/\n/desktop/windows/obj/\n/desktop/ai-helper/target/\n/desktop/ai-helper/bin/\n"
+        "*.deb\n*.app/\n*.dmg\n*.exe\n*.zip\n.env\n.env.*\n/desktop/windows/bin/\n/desktop/windows/obj/\n/desktop/ai-helper/target/\n/desktop/ai-helper/bin/\n"
         "*.rdcraft\n*.rdatacraft\n!examples/*.rdatacraft\n*.prism\n*.pzfx\n*.pzf\n!tests/fixtures/*.prism\n!tests/fixtures/*.pzfx\n")
     (destination / "GITHUB_UPLOAD.md").write_text(f"""# RDataCraft v{VERSION}: GitHub upload
 
@@ -42,9 +42,9 @@ This is the source-only upload folder. Use the existing RDataCraft repository an
 its single main branch in GitHub Desktop; do not create another repository.
 Review and commit the updated source, then Push origin.
 
-GitHub Actions builds and tests Intel Mac, Apple Silicon and Windows installers
+GitHub Actions builds and tests Intel Mac, Apple Silicon, Windows and Ubuntu installers
 on their matching runners. After every required job passes, it assembles
-v{VERSION} with three installer downloads, validation, checksums and corresponding
+v{VERSION} with four installer downloads, validation, checksums and corresponding
 source/build material. It verifies uploaded asset hashes and the tested tag, then
 publishes the release. No local Windows packaging is needed. See RELEASE.md.
 
@@ -58,7 +58,7 @@ This preparation does not push source, run Actions or publish a release.
         raise SystemExit("Source preflight failed:\n" + "\n".join(privacy["findings"]))
     # Keep the upload free of runtime binaries and oversized files by construction.
     if any(p.stat().st_size > 90 * 1024**2 or p.suffix.lower() in
-           [".pzf", ".exe", ".dll", ".so", ".dmg"] for p in files):
+           [".pzf", ".exe", ".dll", ".so", ".dmg", ".deb"] for p in files):
         raise SystemExit("Unexpected binary or oversized file in the source upload.")
     assert all(p.relative_to(destination).parts[:2] == ("tests", "fixtures")
                for p in files if p.suffix.lower() == ".prism")

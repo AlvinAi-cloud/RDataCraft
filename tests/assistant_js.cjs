@@ -25,4 +25,18 @@ handlers['rdatacraft-ai-state']({busy:false});check(!element('assistant_send').d
 window.RDataCraftAssistant.receive({type:'ai-result',id:'native',ok:true,response:'{}'});check(inputs.at(-1).key==='assistant_response' && inputs.at(-1).value.id==='native','model responses return to server validation');
 window.RDataCraftAssistant.toggle();handlers['rdatacraft-review-r']({});check(element('assistant_panel').hidden,'opening a reviewed R draft closes the docked assistant');
 handlers['rdatacraft-review-r']({});check(element('assistant_panel').hidden,'review routing preserves an already hidden assistant');
+element('assistant_prompt').value='Latest unsynchronized text';element('assistant_share').checked=true;
+element('assistant_send').listeners.click();
+check(inputs.at(-1).key==='assistant_submit' && inputs.at(-1).value.prompt==='Latest unsynchronized text' && inputs.at(-1).value.share===true,'Send captures the current text and explicit sharing choice together');
+const beforeDisabled=inputs.length;handlers['rdatacraft-ai-state']({busy:true});element('assistant_send').listeners.click();
+check(inputs.length===beforeDisabled && element('assistant_clear').disabled,'busy controls prevent duplicate DOM submits and clearing');
+handlers['rdatacraft-ai-state']({busy:false});handlers['rdatacraft-ai-compose']({prompt:'Review this synthetic script'});
+check(!element('assistant_panel').hidden && element('assistant_prompt').value==='Review this synthetic script' && inputs.at(-1).key!=='assistant_submit','Advanced R help opens a reviewable prompt without sending inference');
+handlers['rdatacraft-ai-reset']({});
+check(element('assistant_prompt').value==='' && element('assistant_share').checked===false,'new-study reset clears the message and disables value sharing');
+handlers['rdatacraft-r-state']({busy:true});check(element('r_run').disabled && element('r_load_template').disabled && !element('r_stop').disabled,'R execution locks draft-loading controls and enables Stop');
+handlers['rdatacraft-r-state']({busy:false});check(!element('r_run').disabled && element('r_stop').disabled,'R completion restores editing controls');
+element('r_code').value='result <- list(text="latest edit")';element('r_title').value='Current R draft';element('r_packages').value='stats';element('r_use_saved').checked=true;element('r_timeout').value='30';
+element('r_run').listeners.click();
+check(inputs.at(-1).key==='r_submit' && inputs.at(-1).value.r_code==='result <- list(text="latest edit")' && inputs.at(-1).value.r_use_saved===true && inputs.at(-1).value.r_timeout==='30','Run captures the currently reviewed script, package list and input choice together');
 console.log(`${checks} checks passed`);

@@ -13,7 +13,11 @@ import tarfile
 
 ROOT = Path(__file__).resolve().parent.parent
 VERSION = json.loads((ROOT / 'config/release.json').read_text())['version']
-PLATFORMS = ('macos-x86_64', 'macos-arm64', 'windows-x64')
+PLATFORMS = ('macos-x86_64', 'macos-arm64', 'windows-x64', 'ubuntu-amd64')
+
+def installer_name(platform):
+    suffix='-setup.exe' if platform=='windows-x64' else '.deb' if platform=='ubuntu-amd64' else '.dmg'
+    return f'RDataCraft-{platform}{suffix}'
 
 
 def digest(path):
@@ -94,8 +98,7 @@ def native():
 def platform_assets(platform, installer):
     """Record the bytes tested by this platform job, together with their sources."""
     installer = installer.resolve()
-    suffix = '-setup.exe' if platform == 'windows-x64' else '.dmg'
-    if installer.name != f'RDataCraft-{VERSION}-{platform}{suffix}' or not installer.is_file():
+    if installer.name != installer_name(platform) or not installer.is_file():
         raise ValueError('Installer name/version differs from this release.')
     output = ROOT / 'artifacts/release-ready' / platform
     output.mkdir(parents=True, exist_ok=True)
@@ -103,11 +106,15 @@ def platform_assets(platform, installer):
     if platform.startswith('macos-'):
         report = ROOT / 'artifacts/installed-mac/validation.json'
         source_report = ROOT / f'artifacts/validation-{VERSION}.json'
+    elif platform == 'ubuntu-amd64':
+        report = ROOT / 'artifacts/installed-linux/validation.json'
+        source_report = ROOT / f'artifacts/validation-installed-linux-{VERSION}.json'
     else:
         report = ROOT / 'artifacts/installed-windows-native/validation-windows-desktop.json'
         source_report = ROOT / f'artifacts/validation-installed-windows-{VERSION}.json'
     reports = {}
     extra = [('installer', ROOT / f'artifacts/validation-windows-installer-{VERSION}.json')] if platform == 'windows-x64' else []
+    if platform=='ubuntu-amd64':extra=[('installer',ROOT/f'artifacts/validation-linux-installer-{VERSION}.json')]
     for name, path in [('native', report), ('source', source_report)] + extra:
         data = json.loads(path.read_text())
         if data.get('status') != 'passed' or data.get('version') != VERSION:
@@ -141,7 +148,7 @@ def assemble(inputs, output):
         record = json.loads(matches[0].read_text())
         if record.get('status') != 'passed' or any(record.get(k) != v for k, v in current.items()):
             raise ValueError('Validation does not match this commit/run: ' + platform)
-        expected_name = f'RDataCraft-{VERSION}-{platform}' + ('-setup.exe' if platform == 'windows-x64' else '.dmg')
+        expected_name = installer_name(platform)
         if record.get('platform') != platform or record.get('installer') != expected_name:
             raise ValueError('Installer/platform identity does not match.')
         installer = matches[0].parent / record['installer']
@@ -152,8 +159,8 @@ def assemble(inputs, output):
     # Verify each source archive against the same job's recorded hash before release.
     source_records = [*inputs.rglob('*-source-record.json'), *inputs.rglob('native-source-record.json')]
     source_records = sorted(set(source_records))
-    if len(source_records) != 4:
-        raise ValueError('Expected native and three platform source records.')
+    if len(source_records) != len(PLATFORMS)+1:
+        raise ValueError('Expected native and matching platform source records.')
     archives = []
     for path in source_records:
         record = json.loads(path.read_text())

@@ -13,7 +13,7 @@ from runtime_inventory import write_notices
 from build_ai import build as build_ai
 
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = "0.41"
+VERSION = "0.5"
 
 
 def run(*args):
@@ -23,6 +23,7 @@ def run(*args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, help="Build into a separate .app path to preserve an open earlier version.")
+    parser.add_argument("--preview",action="store_true",help="Separate local review app; does not register as the default study opener.")
     parser.add_argument("--arch",choices=["arm64","x86_64"],default=platform.machine())
     parser.add_argument("--runtime-root",type=Path,default=ROOT/"runtime")
     parser.add_argument("--cross-build",action="store_true",help="Compile a different Mac CPU without claiming target execution tests.")
@@ -31,6 +32,9 @@ def main():
     parser.add_argument("--zip", action="store_true", help="Create a development ZIP containing RDataCraft.app.")
     parser.add_argument("--install", action="store_true", help="Copy the build to /Applications/RDataCraft.app.")
     args = parser.parse_args()
+    if args.preview and args.install:
+        raise SystemExit("A local preview must not replace the installed production app.")
+    bundle_id="org.rdatacraft.desktop.preview" if args.preview else "org.rdatacraft.desktop"
     if platform.system() != "Darwin":
         raise SystemExit("The native desktop host currently targets macOS.")
     runtime=args.runtime_root.resolve()
@@ -59,7 +63,7 @@ def main():
     deployment = "14.0" if args.arch == "arm64" and "arm64" in arches else "13.0"
     if args.arch not in arches and not (args.allow_rosetta and args.arch=='arm64' and 'x86_64' in arches):
         raise SystemExit(f'R architecture {arches} does not match host {args.arch}. Use bootstrap.py --arch {args.arch} --runtime-root runtime-{args.arch}.')
-    required = ["R/r_packages.R", "R/r_packages_server.R", "scripts/r_packages_worker.R", "R/advanced_r.R", "R/advanced_r_server.R", "scripts/advanced_r_worker.R", "examples/Advanced R teaching example.rdatacraft", "R/prism_xml.R", "R/prism_convert.R", "R/portable_ai.R", "R/tutorials.R", "R/prism_archive.R", "desktop/RDataCraft.swift", "R/pca.R", "R/assistant.R", "R/assistant_server.R", "www/assistant.js", "desktop/PrismXML.swift", "desktop/PrismDecode.swift",
+    required = ["R/updates.R", "scripts/check_updates.R", "R/r_packages.R", "R/r_packages_server.R", "scripts/r_packages_worker.R", "R/advanced_r.R", "R/advanced_r_server.R", "scripts/advanced_r_worker.R", "examples/Advanced R teaching example.rdatacraft", "R/prism_xml.R", "R/prism_convert.R", "R/portable_ai.R", "R/tutorials.R", "R/prism_archive.R", "desktop/RDataCraft.swift", "R/pca.R", "R/assistant.R", "R/assistant_server.R", "www/assistant.js", "desktop/PrismXML.swift", "desktop/PrismDecode.swift",
                 "www/rdatacraft.css", "www/craft.css", "examples/xy.csv", "examples/dose-response.csv",
                 "examples/Prism workflow improvements.rdatacraft", "examples/Figure studio.rdatacraft",
                 "R/graph_options.R", "R/layout_editor.R", "www/layout-editor.js"]
@@ -68,13 +72,13 @@ def main():
         raise SystemExit("Incomplete project copy; missing files: " + ", ".join(missing))
     if not cross:run(ROOT / "scripts/rscript.sh", "scripts/check_runtime.R")
     run("/usr/bin/python3", "scripts/relocate_runtime.py")
-    app = args.output.resolve() if args.output else ROOT / "dist" / f"RDataCraft v{VERSION}.app"
+    app = args.output.resolve() if args.output else ROOT / "dist" / ("RDataCraft Local Preview.app" if args.preview else "RDataCraft.app")
     if app.suffix != ".app":
         raise SystemExit("The output path must end in .app.")
     # Rebuild the generated bundle from scratch so removed dependencies cannot linger.
     if app.exists():
         previous = plistlib.loads((app / "Contents/Info.plist").read_bytes())
-        if previous.get("CFBundleIdentifier") != "org.rdatacraft.desktop":
+        if previous.get("CFBundleIdentifier") != bundle_id:
             raise SystemExit("Unexpected application in the build destination.")
         shutil.rmtree(app)
     ai_output=build_ai(target=("aarch64-apple-darwin" if args.arch=="arm64" else "x86_64-apple-darwin") if cross else None)
@@ -114,7 +118,7 @@ def main():
     write_notices(runtime/'R.framework/Resources',runtime/'library',backend/'licenses')
     info = {
         "CFBundleName": "RDataCraft", "CFBundleDisplayName": "RDataCraft", "CFBundleExecutable": "RDataCraft",
-        "CFBundleIdentifier": "org.rdatacraft.desktop", "CFBundlePackageType": "APPL",
+        "CFBundleIdentifier": bundle_id, "CFBundlePackageType": "APPL",
         "CFBundleShortVersionString": VERSION, "CFBundleVersion": str(json.loads((ROOT / "config/release.json").read_text())["build"]), "CFBundleIconFile": "RDataCraft.icns",
         "LSMinimumSystemVersion": deployment, "NSHighResolutionCapable": True,
         "NSPrincipalClass": "NSApplication", "NSAppTransportSecurity": {"NSAllowsLocalNetworking": True},
@@ -129,6 +133,9 @@ def main():
                                          "UTTypeConformsTo": ["public.json"],
                                          "UTTypeTagSpecification": {"public.filename-extension": ["rdatacraft"]}}],
     }
+    if args.preview:
+        info["CFBundleDisplayName"]="RDataCraft Local Preview"
+        info["CFBundleDocumentTypes"][0]["LSHandlerRank"]="Alternate"
     (app / "Contents/Info.plist").write_bytes(plistlib.dumps(info))
     (backend/'build-platform.json').write_text(json.dumps({'version':VERSION,'platform':'Darwin','architecture':args.arch,'cross_compiled':cross,'target_execution_tested':False,'note':'Consult the accompanying validation report for executed tests.'},indent=2)+'\n')
     module_cache = ROOT / ("artifacts/desktop/module-cache" if args.arch=="arm64" else "artifacts/desktop/module-cache-intel")

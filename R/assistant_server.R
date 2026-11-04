@@ -31,7 +31,7 @@ pc_assistant_server <- function(input,output,session,capture,apply_result,open_r
   pending<-shiny::reactiveVal(NULL); ready<-shiny::reactiveVal(NULL); history<-shiny::reactiveVal(list())
   busy<-shiny::reactiveVal(FALSE); status<-shiny::reactiveVal("Check connection to use the connected model. Local tools work offline.")
   notify<-function(message) {status(message);session$sendCustomMessage("rdatacraft-ai-state",list(busy=busy(),message=message))}
-  fingerprint<-function(state) digest::digest(list(state$sheet,state$view,state$table,state$settings),algo="xxhash64")
+  fingerprint<-function(state) digest::digest(list(state$sheet,state$view,state$name,state$table,state$settings),algo="xxhash64")
   record<-function(role,text) {h<-isolate(history());history(tail(c(h,list(list(role=role,text=substr(text,1,20000)))),30))}
   show_plan<-function(state,plan) {
     result<-pc_ai_prepare(state$table,state$settings,state$name,plan)
@@ -45,15 +45,19 @@ pc_assistant_server <- function(input,output,session,capture,apply_result,open_r
   })
   shiny::observeEvent(input$assistant_status_check,{notify(transport$status());tryCatch(transport$command('status'),error=function(e) notify(conditionMessage(e)))})
   shiny::observeEvent(input$assistant_native_status,notify(pc_ai_text(input$assistant_native_status$message,1000)))
-  shiny::observeEvent(input$assistant_send,tryCatch({
+  send_request<-function(prompt,share) tryCatch({
     if(busy()) {notify("Finish or stop the current request first.");return()}
-    prompt<-trimws(pc_ai_text(input$assistant_prompt,6000));if(!nzchar(prompt)) stop("Enter a question or describe the change you want.")
-    state<-capture();context<-pc_ai_context(state$table,state$settings,state$name,isTRUE(input$assistant_share))
+    prompt<-trimws(pc_ai_text(prompt,6000));if(!nzchar(prompt)) stop("Enter a question or describe the change you want.")
+    state<-capture();if(identical(state$open,FALSE)) stop('Create or open a study before asking about its data.')
+    context<-pc_ai_context(state$table,state$settings,state$name,isTRUE(share))
     id<-paste0(as.integer(Sys.time()),"-",sample.int(1e8,1));pending(list(id=id,state=state));ready(NULL);busy(TRUE)
     prior<-tail(history(),10);record("user",prompt);notify("Thinking with the connected model…")
     request<-list(id=id,instructions=pc_ai_instructions(),prompt=prompt,context=context,history=prior,schema=pc_ai_schema())
     transport$start(request)
-  },error=fail))
+  },error=fail)
+  # Submit contains the current DOM text and sharing choice in one event.
+  shiny::observeEvent(input$assistant_submit,send_request(input$assistant_submit$prompt,input$assistant_submit$share))
+  shiny::observeEvent(input$assistant_send,send_request(input$assistant_prompt,isTRUE(input$assistant_share)))
   shiny::observeEvent(input$assistant_response,tryCatch({
     value<-input$assistant_response;request<-pending()
     if(is.null(request) || !identical(value$id,request$id)) return()
@@ -83,10 +87,12 @@ pc_assistant_server <- function(input,output,session,capture,apply_result,open_r
     if(!identical(proposed$source,fingerprint(capture()))) stop("The source table or graph changed. Generate a fresh preview first.")
     if(!is.null(proposed$result$r_draft)) {
       if(is.null(open_r)) stop('Advanced R is unavailable in this session.')
-      open_r(proposed$result$r_draft);ready(NULL);notify('Draft opened in Advanced R. Review the script and choose Run reviewed script to execute it.');return()
+      draft<-proposed$result$r_draft;source<-capture();draft$source<-list(table=source$table,name=source$name)
+      open_r(draft);ready(NULL);notify('Draft opened in Advanced R. Review the script and choose Run reviewed script to execute it.');return()
     }
     apply_result(proposed$result);ready(NULL);notify("Applied to a new table copy. Save the study when you want to keep it.")
   },error=function(e) notify(conditionMessage(e))))
+  shiny::observeEvent(input$assistant_discard,{ready(NULL);notify("Proposed operations discarded. No changes were applied.")})
   shiny::observeEvent(input$assistant_clear,{
     if(busy()) {notify("Stop the current request before clearing history.");return()}
     history(list());ready(NULL);notify("Conversation cleared from this session.")
@@ -96,18 +102,22 @@ pc_assistant_server <- function(input,output,session,capture,apply_result,open_r
     lapply(h,function(m) shiny::div(class=paste("assistant-message",m$role),shiny::strong(if(m$role=="user") "You" else "Assistant"),shiny::p(m$text)))
   })
   output$assistant_operations<-shiny::renderUI({
-    p<-ready();if(is.null(p)) return(shiny::p(class="muted","No pending operations."))
+    p<-ready();if(is.null(p)) return(shiny::p(class="muted","Proposed graph changes and R drafts appear here for review. Nothing runs or changes automatically."))
     r<-p$result
-    if(!is.null(r$r_draft)) return(shiny::tagList(shiny::p('R script draft only: it has not executed.'),shiny::tags$pre(r$r_draft$code),shiny::p(paste('Required packages:',r$r_draft$packages)),shiny::actionButton('assistant_apply','Open in Advanced R',class='btn-primary')))
+    if(!is.null(r$r_draft)) return(shiny::tagList(shiny::p('R script draft only: it has not executed.'),shiny::tags$pre(r$r_draft$code),shiny::p(paste('Required packages:',r$r_draft$packages)),shiny::div(class='assistant-actions',shiny::actionButton('assistant_apply','Open in Advanced R',class='btn-primary'),shiny::actionButton('assistant_discard','Discard'))))
     shiny::tagList(shiny::p("Source observations stay in the original table. The preview creates a new table copy."),
       shiny::tags$ol(lapply(r$operations,function(op) shiny::tags$li(shiny::strong(op$title),shiny::tags$ul(lapply(op$parameters,function(v) shiny::tags$li(paste(v$key,"=",v$value))))))),
       lapply(r$reports,function(a) shiny::tags$details(shiny::tags$summary(a$title," · calculated by R"),shiny::tags$pre(jsonlite::toJSON(a$result,auto_unbox=TRUE,pretty=TRUE,na="null",digits=7)))),
       shiny::tags$img(class="assistant-preview",src=paste0("data:image/svg+xml;base64,",jsonlite::base64_enc(charToRaw(r$preview))),alt="Preview of proposed graph or figure layout"),
-      shiny::actionButton("assistant_apply","Apply to new table copy",class="btn-primary"))
+      shiny::div(class="assistant-actions",shiny::actionButton("assistant_apply","Apply to new table copy",class="btn-primary"),shiny::actionButton("assistant_discard","Discard")))
   })
   output$assistant_context<-shiny::renderText({s<-capture();paste(s$name,"·",nrow(s$table),"rows ·",s$settings$layout,"·",s$settings$graph)})
+  output$assistant_connection_summary<-shiny::renderText({
+    v<-connection_value()
+    if(is.character(v$status) && startsWith(v$status,'Connected ·')) v$status else 'No provider connected · set up through AI → Accounts and Models…'
+  })
   output$assistant_status<-shiny::renderText(status())
-  for(id in c("assistant_history","assistant_operations","assistant_context","assistant_status")) shiny::outputOptions(output,id,suspendWhenHidden=FALSE)
+  for(id in c("assistant_history","assistant_operations","assistant_context","assistant_status","assistant_connection_summary")) shiny::outputOptions(output,id,suspendWhenHidden=FALSE)
   api_body<-function() list(connection=list(provider=input$ai_provider,endpoint=if(identical(input$ai_provider,'compatible')) input$ai_endpoint else '',apiKey=if(is.null(input$ai_key)) '' else input$ai_key))
   op<-function(action,body=list()) tryCatch({if(action=='sign_in') session$sendCustomMessage('rdatacraft-ai-connection',list(notice='Complete sign-in and consent in your browser, then return here.',loginBusy=TRUE));transport$command(action,body)},error=function(e) {notify(conditionMessage(e));session$sendCustomMessage('rdatacraft-ai-connection',list(error=conditionMessage(e),loginBusy=FALSE))})
   shiny::observeEvent(input$ai_sign_in,op('sign_in'))
@@ -133,5 +143,7 @@ pc_assistant_server <- function(input,output,session,capture,apply_result,open_r
   shiny::observeEvent(input$ai_forget,op('forget'))
   shiny::observeEvent(input$ai_settings_closed,{shiny::updateTextInput(session,'ai_key',value='');op('cancel_login')})
   session$onSessionEnded(function() transport$close())
-  invisible(list(pending=pending,ready=ready,history=history,busy=busy))
+  compose<-function(prompt) {session$sendCustomMessage('rdatacraft-ai-compose',list(prompt=pc_ai_text(prompt,6000)));invisible(TRUE)}
+  reset<-function() {p<-pending();if(!is.null(p)) transport$cancel(p$id,announce=FALSE);pending(NULL);ready(NULL);history(list());busy(FALSE);notify('New study context. Describe what you want to do with this table.');session$sendCustomMessage('rdatacraft-ai-reset',list())}
+  invisible(list(pending=pending,ready=ready,history=history,busy=busy,compose=compose,reset=reset))
 }

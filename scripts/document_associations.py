@@ -2,9 +2,9 @@
 
 
 def windows_associations(version, uninstall=False):
-    progid = 'RDataCraft.Study.' + version
+    progid = 'RDataCraft.Study'
     classes = r'Software\Classes'
-    capability = r'Software\RDataCraft\Capabilities' + '\\' + version
+    capability = r'Software\RDataCraft\Capabilities'
     command = r'$\"$INSTDIR\RDataCraft.exe$\" $\"%1$\"'
     icon = r'$\"$INSTDIR\RDataCraftDocument.ico$\",0'
     if uninstall:
@@ -19,7 +19,7 @@ def windows_associations(version, uninstall=False):
                       f'    DeleteRegKey /ifempty HKCU "{classes}\\{ext}"']
         lines += [f'    DeleteRegKey HKCU "{classes}\\{progid}"',
                   f'    DeleteRegKey HKCU "{capability}"',
-                  f'    DeleteRegValue HKCU "Software\\RegisteredApplications" "RDataCraft {version}"',
+                  f'    DeleteRegValue HKCU "Software\\RegisteredApplications" "RDataCraft"',
                   '  ${EndIf}']
     else:
         lines = [f'  WriteRegStr HKCU "{classes}\\{progid}" "" "RDataCraft Study"',
@@ -27,13 +27,15 @@ def windows_associations(version, uninstall=False):
                  f'  WriteRegStr HKCU "{classes}\\{progid}\\shell\\open\\command" "" \'{command}\'',
                  f'  WriteRegStr HKCU "{capability}" "ApplicationName" "RDataCraft"',
                  f'  WriteRegStr HKCU "{capability}" "ApplicationDescription" "RDataCraft scientific studies"',
-                 f'  WriteRegStr HKCU "Software\\RegisteredApplications" "RDataCraft {version}" "{capability}"']
+                 f'  WriteRegStr HKCU "Software\\RegisteredApplications" "RDataCraft" "{capability}"']
         for ext in ('.rdcraft', '.rdatacraft'):
             lines += [f'  WriteRegStr HKCU "{classes}\\{ext}\\OpenWithProgids" "{progid}" ""',
                       f'  WriteRegStr HKCU "{capability}\\FileAssociations" "{ext}" "{progid}"',
                       f'  ReadRegStr $0 HKCU "{classes}\\{ext}" ""',
                       f'  StrCpy $1 $0 {len("RDataCraft.Study.")}',
                       '  ${If} $0 == ""', f'    WriteRegStr HKCU "{classes}\\{ext}" "" "{progid}"',
+                      '  ${ElseIf} $0 == "RDataCraft.Study"',
+                      f'    WriteRegStr HKCU "{classes}\\{ext}" "" "{progid}"',
                       '  ${ElseIf} $1 == "RDataCraft.Study."',
                       f'    WriteRegStr HKCU "{classes}\\{ext}" "" "{progid}"', '  ${EndIf}']
     return lines + ["  System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'"]

@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
-from release_assets import VERSION, digest, PLATFORMS
+from release_assets import installer_name, VERSION, digest, PLATFORMS
 
 
 def api(path, payload=None, method="PATCH"):
@@ -27,9 +27,9 @@ def main(publish=False):
     validation = json.loads((output / f'RDataCraft-{VERSION}-validation.json').read_text())
     if validation['status'] != 'passed' or validation['commit'] != sha or validation['run_id'] != os.environ['GITHUB_RUN_ID']:
         raise ValueError('Release validation differs from this workflow.')
-    expected = {f'RDataCraft-{VERSION}-{p}' + ('-setup.exe' if p == 'windows-x64' else '.dmg') for p in PLATFORMS}
-    if {p.name for p in output.iterdir() if p.suffix in ('.exe', '.dmg')} != expected:
-        raise ValueError('Expected precisely the three native installers.')
+    expected = {installer_name(p) for p in PLATFORMS}
+    if {p.name for p in output.iterdir() if p.suffix in ('.exe', '.dmg', '.deb')} != expected:
+        raise ValueError('Expected precisely the four platform installers.')
     for line in (output / f'RDataCraft-{VERSION}-SHA256SUMS.txt').read_text().splitlines():
         value, name = line.split('  ', 1)
         if Path(name).name != name or digest(output / name) != value:
@@ -67,23 +67,24 @@ def main(publish=False):
     # Binary UTF-8 keeps LF line endings identical on Windows and Unix hosts.
     notes.write_bytes((
         f'RDataCraft {tag}\n\n'
-        'R-powered scientific plotting and statistics for Mac and Windows.\n\n'
-        'This release fixes individual-observation visibility and draws raw points in lighter series colors, '
-        'adds nine palette presets, and retains Show fitted curves in Figure settings → XY lines & fitted curves. '
-        'Comparison-P controls are hidden when no comparison P values are available.\n\n'
-        'XY graphs can optionally compare two Y series at each matching X using observed-replicate, independent two-sided Welch tests '
-        '(at least two replicates per series per X). Holm correction is the default, with Bonferroni or no adjustment optional. '
-        'Graphs support numeric P values or significance stars and significant-only labels. Full raw/adjusted P values, sample sizes '
-        'and individual 95% difference intervals are available in Analysis and Time-point CSV. These tests are separate from curve '
-        'fitting; paired/longitudinal designs require an appropriate Advanced R analysis. '
-        'Studies using these comparisons or the new palettes require v0.41 or later.\n\n'
-        'The README includes real desktop screenshots, contribution guidelines, a Code of Conduct and ChatGPT Codex AI co-contributor credit. '
-        'Compact results tables and CSV exports remain available; new studies use `.rdcraft` and existing `.rdatacraft` studies continue to open.\n\n'
+        'R-powered scientific plotting and statistics for Mac, Windows and Ubuntu.\n\n'
+        'A refreshed AI Assistant keeps conversation, message controls and reviewed operations in separate scrolling areas. '
+        'Advanced R adds input snapshots for AI drafts, script/package checks, live run progress and an explicit route back to AI help. '
+        'Drafts do not execute automatically; package installation still requires approval.\n\n'
+        'Installer filenames and the installed app name are now stable across versions. The version remains in About, study metadata, '
+        'release tags, checksums and validation reports. Legacy version-named Mac apps may be removed manually after installing RDataCraft.app.\n\n'
+        'Figure settings → XY lines & fitted curves and the existing scientific workflows are retained. '
+        'New studies use `.rdcraft`; existing `.rdatacraft` studies continue to open.\n\n'
+        'The AI panel points to AI → Accounts and Models when disconnected; connection settings stay in the AI menu. '
+        'Figure settings and AI tile side by side with independent visibility controls. Check for Updates opens matching public installer downloads. '
+        'Ubuntu 24.04 LTS amd64 is available as a native GTK/WebKit .deb; Ubuntu manages its R 4.3 engine while the app carries its R package library. '
+        'Ubuntu uses SVG/PDF export for vector transfer; optional package installation in the app is available on Mac and Windows only.\n\n'
         'Download the installer for your computer:\n\n'
-        f'- [Intel Mac](https://github.com/{repo}/releases/download/{tag}/RDataCraft-{VERSION}-macos-x86_64.dmg)\n'
-        f'- [Apple Silicon Mac](https://github.com/{repo}/releases/download/{tag}/RDataCraft-{VERSION}-macos-arm64.dmg)\n'
-        f'- [Windows x64](https://github.com/{repo}/releases/download/{tag}/RDataCraft-{VERSION}-windows-x64-setup.exe)\n\n'
-        'All three installers passed required build, source and installed-app checks in this GitHub Actions run. R and required packages are bundled; '
+        f'- [Intel Mac](https://github.com/{repo}/releases/download/{tag}/RDataCraft-macos-x86_64.dmg)\n'
+        f'- [Apple Silicon Mac](https://github.com/{repo}/releases/download/{tag}/RDataCraft-macos-arm64.dmg)\n'
+        f'- [Windows x64](https://github.com/{repo}/releases/download/{tag}/RDataCraft-windows-x64-setup.exe)\n\n'
+        f'- [Ubuntu 24.04 amd64](https://github.com/{repo}/releases/download/{tag}/RDataCraft-ubuntu-amd64.deb)\n\n'
+        'All four installers passed required build, source and installed-app checks in this GitHub Actions run. Mac and Windows bundle R and required packages; Ubuntu installs R through its package manager; '
         'Windows uses its own desktop window, not an external browser. Mac builds are ad-hoc signed and not notarized; '
         'Windows setup is unsigned. GitHub does not provide trusted signing credentials.\n\n'
         'Studies using the XY display options introduced in v0.32 require v0.32 or later. Corresponding source, dependency notices, '

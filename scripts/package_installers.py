@@ -14,7 +14,7 @@ import sys
 from document_associations import windows_associations
 
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = "0.41"
+VERSION = "0.5"
 
 
 def checksum(path):
@@ -41,7 +41,7 @@ def mac(app, arch, distribution=False):
     if stage.exists():
         raise SystemExit('Choose a clean installer staging directory: ' + str(stage))
     stage.mkdir(parents=True)
-    shutil.copytree(app, stage / app.name, symlinks=True, ignore=shutil.ignore_patterns('.DS_Store'))
+    shutil.copytree(app, stage / "RDataCraft.app", symlinks=True, ignore=shutil.ignore_patterns('.DS_Store'))
     (stage / 'Applications').symlink_to('/Applications')
     (stage / 'Read me.txt').write_text(
         f'RDataCraft {VERSION} — {arch} Mac\n\nDrag the app into Applications, then open it there.\n'
@@ -50,7 +50,7 @@ def mac(app, arch, distribution=False):
         ('Developer ID signed and Apple-notarized application.\n' if distribution else
          'Release candidate: ad-hoc signed, not Apple-notarized.\n') +
         'See the accompanying release report for platform validation.\n')
-    image = ROOT / 'dist' / f'RDataCraft-{VERSION}-macos-{arch}.dmg'
+    image = ROOT / 'dist' / f'RDataCraft-macos-{arch}.dmg'
     subprocess.run(['hdiutil', 'create', '-ov', '-format', 'UDZO', '-volname',
                     f'RDataCraft {VERSION} {arch}', '-srcfolder', str(stage), str(image)], check=True)
     subprocess.run(['hdiutil', 'verify', str(image)], check=True)
@@ -60,6 +60,24 @@ def mac(app, arch, distribution=False):
 
 def nsis_quote(value):
     return str(value).replace('$', '$$').replace('"', '$\\"')
+
+
+def windows_upgrade(key):
+    return [f'  ReadRegStr $2 HKCU "{key}" "InstallLocation"',
+            '  ${If} $2 != ""',
+            '    IfFileExists "$2\\Uninstall.exe" 0 upgrade_missing',
+            '    ClearErrors',
+            '    ExecWait \'"$2\\Uninstall.exe" /S _?=$2\' $0',
+            '    IfErrors upgrade_failed',
+            '    ${If} $0 != 0', '      Goto upgrade_failed', '    ${EndIf}',
+            '    IfFileExists "$2\\RDataCraft.exe" upgrade_failed',
+            '    Goto upgrade_done',
+            '    upgrade_missing:',
+            '    IfFileExists "$2\\RDataCraft.exe" upgrade_failed upgrade_done',
+            '    upgrade_failed:',
+            '    IfSilent +2',
+            '    MessageBox MB_OK|MB_ICONSTOP "Close RDataCraft and retry setup. The previous installation could not be removed safely."',
+            '    SetErrorLevel 1', '    Abort', '  ${EndIf}', '  upgrade_done:']
 
 
 def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signtool='signtool.exe', webview_installer=None):
@@ -77,18 +95,18 @@ def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signto
         from fetch_windows_components import verify
         if not webview_installer:raise SystemExit('The native Windows installer requires --webview-installer for offline setup.')
         verify(webview_installer)
-    output = ROOT / 'dist' / f'RDataCraft-{VERSION}-windows-x64-setup.exe'
+    output = ROOT / 'dist' / 'RDataCraft-windows-x64-setup.exe'
     script = ROOT / 'artifacts/installer-staging/windows.nsi'
     script.parent.mkdir(parents=True, exist_ok=True)
-    key = f'Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\RDataCraft-{VERSION}'
+    key = f'Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\RDataCraft'
     lines = [
         'Unicode true', '!include "MUI2.nsh"', '!include "x64.nsh"', '!include "WinVer.nsh"',
         f'Name "RDataCraft {VERSION}"', f'OutFile "{nsis_quote(output)}"',
-        f'InstallDir "$LOCALAPPDATA\\Programs\\RDataCraft-{VERSION}"',
+        f'InstallDir "$LOCALAPPDATA\\Programs\\RDataCraft"',
         'RequestExecutionLevel user', 'SetCompressor /FINAL zlib',
-        'VIProductVersion "0.41.0.1"', 'VIAddVersionKey "ProductName" "RDataCraft"',
-        'VIAddVersionKey "FileDescription" "RDataCraft 0.41 development setup"',
-        'VIAddVersionKey "FileVersion" "0.41.0.1"', 'VIAddVersionKey "LegalCopyright" "RDataCraft contributors; GPL-3.0"',
+        'VIProductVersion "0.5.0.1"', 'VIAddVersionKey "ProductName" "RDataCraft"',
+        'VIAddVersionKey "FileDescription" "RDataCraft 0.5 development setup"',
+        'VIAddVersionKey "FileVersion" "0.5.0.1"', 'VIAddVersionKey "LegalCopyright" "RDataCraft contributors; GPL-3.0"',
         '!insertmacro MUI_PAGE_WELCOME', f'!insertmacro MUI_PAGE_LICENSE "{nsis_quote(ROOT / "LICENSE")}"',
         '!insertmacro MUI_PAGE_DIRECTORY', '!insertmacro MUI_PAGE_INSTFILES', '!insertmacro MUI_PAGE_FINISH',
         '!insertmacro MUI_UNPAGE_CONFIRM', '!insertmacro MUI_UNPAGE_INSTFILES', '!insertmacro MUI_LANGUAGE "English"',
@@ -98,12 +116,12 @@ def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signto
         '  ${IfNot} ${AtLeastWin10}',
         '    MessageBox MB_OK|MB_ICONSTOP "RDataCraft requires Windows 10 or later (x64)."',
         '    Abort', '  ${EndIf}', 'FunctionEnd',
-        'Section "RDataCraft"', '  SetShellVarContext current', '  SetOutPath "$INSTDIR"',
+        'Section "RDataCraft"', '  SetShellVarContext current', *windows_upgrade(key), '  SetOutPath "$INSTDIR"',
         f'  File /r "{nsis_quote(bundle / "*")}"', '  WriteUninstaller "$INSTDIR\\Uninstall.exe"',
-        f'  CreateDirectory "$SMPROGRAMS\\RDataCraft {VERSION}"',
-        f'  CreateShortCut "$SMPROGRAMS\\RDataCraft {VERSION}\\RDataCraft.lnk" "$INSTDIR\\' + ('RDataCraft.exe"' if native else 'Launch RDataCraft.cmd"'),
-        f'  CreateShortCut "$SMPROGRAMS\\RDataCraft {VERSION}\\RDataCraft help.lnk" "$INSTDIR\\examples\\RDataCraft help.html"',
-        f'  CreateShortCut "$SMPROGRAMS\\RDataCraft {VERSION}\\Uninstall.lnk" "$INSTDIR\\Uninstall.exe"',
+        f'  CreateDirectory "$SMPROGRAMS\\RDataCraft"',
+        f'  CreateShortCut "$SMPROGRAMS\\RDataCraft\\RDataCraft.lnk" "$INSTDIR\\' + ('RDataCraft.exe"' if native else 'Launch RDataCraft.cmd"'),
+        f'  CreateShortCut "$SMPROGRAMS\\RDataCraft\\RDataCraft help.lnk" "$INSTDIR\\examples\\RDataCraft help.html"',
+        f'  CreateShortCut "$SMPROGRAMS\\RDataCraft\\Uninstall.lnk" "$INSTDIR\\Uninstall.exe"',
         f'  WriteRegStr HKCU "{key}" "DisplayName" "RDataCraft {VERSION}"',
         f'  WriteRegStr HKCU "{key}" "DisplayVersion" "{VERSION}"',
         f'  WriteRegStr HKCU "{key}" "InstallLocation" "$INSTDIR"',
@@ -167,16 +185,16 @@ def windows(bundle, compiler, nsis_dir, certificate=None, timestamp=None, signto
     for folder in sorted((p for p in bundle.rglob('*') if p.is_dir()), key=lambda p: len(p.parts), reverse=True):
         relative = str(folder.relative_to(bundle)).replace('/', '\\')
         lines.append(f'  RMDir "$INSTDIR\\{nsis_quote(relative)}"')
-    lines += [f'  Delete "$SMPROGRAMS\\RDataCraft {VERSION}\\RDataCraft.lnk"',
-              f'  Delete "$SMPROGRAMS\\RDataCraft {VERSION}\\RDataCraft help.lnk"',
-              f'  Delete "$SMPROGRAMS\\RDataCraft {VERSION}\\Uninstall.lnk"',
-              f'  RMDir "$SMPROGRAMS\\RDataCraft {VERSION}"', '  RMDir "$INSTDIR"',
+    lines += [f'  Delete "$SMPROGRAMS\\RDataCraft\\RDataCraft.lnk"',
+              f'  Delete "$SMPROGRAMS\\RDataCraft\\RDataCraft help.lnk"',
+              f'  Delete "$SMPROGRAMS\\RDataCraft\\Uninstall.lnk"',
+              f'  RMDir "$SMPROGRAMS\\RDataCraft"', '  RMDir "$INSTDIR"',
               f'  DeleteRegKey HKCU "{key}"', 'SectionEnd']
-    script.write_text('\n'.join(lines) + '\n')
+    script.write_text('\n'.join(lines) + '\n',encoding='utf-8')
     environment = dict(os.environ, NSISDIR=str(nsis_dir.resolve()))
     subprocess.run([str(compiler.resolve()), '-V2', str(script)], env=environment, check=True)
     checksum(output)
-    (ROOT / 'artifacts/windows-installer-audit-0.41.json').write_text(json.dumps(
+    (ROOT / 'artifacts/windows-installer-audit-0.5.json').write_text(json.dumps(
         dict(audit, installer='NSIS', execution_tested=False, per_user=True,
              setup_and_uninstaller_signatures_verified=bool(certificate),
              uninstall_preserves_extra_files=True, script=str(script.relative_to(ROOT))), indent=2) + '\n')

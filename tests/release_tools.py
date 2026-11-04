@@ -58,14 +58,19 @@ with tempfile.TemporaryDirectory() as folder:
     check(blocked and not (Path(folder)/record['archive']).exists(),
           'a changed source archive still blocks the release instead of being accepted')
 
-association_install = '\n'.join(windows_associations('0.41'))
-association_remove = '\n'.join(windows_associations('0.41',uninstall=True))
+association_install = '\n'.join(windows_associations('0.42'))
+association_remove = '\n'.join(windows_associations('0.42',uninstall=True))
 check(all(ext in association_install and ext in association_remove for ext in ('.rdcraft','.rdatacraft')),
       'future Windows setup registers both study extensions and removes its own registrations')
 check('RDataCraftDocument.ico' in association_install and '"%1' in association_install.replace('$\\"','"'),
       'Windows study association uses the document icon and quotes the opened filename')
 check('UserChoice' not in association_install and '${If} $0 ==' in association_remove,
       'Windows registration preserves protected user choices and checks ownership before uninstall cleanup')
+check(windows_associations('0.42') == windows_associations('0.99'),
+      'Windows document identity stays stable across future versions')
+upgrade = '\n'.join(package_installers.windows_upgrade(r'Software\Microsoft\Windows\CurrentVersion\Uninstall\RDataCraft'))
+check('ExecWait' in upgrade and '_?=$2' in upgrade and 'upgrade_failed' in upgrade and 'RMDir /r' not in upgrade,
+      'in-place upgrade uses the old app uninstaller and aborts safely without recursively deleting user files')
 check((ROOT/'desktop/RDataCraftDocument.icns').read_bytes()[:4]==b'icns' and
       (ROOT/'desktop/windows/RDataCraftDocument.ico').read_bytes()[:4]==b'\x00\x00\x01\x00',
       'Mac and Windows document icon assets have valid native container headers')
@@ -76,7 +81,7 @@ check('RDataCraftDocument.ico' in (ROOT/'desktop/windows/RDataCraft.csproj').rea
 with tempfile.TemporaryDirectory() as temporary:
     root = Path(temporary)
     for name in ["app.R", "README.md", "LICENSE", ".gitignore", "R/help.R",
-                 "R/power.R", "R/power_pilot.R", "www/dropdowns.js", "tests/power_pilot.R",
+                 "R/updates.R", "scripts/check_updates.R", "desktop/linux/rdatacraft.py", "scripts/package_linux.py", "scripts/test_linux_installer.py", "R/power.R", "R/power_pilot.R", "www/dropdowns.js", "tests/power_pilot.R",
                  "scripts/test.py", ".github/workflows/platform-builds.yml"]:
         file = root / name
         file.parent.mkdir(parents=True, exist_ok=True)
@@ -222,10 +227,11 @@ with tempfile.TemporaryDirectory() as temporary:
     base = dict(version=version, commit=env['GITHUB_SHA'], run_id='42')
     installers = []
     for platform in release_assets.PLATFORMS:
-        name = f'RDataCraft-{version}-{platform}' + ('-setup.exe' if platform == 'windows-x64' else '.dmg')
+        name = release_assets.installer_name(platform)
         installer = inputs / name
         installer.write_bytes(('synthetic installer ' + platform).encode())
         installers.append(installer)
+        check(version not in name, 'installer filename remains stable while provenance retains the release version')
         release_assets.write_json(inputs / (platform + '-validation.json'), dict(
             **base, status='passed', platform=platform, installer=name, sha256=release_assets.digest(installer)))
     for platform in (*release_assets.PLATFORMS, 'native'):
@@ -241,14 +247,14 @@ with tempfile.TemporaryDirectory() as temporary:
     with patch.dict(os.environ, env), patch.object(release_assets, 'ROOT', root), patch.object(release_assets.subprocess, 'run', side_effect=application_archive):
         output = root / 'release'
         release_assets.assemble(inputs, output)
-        check(len(list(output.glob('*.dmg'))) == 2 and len(list(output.glob('*-setup.exe'))) == 1,
-              'release assembly retains precisely three tested platform installers')
+        check(len(list(output.glob('*.dmg'))) == 2 and len(list(output.glob('*-setup.exe'))) == 1 and len(list(output.glob('*.deb'))) == 1,
+              'release assembly retains precisely four tested platform installers')
         report = json.loads((output / f'RDataCraft-{version}-validation.json').read_text())
-        check(report['commit'] == env['GITHUB_SHA'] and len(report['platforms']) == 3,
-              'release validation binds all three installers to one commit and Actions run')
+        check(report['commit'] == env['GITHUB_SHA'] and len(report['platforms']) == 4,
+              'release validation binds all four installers to one commit and Actions run')
         with tarfile.open(output / f'RDataCraft-{version}-sources.tar.gz') as archive:
-            check(len([n for n in archive.getnames() if n.endswith('-sources.tar.gz')]) == 4 and 'application-source.tar' in archive.getnames(),
-                  'release source bundle includes the current application and four dependency source parts')
+            check(len([n for n in archive.getnames() if n.endswith('-sources.tar.gz')]) == 5 and 'application-source.tar' in archive.getnames(),
+                  'release source bundle includes the current application and five dependency source parts')
         original = installers[0].read_bytes()
         installers[0].write_bytes(b'tampered fixture')
         try:

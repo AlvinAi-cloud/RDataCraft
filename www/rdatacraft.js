@@ -147,6 +147,7 @@
       else if (document.querySelector("#nav_data.active")) { const button = document.getElementById(name + "_data"); if (button && !button.disabled) button.click(); }
       return;
     }
+    if (name === "check-updates") return Shiny.setInputValue("check_updates",Date.now(),{priority:"event"});
     if (name === "power") return Shiny.setInputValue("power_open",Date.now(),{priority:"event"});
     if (name === "advanced") return Shiny.setInputValue("advanced_open",Date.now(),{priority:"event"});
     if (name === "examples") return input("show_examples", {});

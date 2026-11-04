@@ -45,8 +45,8 @@ check(is.null(r$table) && !length(r$operations),'answer-only responses do not cr
 check(fails(pc_ai_prepare(tab,s,'Synthetic',list(answer='Invalid',operations=rep(plan(op('graph','x',graph='box'))$operations,7)))),'operation count is bounded')
 # Isolate operation staging from account state; the native bridge has its own tests.
 real_connected_ai<-pc_connected_ai
-ai_commands<-list();fake_account<-NULL
-pc_connected_ai<-function(deliver,connection_event) list(start=function(body) invisible(NULL),cancel=function(...) invisible(NULL),close=function() invisible(NULL),status=function() 'Synthetic connection',command=function(action,body=list()) {ai_commands[[length(ai_commands)+1L]]<<-list(action=action,body=body);invisible(NULL)},account=function() fake_account)
+ai_commands<-list();ai_requests<-list();fake_account<-NULL
+pc_connected_ai<-function(deliver,connection_event) list(start=function(body) {ai_requests[[length(ai_requests)+1L]]<<-body;invisible(NULL)},cancel=function(...) invisible(NULL),close=function() invisible(NULL),status=function() 'Synthetic connection',command=function(action,body=list()) {ai_commands[[length(ai_commands)+1L]]<<-list(action=action,body=body);invisible(NULL)},account=function() fake_account)
 shiny::testServer(app,{
  session$setInputs(ai_mode='api',ai_model='draft-provider-model');session$flushReact()
  check(!any(vapply(ai_commands,function(x)x$action=='set_model',logical(1))),'an API connection draft does not change the active model before Save and connect')
@@ -84,6 +84,17 @@ shiny::testServer(app,{
  session$setInputs(assistant_clear=1);session$flushReact()
  check(!length(assistant$history()),'conversation can be cleared from the session')
  check(!'assistant_history' %in% names(snapshot()),'conversation history is excluded from saved studies')
+ session$setInputs(assistant_submit=list(prompt='Current composer snapshot',share=FALSE,nonce=1));session$flushReact()
+ check(tail(ai_requests,1)[[1]]$prompt=='Current composer snapshot' && is.null(tail(ai_requests,1)[[1]]$context$data_tsv),'atomic composer event uses current prompt and excludes values when unchecked')
+ old_id<-assistant$pending()$id
+ restore_project(pc_decode_project(pc_project(tab,s)),'Different study');session$flushReact()
+ check(!assistant$busy() && is.null(assistant$pending()) && !length(assistant$history()) && is.null(assistant$ready()),'opening a new study cancels inference and removes prior conversation and operations')
+ session$setInputs(assistant_response=list(id=old_id,ok=TRUE,response=jsonlite::toJSON(pc_ai_local_plan('polish',s),auto_unbox=TRUE)));session$flushReact()
+ check(is.null(assistant$ready()) && !length(assistant$history()),'a late reply from the previous study cannot populate the new study')
+ session$setInputs(assistant_local=list(kind='polish',nonce=10));session$flushReact()
+ session$setInputs(assistant_discard=1);session$flushReact()
+ check(is.null(assistant$ready()) && length(workbook())==1,'discarding a proposal leaves the source study intact')
+
 })
 pc_connected_ai<-real_connected_ai
 cat(checks,'checks passed\n')

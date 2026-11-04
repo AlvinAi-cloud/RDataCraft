@@ -1,11 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 RDATACRAFT_ROOT="$(cd "$(dirname "$0")" && pwd)"
-if [[ "$(uname -m)" == "arm64" ]]; then
-  RDATACRAFT_CANDIDATES=("RDataCraft v0.4 Apple Silicon.app" "RDataCraft v0.4.app")
-else
-  RDATACRAFT_CANDIDATES=("RDataCraft v0.4.app")
-fi
+RDATACRAFT_CANDIDATES=("RDataCraft Local Preview.app" "RDataCraft.app")
 for RDATACRAFT_NAME in "${RDATACRAFT_CANDIDATES[@]}"; do
   RDATACRAFT_APP="$RDATACRAFT_ROOT/dist/$RDATACRAFT_NAME"
   if [[ -d "$RDATACRAFT_APP" ]]; then

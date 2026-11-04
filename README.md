@@ -5,24 +5,42 @@ publication-quality figures. It combines editable tables, linked graphs,
 statistical workflows, curve fitting, PCA, multi-panel layouts and reviewed custom
 R scripts with optional AI assistance.
 
-**v0.41 is a development preview.** Mac and Windows x64 editions open in dedicated desktop windows, with native
-menus and file dialogs. The Windows installer includes Microsoft WebView2; no
-external browser or separate R installation is needed. R and the required
-packages are included in packaged builds. Scientific calculations run locally.
-The optional AI Assistant connects directly to your ChatGPT account or to OpenAI, Anthropic/Claude, Gemini, and OpenAI-compatible API services. Open **AI → Accounts and Models…** to connect. No Codex installation is required. ChatGPT plan access depends on OpenAI eligibility and your consent.
+**v0.5** provides native desktop windows for Intel Mac, Apple Silicon, Windows x64
+and Ubuntu 24.04 LTS amd64. Mac and Windows bundle R and the required packages.
+The Ubuntu `.deb` installs its compatible R 4.3 engine through Ubuntu’s package
+manager and includes the app’s R package library; no manual R setup is needed.
+Scientific calculations run locally.
 
-Download tested installers for **Intel Mac, Apple Silicon Mac and Windows x64**
-from [Releases](https://github.com/AlvinAi-cloud/RDataCraft/releases). GitHub Actions
-builds each installer on its matching platform. The source-code ZIP is for
-developers and is not an installer. Mac builds are ad-hoc signed and not notarized;
-Windows setup is unsigned.
+The optional AI Assistant connects to your own ChatGPT account, OpenAI, Claude,
+Gemini or an OpenAI-compatible service. Configure it through **AI → Accounts and
+Models…**. The assistant points to this menu when disconnected. It keeps the
+conversation, composer and reviewed operations in separate scrolling areas.
+Figure settings and AI tile side by side; each panel can be shown or hidden
+independently. No AI draft executes automatically, and package installation on
+Mac/Windows still requires explicit approval. Ubuntu supports reviewed R scripts
+with the included/available packages; in-app installation of additional packages
+currently requires a Mac or Windows edition. Use SVG/PDF export for vector transfer
+on Ubuntu.
 
-**New in v0.41:** nine color palettes, clearer individual observations with lighter
-points, consistent point visibility and optional comparisons at each X value.
-Select two Y series, calculate observed-replicate Welch tests, choose a correction
-across X values and label the graph with numeric P values or significance stars.
-Fits and pointwise comparisons remain separate. Comparison-P controls appear only
-when comparison results are available.
+**Check for Updates…** is in the Mac application menu and Windows/Ubuntu Help menu,
+and in the in-app Help center. It checks the latest public release only when
+requested and offers the matching installer. Close the app and install the downloaded
+update; no study data or credentials are sent by the update check.
+
+Download tested installers from [Releases](https://github.com/AlvinAi-cloud/RDataCraft/releases).
+GitHub Actions builds each installer on its target platform and publishes only after
+all required checks pass. Mac builds are ad-hoc signed and not notarized; Windows
+setup is unsigned.
+
+Installer filenames remain stable across releases: `RDataCraft-macos-x86_64.dmg`,
+`RDataCraft-macos-arm64.dmg`, `RDataCraft-windows-x64-setup.exe` and
+`RDataCraft-ubuntu-amd64.deb`. The Mac app is `RDataCraft.app`. Version information
+remains inside the app and release reports. Legacy version-named installations are
+separate; remove the older app after verifying the new one and your saved studies.
+
+Advanced R includes input snapshots for AI drafts, a nonexecuting script check,
+live progress and an explicit AI-help draft. Model access depends on provider
+eligibility and consent; no Codex installation is required.
 
 ## See the desktop app
 
@@ -138,6 +156,10 @@ float outside section boundaries. Help includes these workflows.
 
 **Analysis → Advanced R analysis** supports methods beyond the presets. Write a
 script, load a template, or review an AI draft, then choose **Run reviewed script**.
+**Check script** validates syntax and package availability without executing code.
+AI drafts retain their original input snapshot; the editor clearly identifies it
+and offers the active table instead. **Ask AI for help** opens a message for review
+before sending.
 The worker receives `data` (a copied table with numeric conversion) and `data_raw`
 (original cell text). Return results using:
 
@@ -168,7 +190,7 @@ Review code before running it. See the in-app Advanced R guide and
 
 The connected assistant sends your message, column names, graph settings and
 recent conversation to your selected model service. Table values and computed results are
-included only when **Share active table values and computed results** is checked.
+included only when **Include active table values and calculated results** is checked.
 Local assistant tools and the main analysis workflows work offline. Model changes
 require review; Advanced R proposals remain drafts until explicitly run.
 
@@ -218,7 +240,7 @@ required source/installed-app checks, and collects dependency sources and notice
 The recent extended paste/layout and pilot-planning UI checks do not run in
 GitHub. Numerical, source, installer and core installed-app checks remain required.
 After all required jobs pass, Actions
-assembles v0.41 with three installer downloads, checksums and matching source
+assembles the reviewed version with four installer downloads, checksums and matching source
 material, verifies the uploaded asset hashes and publishes the release. Mac builds
 are ad-hoc signed and not notarized; Windows setup is unsigned.
 See [RELEASE.md](RELEASE.md) for GitHub Desktop publishing steps, the app description,
@@ -228,7 +250,7 @@ Prepare an upload without publishing:
 
 ```sh
 python3 scripts/prepare_github.py
-python3 scripts/preflight.py --source dist/RDataCraft-0.41-GitHub
+python3 scripts/preflight.py --source dist/RDataCraft-0.5-GitHub
 ```
 
 Use the generated **source folder contents**, rather than the entire development

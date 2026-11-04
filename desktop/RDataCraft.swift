@@ -20,7 +20,7 @@ final class RDataCraftApp: NSObject, NSApplicationDelegate {
     var quitQueue: [RDataCraftWindow] = []
     var testQuitReply: ((Bool) -> Void)?
     var testFolder: URL? {
-        let prefixes=["--multiwindow-test=","--studio-test=","--workflow-test=","--smoke-test=","--navigator-test=","--paste-test=","--graph-test=","--planning-test="]
+        let prefixes=["--assistant-test=","--multiwindow-test=","--studio-test=","--workflow-test=","--smoke-test=","--navigator-test=","--paste-test=","--graph-test=","--planning-test="]
         guard let flag=CommandLine.arguments.first(where:{value in prefixes.contains(where:{value.hasPrefix($0)})}) else {return nil}
         return URL(fileURLWithPath:String(flag.split(separator:"=",maxSplits:1)[1]),isDirectory:true)
     }
@@ -215,6 +215,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         }
         let app = menu("RDataCraft")
         add(app, "About RDataCraft", #selector(about))
+        add(app, "Check for Updates…", #selector(checkUpdates))
         app.addItem(.separator())
         add(app, "Hide RDataCraft", #selector(NSApplication.hide(_:)), "h")
         app.items.last?.target = NSApp
@@ -308,7 +309,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         var environment = ProcessInfo.processInfo.environment
         environment["RDATACRAFT_DESKTOP"] = "1"
         environment["RDATACRAFT_PARENT_PID"] = String(ProcessInfo.processInfo.processIdentifier)
-        if isAutomatedSession { environment["RDATACRAFT_USER_LIBRARY"] = coordinator!.testFolder!.appendingPathComponent("optional-R-library").path }
+        if isAutomatedSession { environment["RDATACRAFT_USER_LIBRARY"] = coordinator!.testFolder!.appendingPathComponent("optional-R-library").path; environment["RDATACRAFT_AI_PROFILE"] = coordinator!.testFolder!.appendingPathComponent("ai-profile").path }
         worker.environment = environment
         let output = Pipe()
         worker.standardOutput = output; worker.standardError = output
@@ -440,6 +441,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
     @objc func exportLayoutPDF() { command("export-layout-pdf") }
     @objc func showProject() { command("project") }
     @objc func showAIAccounts() { command("ai-accounts") }
+    @objc func checkUpdates() { command("check-updates") }
     @objc func toggleAssistant() { command("assistant") }
     @objc func toggleInspector() { command("inspector") }
     @objc func exportSVG() { command("export-svg") }
@@ -608,7 +610,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         return ready
     }
     @objc func about() {
-        NSApp.orderFrontStandardAboutPanel(options: [.applicationName: "RDataCraft", .applicationVersion: "v0.41 · Development preview", .credits: NSAttributedString(string: "Scientific plotting and statistics\nR-powered data analysis and publication-ready figures.\nAvailable for Mac and Windows.")])
+        NSApp.orderFrontStandardAboutPanel(options: [.applicationName: "RDataCraft", .applicationVersion: "v0.5 · Development preview", .credits: NSAttributedString(string: "Scientific plotting and statistics\nR-powered data analysis and publication-ready figures.\nAvailable for Mac, Windows and Ubuntu.")])
     }
     @objc func showExamples() { send(["type":"examples"]) }
     @objc func showHelp() {
@@ -1031,7 +1033,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         _ = try await webView.evaluateJavaScript("document.getElementById('add_tutorial').click()")
         try await waitUntil("document.getElementById('layout').value==='multiple' && document.getElementById('method').value==='pca' && document.querySelector('#pca_scree tbody tr')!==null && !document.documentElement.classList.contains('shiny-busy')")
         try await waitUntil("document.getElementById('pca_variable_pick').selectize.items.length===5 && !document.getElementById('pca_variable_pick').selectize.items.includes('SampleID') && document.querySelector('#pca_scores .dataTables_info')?.textContent.includes('12 entries')===true")
-        try await waitUntil("document.querySelector('.version-label')?.textContent.includes('v0.41')===true && Object.keys(document.getElementById('graph_view').selectize.options).length===3")
+        try await waitUntil("document.querySelector('.version-label')?.textContent.includes('v0.5')===true && Object.keys(document.getElementById('graph_view').selectize.options).length===3")
         try imageData(try await webView.takeSnapshot(configuration:nil)).write(to:folder.appendingPathComponent("pca-analysis.png"))
         for key in ["scores","loadings","scree","preprocessing"] {
             let file=folder.appendingPathComponent("pca-\(key).csv")
@@ -1046,7 +1048,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         let file=folder.appendingPathComponent("PCA teaching workflow.rdatacraft")
         nextTestDestination=file;saveAs();try await waitForFile(file)
         let saved=try JSONSerialization.jsonObject(with:Data(contentsOf:file)) as? [String:Any]
-        guard saved?["app_version"] as? String == "0.41",let settings=saved?["settings"] as? [String:Any],let selected=settings["pca_variables"] as? String,!selected.contains("SampleID"),selected.contains("CellArea") else {throw HostError.failed("PCA example settings or release version were not saved correctly.")}
+        guard saved?["app_version"] as? String == "0.5",let settings=saved?["settings"] as? [String:Any],let selected=settings["pca_variables"] as? String,!selected.contains("SampleID"),selected.contains("CellArea") else {throw HostError.failed("PCA example settings or release version were not saved correctly.")}
         return ["PCA in the shared Help example selector", "PCA walkthrough visible", "PCA example adds 12 observations", "PCA selects measurements without numeric IDs", "three linked PCA views", "four PCA CSV exports", "PCA scores graph", "PCA settings and version saved"]
     }
     func workflowTest() async {
@@ -1318,6 +1320,24 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
             app.testQuitReply=nil;app.stopAll();Darwin.exit(0)
         } catch {fail(error.localizedDescription)}
     }
+    func assistantLayoutTest(_ folder:URL) async throws -> [String] {
+        send(["type":"open","path":backend.appendingPathComponent("examples/RDataCraft examples.rdatacraft").path])
+        try await waitUntil("document.getElementById('study_name').value==='RDataCraft examples' && !document.documentElement.classList.contains('shiny-busy')")
+        command("figure")
+        try await waitUntil("window.RDataCraftGraph?.ready()===true && !!document.querySelector('#figure svg.graph-interactive')")
+        if (try await webView.evaluateJavaScript("document.body.classList.contains('inspector-hidden')")) as? Bool == true {command("inspector")}
+        command("assistant")
+        try await waitUntil("document.body.classList.contains('assistant-open') && document.getElementById('assistant_connection')===null && document.getElementById('assistant_connection_summary').textContent.includes('AI → Accounts and Models')")
+        try await waitUntil("(()=>{const a=document.getElementById('assistant_panel').getBoundingClientRect(),b=document.querySelector('.inspector').getBoundingClientRect();return b.width>0 && b.right<=a.left+2 && b.top<a.bottom;})()")
+        try imageData(try await webView.takeSnapshot(configuration:nil)).write(to:folder.appendingPathComponent("assistant-and-figure-settings.png"))
+        command("inspector")
+        try await waitUntil("document.body.classList.contains('inspector-hidden') && document.body.classList.contains('assistant-open')")
+        command("inspector")
+        try await waitUntil("!document.body.classList.contains('inspector-hidden') && document.body.classList.contains('assistant-open')")
+        command("assistant")
+        try await waitUntil("!document.body.classList.contains('assistant-open') && !document.body.classList.contains('inspector-hidden')")
+        return ["disconnected AI menu instruction", "no account button in assistant", "figure settings tile next to AI", "independent inspector hide", "independent inspector show", "assistant close preserves inspector"]
+    }
     func smokeTest() async {
         if CommandLine.arguments.contains(where:{$0.hasPrefix("--multiwindow-test=")}) {await multiwindowTest();return}
         if CommandLine.arguments.contains(where:{$0.hasPrefix("--workflow-test=") || $0.hasPrefix("--studio-test=")}) {await workflowTest();return}
@@ -1327,6 +1347,11 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
                 throw HostError.failed("Use a new empty folder for each native smoke test.")
             }
             try fm.createDirectory(at: folder, withIntermediateDirectories: true)
+            if CommandLine.arguments.contains(where:{$0.hasPrefix("--assistant-test=")}) {
+                let checks=try await assistantLayoutTest(folder)
+                try JSONSerialization.data(withJSONObject:["status":"passed","checks":checks],options:[.prettyPrinted,.sortedKeys]).write(to:folder.appendingPathComponent("report.json"))
+                stopEngine();Darwin.exit(0)
+            }
             if CommandLine.arguments.contains(where:{$0.hasPrefix("--planning-test=")}) {
                 let checks=try await planningTest(folder)
                 try JSONSerialization.data(withJSONObject:["status":"passed","checks":checks],options:[.prettyPrinted,.sortedKeys]).write(to:folder.appendingPathComponent("report.json"))
