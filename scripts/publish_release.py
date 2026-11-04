@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import subprocess
 from release_assets import installer_name, VERSION, digest, PLATFORMS
+from release_plan import load_reuse,verify_report
 
 
 def api(path, payload=None, method="PATCH"):
@@ -27,6 +28,15 @@ def main(publish=False):
     validation = json.loads((output / f'RDataCraft-{VERSION}-validation.json').read_text())
     if validation['status'] != 'passed' or validation['commit'] != sha or validation['run_id'] != os.environ['GITHUB_RUN_ID']:
         raise ValueError('Release validation differs from this workflow.')
+    plan=load_reuse(Path.cwd(),VERSION)
+    if plan:
+        records=validation.get('platforms',[])
+        if len(records)!=len(PLATFORMS) or {r.get('platform') for r in records}!=set(PLATFORMS):raise ValueError('Missing preserved platform provenance.')
+        current=dict(version=VERSION,commit=sha,run_id=os.environ['GITHUB_RUN_ID'])
+        for r in records:
+            verify_report(r,current,r['platform'],plan)
+            file=output/installer_name(r['platform'])
+            if digest(file)!=r.get('sha256') or file.stat().st_size!=r.get('size'):raise ValueError('Preserved installer bytes differ from their original tested report.')
     expected = {installer_name(p) for p in PLATFORMS}
     if {p.name for p in output.iterdir() if p.suffix in ('.exe', '.dmg', '.deb')} != expected:
         raise ValueError('Expected precisely the four platform installers.')
@@ -84,13 +94,14 @@ def main(publish=False):
         f'- [Apple Silicon Mac](https://github.com/{repo}/releases/download/{tag}/RDataCraft-macos-arm64.dmg)\n'
         f'- [Windows x64](https://github.com/{repo}/releases/download/{tag}/RDataCraft-windows-x64-setup.exe)\n\n'
         f'- [Ubuntu 24.04 amd64](https://github.com/{repo}/releases/download/{tag}/RDataCraft-ubuntu-amd64.deb)\n\n'
-        'All four installers passed required build, source and installed-app checks in this GitHub Actions run. Mac and Windows bundle R and required packages; Ubuntu installs R through its package manager; '
+        'All four installers passed required build, source and installed-app checks in the GitHub Actions runs recorded in validation. Mac and Windows bundle R and required packages; Ubuntu installs R through its package manager; '
         'Windows uses its own desktop window, not an external browser. Mac builds are ad-hoc signed and not notarized; '
         'Windows setup is unsigned. GitHub does not provide trusted signing credentials.\n\n'
         'Studies using the XY display options introduced in v0.32 require v0.32 or later. Corresponding source, dependency notices, '
         'SHA-256 checksums and the matching validation report accompany these installers. '
         'Live AI-provider account access and vector paste into external design apps are not certified by these automated tests.\n\n'
-        f'Built from `{sha}`.\n').encode('utf-8'))
+        f'Release source: `{sha}`. The validation report identifies each installer’s actual build commit and run.\n'
+        + (f'The tested Mac and Windows installers are preserved from `{plan["commit"]}` (run {plan["run_id"]}); only Ubuntu was rebuilt. Corresponding application source for both commits is included.\n' if plan else '')).encode('utf-8'))
     payload = dict(tag_name=tag, target_commitish=sha, name='RDataCraft ' + tag,
                    body=notes.read_text(encoding='utf-8'), draft=True)
     if existing is None:

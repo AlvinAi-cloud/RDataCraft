@@ -216,6 +216,54 @@ check(all(f'v{version}' in (ROOT/name).read_text(encoding='utf-8') for name in [
 import release_assets
 import publish_release
 import os
+import release_plan
+
+# Exercise a real Git history: Ubuntu-only source changes may preserve tested
+# platforms, but shared code or their actual build steps must force a new build.
+with tempfile.TemporaryDirectory() as temporary:
+    root=Path(temporary)
+    def git(*args):return subprocess.check_output(['git',*args],cwd=root,text=True).strip()
+    git('init','-q','-b','main');git('config','user.name','Release fixture');git('config','user.email','test@example.invalid')
+    (root/'R').mkdir();(root/'R/plot.R').write_text('original scientific code')
+    (root/'scripts').mkdir();(root/'scripts/package_linux.py').write_text('original Ubuntu packaging')
+    (root/'.github/workflows').mkdir(parents=True)
+    workflow=(ROOT/'.github/workflows/platform-builds.yml').read_text()
+    (root/'.github/workflows/platform-builds.yml').write_text(workflow)
+    git('add','.');git('commit','-qm','original tested application');base_commit=git('rev-parse','HEAD')
+    (root/'config').mkdir();plan=dict(version=version,commit=base_commit,run_id='41',preserve=list(release_plan.PRESERVED),rebuild=['ubuntu-amd64'])
+    (root/'config/release-reuse.json').write_text(json.dumps(plan));(root/'scripts/package_linux.py').write_text('corrected Ubuntu packaging')
+    git('add','.');git('commit','-qm','Ubuntu-only correction')
+    check(release_plan.load_reuse(root,version)==plan,'targeted preservation accepts Ubuntu-only changes in a real Git history')
+    current=dict(version=version,commit=git('rev-parse','HEAD'),run_id='42')
+    record=dict(version=version,commit=base_commit,run_id='41',platform='windows-x64',status='passed',reports={k:dict(version=version,status='passed') for k in ('native','source','installer')})
+    release_plan.verify_report(record,current,'windows-x64',plan)
+    check(record['commit']==base_commit and record['run_id']=='41','preservation retains the original passing installer commit and run')
+    bad=dict(record,reports=dict(record['reports'],installer=dict(version=version,status='failed')))
+    try:release_plan.verify_report(bad,current,'windows-x64',plan)
+    except ValueError:check(True,'a failed original installation check blocks preservation')
+    else:raise AssertionError('Failed installer validation was preserved')
+    bad=dict(record,commit=current['commit'])
+    try:release_plan.verify_report(bad,current,'windows-x64',plan)
+    except ValueError:check(True,'a preserved report cannot be relabeled with the replacement commit')
+    else:raise AssertionError('Relabeled validation was accepted')
+    previous=dict(name='Native platform validation',path='.github/workflows/platform-builds.yml',head_sha=base_commit,head_branch='main',repository=dict(full_name='example/RDataCraft'),event='push',status='completed')
+    jobs=dict(jobs=[dict(name=name,status='completed',conclusion='success') for name in ('mac (macos-15, arm64)','mac (macos-15-intel, x86_64)','windows')])
+    release_plan.verify_prior_run(plan,'example/RDataCraft',lambda path:jobs if '/jobs?' in path else previous)
+    check(True,'preservation verifies all three original successful platform jobs and their repository/commit')
+    wrong=dict(previous,head_sha='b'*40)
+    try:release_plan.verify_prior_run(plan,'example/RDataCraft',lambda path:jobs if '/jobs?' in path else wrong)
+    except ValueError:check(True,'a previous run from a different commit cannot supply preserved installers')
+    else:raise AssertionError('Wrong original run accepted')
+    (root/'.github/workflows/platform-builds.yml').write_text(workflow.replace("r-version: '4.6.1'","r-version: '9.9.9'"))
+    git('add','.');git('commit','-qm','changed Windows runtime input')
+    try:release_plan.load_reuse(root,version)
+    except ValueError:check(True,'changes to actual Windows build inputs block installer preservation')
+    else:raise AssertionError('Changed Windows workflow was allowed')
+    (root/'.github/workflows/platform-builds.yml').write_text(workflow);(root/'R/plot.R').write_text('changed scientific code');git('add','.');git('commit','-qm','changed application')
+    try:release_plan.load_reuse(root,version)
+    except ValueError:check(True,'a shared scientific-code change blocks preservation')
+    else:raise AssertionError('Changed shared application was allowed')
+    check(release_plan.load_reuse(root,version+'1') is None,'a prior version’s preservation plan cannot carry into a future release')
 
 with tempfile.TemporaryDirectory() as temporary:
     root = Path(temporary)
@@ -255,6 +303,34 @@ with tempfile.TemporaryDirectory() as temporary:
         with tarfile.open(output / f'RDataCraft-{version}-sources.tar.gz') as archive:
             check(len([n for n in archive.getnames() if n.endswith('-sources.tar.gz')]) == 5 and 'application-source.tar' in archive.getnames(),
                   'release source bundle includes the current application and five dependency source parts')
+        preserved_inputs=root/'preserved-inputs'
+        __import__('shutil').copytree(inputs,preserved_inputs)
+        replacement=dict(env,GITHUB_SHA='c'*40,GITHUB_RUN_ID='43')
+        preserve_plan=dict(version=version,commit=env['GITHUB_SHA'],run_id='42',preserve=list(release_plan.PRESERVED),rebuild=['ubuntu-amd64'])
+        for platform in release_assets.PLATFORMS:
+            path=preserved_inputs/(platform+'-validation.json');value=json.loads(path.read_text())
+            value['size']=(preserved_inputs/value['installer']).stat().st_size
+            value['reports']={k:dict(version=version,status='passed') for k in ('native','source','installer')}
+            if platform=='ubuntu-amd64':value.update(commit=replacement['GITHUB_SHA'],run_id='43')
+            release_assets.write_json(path,value)
+        for path in preserved_inputs.glob('*-source-record.json'):
+            value=json.loads(path.read_text());platform=value.get('platform',path.name.removesuffix('-source-record.json'))
+            if platform not in release_plan.PRESERVED:value.update(commit=replacement['GITHUB_SHA'],run_id='43')
+            # Existing fixture records predate per-platform fields; actual records carry them.
+            if platform!='native':value['platform']=platform
+            release_assets.write_json(path,value)
+        with patch.dict(os.environ,replacement),patch.object(release_assets,'load_reuse',return_value=preserve_plan):
+            preserved_output=root/'preserved-release';release_assets.assemble(preserved_inputs,preserved_output)
+            report=json.loads((preserved_output/f'RDataCraft-{version}-validation.json').read_text())
+            check(all(release_assets.digest(preserved_output/p.name)==release_assets.digest(p) for p in installers),'targeted release preserves the exact previously tested installer bytes')
+            check(all(r['commit']==(replacement['GITHUB_SHA'] if r['platform']=='ubuntu-amd64' else env['GITHUB_SHA']) for r in report['platforms']),'targeted release honestly retains each platform’s actual build commit')
+            with tarfile.open(preserved_output/f'RDataCraft-{version}-sources.tar.gz') as archive:
+                check('application-source-'+env['GITHUB_SHA']+'.tar' in archive.getnames() and 'application-source.tar' in archive.getnames(),'targeted source release includes both original and corrected application commits')
+            victim=preserved_inputs/installers[0].name;original_bytes=victim.read_bytes();victim.write_bytes(b'changed after original validation')
+            try:release_assets.assemble(preserved_inputs,root/'tampered-preserved')
+            except ValueError:check(True,'targeted preservation still rejects modified installer bytes')
+            else:raise AssertionError('Changed preserved bytes accepted')
+            victim.write_bytes(original_bytes)
         original = installers[0].read_bytes()
         installers[0].write_bytes(b'tampered fixture')
         try:
@@ -300,9 +376,10 @@ with tempfile.TemporaryDirectory() as temporary:
 
         # Emulate a real unpublished draft: the tag lookup returns 404 and
         # the numeric release ID remains usable before a tag is published.
-        def publication_fixture(publish, problem=None, existing=False):
+        def publication_fixture(publish, problem=None, existing=False, fixture_env=None):
+            active_env = fixture_env or env
             state = dict(published=False, tag=False, assets_checked=False)
-            release = dict(id=7, tag_name='v'+version, target_commitish=env['GITHUB_SHA'], draft=True)
+            release = dict(id=7, tag_name='v'+version, target_commitish=active_env['GITHUB_SHA'], draft=True)
             original_open = Path.open
             def windows_text_open(path, mode='r', *args, **kwargs):
                 # Reproduce both a Windows legacy locale and CRLF translation.
@@ -330,12 +407,12 @@ with tempfile.TemporaryDirectory() as temporary:
                     if problem == 'missing': values.pop()
                     return values
                 if path.endswith('/git/refs'):
-                    assert method=='POST' and payload==dict(ref='refs/tags/v'+version,sha=env['GITHUB_SHA']) and state['assets_checked']
+                    assert method=='POST' and payload==dict(ref='refs/tags/v'+version,sha=active_env['GITHUB_SHA']) and state['assets_checked']
                     state['tag'] = True
-                    return dict(object=dict(type='commit',sha=env['GITHUB_SHA']))
+                    return dict(object=dict(type='commit',sha=active_env['GITHUB_SHA']))
                 if '/git/ref/' in path:
                     assert state['tag']
-                    return dict(object=dict(type='commit',sha=env['GITHUB_SHA']))
+                    return dict(object=dict(type='commit',sha=active_env['GITHUB_SHA']))
                 if payload is not None:
                     if 'body' in payload:
                         assert 'Figure settings \u2192 XY lines & fitted curves' in payload['body']
@@ -345,7 +422,7 @@ with tempfile.TemporaryDirectory() as temporary:
                         state['published'] = True
                     release.update(payload)
                 return release
-            with patch.dict(os.environ, env), patch.object(publish_release, 'api', side_effect=remote), patch.object(publish_release.subprocess, 'run', side_effect=command), patch.object(Path, 'open', windows_text_open):
+            with patch.dict(os.environ, active_env), patch.object(publish_release, 'api', side_effect=remote), patch.object(publish_release.subprocess, 'run', side_effect=command), patch.object(Path, 'open', windows_text_open):
                 try: publish_release.main(publish=publish)
                 except ValueError:
                     if not problem: raise
@@ -360,6 +437,11 @@ with tempfile.TemporaryDirectory() as temporary:
               'release notes retain exact UTF-8 and LF bytes under Windows cp1252 and CRLF defaults')
         for problem in ('digest','missing','tag'):
             check(not publication_fixture(True,problem), 'publication rejects remote '+problem+' mismatch')
+        shutil.rmtree(root/'dist/release');shutil.copytree(preserved_output,root/'dist/release')
+        with patch.object(publish_release,'load_reuse',return_value=preserve_plan):
+            check(publication_fixture(True,fixture_env=replacement),'targeted Ubuntu release publishes with the original three installer reports intact')
+            notes=(root/'artifacts/release-notes.md').read_text(encoding='utf-8')
+            check(preserve_plan['commit'] in notes and 'only Ubuntu was rebuilt' in notes,'targeted release notes disclose original installer provenance')
     finally:
         os.chdir(previous)
 

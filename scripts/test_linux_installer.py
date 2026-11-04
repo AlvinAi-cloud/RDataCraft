@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Validate installation, the native desktop and a package-manager upgrade on Ubuntu."""
-import json,os,subprocess,sys,tempfile
+import json,os,subprocess,sys,tempfile,shutil
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];VERSION=json.loads((ROOT/'config/release.json').read_text())['version']
 installer=(ROOT/'dist/RDataCraft-ubuntu-amd64.deb').resolve()
@@ -16,9 +16,17 @@ report=json.loads((ROOT/'artifacts/installed-linux/validation.json').read_text()
 with tempfile.TemporaryDirectory(prefix='RDataCraft-installed-validation-') as folder:
  subprocess.run(['cp','-a',str(backend)+ '/.',folder],check=True)
  env=dict(os.environ,RDATACRAFT_RUNTIME=str(Path(folder)/'runtime'))
- subprocess.run([sys.executable,str(Path(folder)/'scripts/test.py'),'--require-node'],cwd=folder,env=env,check=True,timeout=1800)
- source=Path(folder)/f'artifacts/validation-{VERSION}.json'
- (ROOT/f'artifacts/validation-installed-linux-{VERSION}.json').write_bytes(source.read_bytes())
+ command=[sys.executable,str(Path(folder)/'scripts/test.py'),'--require-node']
+ try:
+  subprocess.run(command,cwd=folder,env=env,check=True,timeout=1800)
+ finally:
+  # Preserve source-test diagnostics before the disposable copy is removed,
+  # including a failed report and the full log that the console tail omits.
+  artifacts=Path(folder)/'artifacts';diagnostics=ROOT/'artifacts/installed-linux/source-tests';diagnostics.mkdir(parents=True,exist_ok=True)
+  for pattern in ['*.log','validation-*.json']:
+   for log in artifacts.glob(pattern):shutil.copy2(log,diagnostics/log.name)
+  source=artifacts/f'validation-{VERSION}.json'
+  if source.exists():(ROOT/f'artifacts/validation-installed-linux-{VERSION}.json').write_bytes(source.read_bytes())
  # A user-created document in user storage survives reinstall and uninstall.
  sentinel=Path(folder)/'user-study.rdcraft';sentinel.write_text('original synthetic study');before=sentinel.read_bytes()
  subprocess.run(['sudo','dpkg','-i',str(installer)],check=True);assert sentinel.read_bytes()==before

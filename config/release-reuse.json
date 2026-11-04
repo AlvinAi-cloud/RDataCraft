@@ -1,0 +1,7 @@
+{
+  "version": "0.5",
+  "commit": "b47e2949723b6937569d87000db015eed6a732a5",
+  "run_id": "41923829035",
+  "preserve": ["macos-x86_64", "macos-arm64", "windows-x64"],
+  "rebuild": ["ubuntu-amd64"]
+}

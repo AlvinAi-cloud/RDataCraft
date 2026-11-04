@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import tarfile
+from release_plan import load_reuse,expected_provenance,verify_report
 
 ROOT = Path(__file__).resolve().parent.parent
 VERSION = json.loads((ROOT / 'config/release.json').read_text())['version']
@@ -139,6 +140,7 @@ def platform_assets(platform, installer):
 
 def assemble(inputs, output):
     current = provenance()
+    plan = load_reuse(ROOT,VERSION)
     output.mkdir(parents=True, exist_ok=False)
     records = []
     for platform in PLATFORMS:
@@ -146,8 +148,7 @@ def assemble(inputs, output):
         if len(matches) != 1:
             raise ValueError('Expected exactly one report for ' + platform)
         record = json.loads(matches[0].read_text())
-        if record.get('status') != 'passed' or any(record.get(k) != v for k, v in current.items()):
-            raise ValueError('Validation does not match this commit/run: ' + platform)
+        verify_report(record,current,platform,plan)
         expected_name = installer_name(platform)
         if record.get('platform') != platform or record.get('installer') != expected_name:
             raise ValueError('Installer/platform identity does not match.')
@@ -164,8 +165,10 @@ def assemble(inputs, output):
     archives = []
     for path in source_records:
         record = json.loads(path.read_text())
-        if any(record.get(k) != v for k, v in current.items()):
-            raise ValueError('Source provenance differs from this commit/run.')
+        source_platform=record.get('platform','native')
+        expected=expected_provenance(current,source_platform,plan)
+        if any(record.get(k) != v for k, v in expected.items()):
+            raise ValueError('Source provenance differs from its actual platform build.')
         if Path(record['archive']).name != record['archive']:
             raise ValueError('Invalid source archive path.')
         matches = list(inputs.rglob(record['archive']))
@@ -178,15 +181,23 @@ def assemble(inputs, output):
     app_source = ROOT / 'artifacts/application-source.tar'
     subprocess.run(['git', 'archive', '--format=tar', '--prefix=application/',
                     '--output=' + str(app_source), current['commit']], cwd=ROOT, check=True)
+    prior_sources=[]
+    for commit in sorted({r['commit'] for r in records}-{current['commit']}):
+        archive=ROOT/'artifacts'/('application-source-'+commit+'.tar')
+        subprocess.run(['git','archive','--format=tar','--prefix=application/','--output='+str(archive),commit],cwd=ROOT,check=True)
+        prior_sources.append(archive)
     source_bundle = output / f'RDataCraft-{VERSION}-sources.tar.gz'
     with tarfile.open(source_bundle, 'w:gz') as stream:
         stream.add(app_source, arcname='application-source.tar')
+        for prior in prior_sources:stream.add(prior,arcname=prior.name)
         for path in archives:
             stream.add(path, arcname=path.name)
         text = output / 'SOURCE-README.txt'
         text.write_text(
             f'RDataCraft v{VERSION} corresponding source and build material\n\n'
-            'Extract application-source.tar for this exact application commit. Each platform source archive\n'
+            'Extract application-source.tar for the release commit. When tested installers are preserved,\n'
+            'application-source-COMMIT.tar contains their exact original application source. Build commit\n'
+            'and Actions run identities remain unchanged in the validation report. Each platform source archive\n'
             'contains its R/package archives, dependency inventory and license records. The native source\n'
             'archive contains pinned native inputs, Rtools45 MXE r6768 recipes and vendored Rust dependencies.\n'
             'Native R Mac recipes/compiler sources are included with those pinned archives.\n'

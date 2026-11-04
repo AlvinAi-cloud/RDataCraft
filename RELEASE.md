@@ -18,9 +18,16 @@ graph checks. Extended paste/planning UI sequences remain advisory; numerical an
 server tests remain required. The local assistant-layout regression is separate
 from those established release gates.
 
-Every installer and corresponding source record must match one tested commit and
-Actions run. Assembly rejects missing platforms, changed bytes or mismatched
-provenance. Publication verifies uploaded asset names, sizes and SHA-256 digests
+Every installer and corresponding source record must retain its actual tested
+commit and Actions run. For the user-requested Ubuntu-only rebuild, the three
+already tested Mac/Windows installers are preserved byte for byte from run
+41923829035 at b47e2949723b6937569d87000db015eed6a732a5. An explicit, version-scoped
+release plan verifies that shared application and Mac/Windows build inputs are
+unchanged before permitting this. Any shared-code change blocks preservation.
+The validation report retains each original build identity; the source bundle
+includes application source for both build commits. The next app version defaults
+to a complete rebuild. Assembly rejects missing platforms, changed bytes,
+unapproved provenance or missing original passing checks. Publication verifies uploaded asset names, sizes and SHA-256 digests
 before publishing the tested tag. A failure leaves the release unpublished.
 
 Stable installer names:

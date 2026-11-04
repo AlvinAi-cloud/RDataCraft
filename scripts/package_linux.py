@@ -6,6 +6,14 @@ ROOT=Path(__file__).resolve().parents[1]
 VERSION=json.loads((ROOT/'config/release.json').read_text())['version']
 DEPENDENCIES=['libc6 (>= 2.39)','libstdc++6','libgcc-s1','libuv1t64','r-base-core (>= 4.3.3)','r-base-core (<< 4.4)','r-recommended','python3','python3-gi','python3-gi-cairo','gir1.2-gtk-3.0','gir1.2-webkit2-4.1','xdg-utils','fonts-dejavu-core','libcurl4t64','libxml2','libfontconfig1','libfreetype6','libharfbuzz0b','libfribidi0','libpng16-16t64','libjpeg-turbo8','libtiff6','libcairo2','libssl3t64']
 
+def copy_application_source(source,backend):
+ """Carry complete, auditable source/support material without build outputs."""
+ backend.mkdir(parents=True,exist_ok=True)
+ for name in ['app.R','README.md','CONTRIBUTING.md','CODE_OF_CONDUCT.md','CONTRIBUTORS.md','CHANGELOG.md','WORKFLOWS.md','RELEASE.md','PLATFORM_SUPPORT.md','LICENSE','.gitignore','.gitattributes','dependencies.csv','dependencies.lock.json','source-manifest.json','Launch RDataCraft.command','Launch RDataCraft portable.command','Launch RDataCraft.cmd','Launch RDataCraft.ps1','Validate RDataCraft.cmd']:
+  shutil.copy2(source/name,backend/name)
+ for name in ['R','www','config','scripts','tests','examples','licenses','docs','desktop','.github']:
+  shutil.copytree(source/name,backend/name,ignore=shutil.ignore_patterns('__pycache__','*.pyc','.DS_Store','.git','target','bin','obj','PrismDecode'))
+
 def main():
  if platform.system()!='Linux' or platform.machine()!='x86_64':raise SystemExit('Build the Ubuntu installer on an Ubuntu amd64 runner.')
  release=Path('/etc/os-release').read_text()
@@ -14,13 +22,7 @@ def main():
  if not version.startswith('4.3.'):raise SystemExit('Build library packages against the matching Ubuntu R 4.3 engine.')
  stage=ROOT/'artifacts/linux-package';backend=stage/'opt/rdatacraft'
  if stage.exists():raise SystemExit('Use a clean Linux staging folder.')
- backend.mkdir(parents=True)
- for name in ['app.R','README.md','CONTRIBUTING.md','CODE_OF_CONDUCT.md','CONTRIBUTORS.md','CHANGELOG.md','WORKFLOWS.md','RELEASE.md','PLATFORM_SUPPORT.md','LICENSE','dependencies.csv','dependencies.lock.json','source-manifest.json']:
-  shutil.copy2(ROOT/name,backend/name)
- for name in ['R','www','config','scripts','tests','examples','licenses','docs']:
-  shutil.copytree(ROOT/name,backend/name,ignore=shutil.ignore_patterns('__pycache__','*.pyc','.DS_Store'))
- shutil.copytree(ROOT/'desktop/linux',backend/'desktop/linux')
- shutil.copytree(ROOT/'desktop/ai-helper',backend/'desktop/ai-helper',ignore=shutil.ignore_patterns('target','bin'))
+ copy_application_source(ROOT,backend)
  from build_ai import build
  ai=build(offline=True);shutil.copytree(ai,backend/'desktop/ai-helper/bin')
  shutil.copytree(ROOT/'runtime/library',backend/'runtime/library')
