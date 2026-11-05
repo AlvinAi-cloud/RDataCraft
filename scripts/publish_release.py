@@ -78,7 +78,12 @@ def main(publish=False):
     notes.write_bytes((
         f'RDataCraft {tag}\n\n'
         'R-powered scientific plotting and statistics for Mac, Windows and Ubuntu.\n\n'
-        'New in v0.6: fixed/bounded regression parameters with Defaults and group-specific overrides; '
+        + ('New in v0.6.1: dose-response results and constraints use the standard Hill coefficient. '
+           'Fixed-Hill fits retry from the measured dose range if the first fit fails. '
+           'Nonlinear regressions report 95% profile-likelihood intervals. '
+           'Shared nonlinear fits with more than 12 free parameters use Wald intervals.\n\n'
+           if tag == 'v0.6.1' else '')
+        + 'New in v0.6: fixed/bounded regression parameters with Defaults and group-specific overrides; '
         'independent curves remain together on one graph. Shared/global fitting is a separate joint least-squares option '
         'with selected shared coefficients, intersected bounds and joint uncertainty. '
         'A three-parameter increasing dose-response model fixes the conventional Hill slope at +1.\n\n'

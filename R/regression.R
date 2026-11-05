@@ -66,12 +66,22 @@ pc_regression <- function(n,method,group,options=list()) {
   se <- sqrt(diag(covariance)); df <- df.residual(fit)
   if(df<=0 || any(!is.finite(se))) stop("There are too few residual degrees of freedom to estimate uncertainty.",call.=FALSE)
   crit <- qt(.975,df); estimate <- co; low <- co-crit*se; high <- co+crit*se
+  profile <- inherits(fit,"nls") && !isFALSE(options$profile_ci)
+  if (profile) {
+    rhs <- specs$formula[[3L]]
+    predict_at <- function(p) eval(rhs, c(as.list(p), list(x=a$x)), environment(specs$formula))
+    limits <- pc_profile_parameters(co, se, lower, upper, names(co), names(co),
+                                    predict_at, a$value, a$.weight, df)
+    low[] <- limits[,1]
+    high[] <- limits[,2]
+  }
   positive_parameters <- startsWith(names(co),"log")
   estimate[positive_parameters] <- exp(co[positive_parameters]);low[positive_parameters] <- exp(low[positive_parameters]);high[positive_parameters] <- exp(high[positive_parameters]);se[positive_parameters] <- se[positive_parameters]*estimate[positive_parameters]
   parameter_names <- names(co);parameter_names[positive_parameters] <- sub("^log","",parameter_names[positive_parameters])
   grid <- data.frame(x=seq(min(a$x),max(a$x),length.out=240))
   r <- pc_result(n,method);r$n <- nrow(a)
   r$parameters <- data.frame(parameter=parameter_names,estimate=as.numeric(estimate),se=as.numeric(se),ci_low=as.numeric(low),ci_high=as.numeric(high))
+  if (profile) r$parameters$ci_method <- "Profile likelihood"
   r$curve <- data.frame(x=grid$x,fit=as.numeric(predict(fit,grid)))
   if(any(!is.finite(r$curve$fit))) stop("The fitted curve contains nonfinite predictions.",call.=FALSE)
   if(inherits(fit,"lm")) {
@@ -86,7 +96,7 @@ pc_regression <- function(n,method,group,options=list()) {
     pc_metric("Weighted SSE",pc_fmt(sum(a$.weight*resid^2))),pc_metric("AIC",pc_fmt(AIC(fit))))
   if(is.finite(r$p)) r$metrics<-rbind(r$metrics,pc_metric("P value (slope = 0)",pc_fmt(r$p)))
   r$notes <- c(paste("Least squares on the original Y scale.",equation),
-    if(inherits(fit,"lm")) "Parameter t intervals and a 95% confidence band for the fitted mean are shown. This is not a prediction band." else "Parameter intervals are approximate local t/Wald intervals. No nonlinear curve confidence or prediction band is implied.",
+    if(inherits(fit,"lm")) "Parameter t intervals and a 95% confidence band for the fitted mean are shown. This is not a prediction band." else if(profile) pc_profile_note(),
     "Fits assume independent observations. Technical repeats are not independent biological replicates. Inspect residuals and parameter uncertainty; R squared alone does not establish model adequacy.",
     "AIC values are comparable only for models fit to the same observations, response scale and weighting convention. No automatic best-model claim is made.")
   r

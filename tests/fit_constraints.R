@@ -24,6 +24,19 @@ r<-pc_analyze(n,'fourpl','Y',options=s);check(all(is.na(r$parameters$se))&&r$n==
 s$fit_constraints<-'{"fourpl":{"bottom":{"fixed":0},"top":{"fixed":100}}}'
 plan<-list(answer='Fix plateaus as requested.',operations=list(list(type='analysis',title='Constrained curve',parameters=list(list(key='method',value='fourpl'),list(key='fit_constraints',value=s$fit_constraints)))))
 check(length(pc_ai_prepare(tab,s,'Synthetic',plan)$operations)==1,'AI constraints pass the same validation and create only a reviewable preview')
+plan$operations[[1]]$parameters[[2]]$value <- '{"fourpl":{"hill":{"fixed":1},"groups":{"Y":{"hill":{"fixed":1}}}}}'
+prepared <- pc_ai_prepare(tab,s,'Synthetic',plan)
+hill <- prepared$reports[[1]]$result$parameters
+check(abs(hill$estimate[hill$parameter=='hill']-1)<1e-14,'AI requests and reports use the standard Hill coefficient')
+shiny::testServer(source('app.R')$value,{
+ raw(tab);document_open(TRUE)
+ old <- '{"fourpl":{"hill":{"fixed":1}}}'
+ do.call(session$setInputs,modifyList(s,list(fit_constraints=old)));session$flushReact()
+ session$setInputs(fit_constraints_open=1);session$flushReact()
+ check(grepl(as.character(1/log(10)),output$constraint_fields$html,fixed=TRUE),'saved Hill constraints display their standard equivalent')
+ session$setInputs(constraint_hill_fixed='1',fit_constraints_apply=1);session$flushReact()
+ check(constraint_draft()$hill$fixed==log(10),'constraint dialog fixes the standard Hill coefficient at one')
+})
 shiny::testServer(source('app.R')$value,{
  raw(data.frame(X=as.character(1:20),Y=as.character(2+3*(1:20)+sin(1:20)*.2)));document_open(TRUE)
  do.call(session$setInputs,modifyList(pc_defaults(),list(layout='xy',graph='scatter',method='linear',group1='Y')));session$flushReact()
@@ -47,4 +60,21 @@ for(method in names(cases)){
 x<-1:20;y<-2+3*x+sin(x)*.2;n<-pc_normalize(data.frame(X=as.character(x),Y=as.character(y)),'xy')
 r<-pc_analyze(n,'linear','Y',options=list(fit_constraints='{"linear":{"intercept":{"fixed":0},"slope":{"upper":2}}}'))
 check(abs(r$parameters$estimate[2]-2)<1e-6&&is.na(r$parameters$se[2]),'an active bound is respected and its Wald interval is omitted')
+
+x <- seq(.2, 10, length.out=35)
+y <- 28*x/(4+x) + .42*sin(seq_along(x))
+n <- pc_normalize(data.frame(X=x,Y=y),'xy')
+r <- pc_analyze(n,'michaelis','Y',options=list(fit_weight='inv_y2'))
+km <- subset(r$parameters, parameter=='Km')
+w <- r$diagnostics$weight
+ss <- sum(w*r$diagnostics$residual^2)
+conditional_sse <- function(km) {
+  fraction <- x/(km+x)
+  vmax <- sum(w*fraction*y)/sum(w*fraction^2)
+  sum(w*(y-vmax*fraction)^2)
+}
+f <- (vapply(c(km$ci_low,km$ci_high),conditional_sse,numeric(1))/ss-1)*(length(x)-2L)
+check(km$ci_method=='Profile likelihood' && km$ci_low<km$estimate && km$estimate<km$ci_high &&
+      max(abs(f-qf(.95,1,length(x)-2L)))<1e-5,
+      'weighted Michaelis–Menten Km limits match independent analytical refits')
 cat(k,'checks passed\n')

@@ -277,7 +277,7 @@ ui <- fluidPage(
                 fileInput("open_project", "Project file", accept = c(".rdcraft", ".rdatacraft", ".json", ".plotcraft"), placeholder = "Choose a RDataCraft project"),
                 downloadButton("save_project_copy", "Save current project", class = "btn-primary")),
               div(class = "card-surface", h3("About this version"),
-                  p("RDataCraft v0.6 · Scientific plotting and statistics"),
+                  p("RDataCraft v0.6.1 · Scientific plotting and statistics"),
                   p("R-powered data analysis and publication-ready figures for Mac and Windows."),
                   p("Six table types including PCA, named worksheets, matched and independent group tests, factorial ANOVA, correlation, dose-response fitting, survival analysis, categorical tests, diagnostic graphs, and reproducible reports."),
                   p("Treat each row as an independent experimental unit unless using a paired test. Technical replicates must not be counted as independent biological replicates."),
@@ -675,12 +675,28 @@ server <- function(input, output, session) {
     if (all(vapply(names(pc_defaults()), function(key) identical(scalar(input[[key]]), scalar(target[[key]])), logical(1)))) restoring_settings(NULL)
   })
   constraint_method<-reactiveVal(NULL);constraint_draft<-reactiveVal(list());constraint_target<-reactiveVal('__defaults__')
+  constraint_field_value <- function(parameter, value) {
+    if (is.null(value)) return('')
+    as.character(if (parameter == 'hill') value / log(10) else value)
+  }
   store_constraint_fields<-function(target) {
     method<-constraint_method();r<-isolate(constraint_draft());current<-list()
     for(k in pc_fit_parameters(method)) {
       if(target!='__defaults__'&&!isTRUE(input[[paste0('constraint_',k,'_override')]]))next
       z<-list()
-      for(part in c('fixed','lower','upper')) {value<-input[[paste0('constraint_',k,'_',part)]];text<-if(is.null(value))''else trimws(value);if(nzchar(text)) {v<-suppressWarnings(as.numeric(text));if(!is.finite(v))stop('Enter finite numbers or leave fields blank.');z[[part]]<-v}}
+      previous <- r$groups[[target]][[k]]
+      if (is.null(previous)) previous <- r[[k]]
+      for (part in c('fixed','lower','upper')) {
+        value <- input[[paste0('constraint_',k,'_',part)]]
+        text <- if (is.null(value)) '' else trimws(value)
+        if (!nzchar(text)) next
+        v <- suppressWarnings(as.numeric(text))
+        if (!is.finite(v)) stop('Enter finite numbers or leave fields blank.')
+        if (k == 'hill') {
+          v <- if (identical(text, constraint_field_value(k, previous[[part]]))) previous[[part]] else v * log(10)
+        }
+        z[[part]] <- v
+      }
       if(length(z)||target!='__defaults__')current[[k]]<-z
     }
     if(target=='__defaults__') {r<-c(current,r[intersect(names(r),c('groups','shared'))])}else {if(is.null(r$groups))r$groups<-list();r$groups[[target]]<-if(length(current))current else NULL;if(!length(r$groups))r$groups<-NULL}
@@ -691,7 +707,8 @@ server <- function(input, output, session) {
     defaults<-r[setdiff(names(r),c('groups','shared'))];rules<-if(target=='__defaults__')defaults else r$groups[[target]]
     div(class='constraint-table-scroll',tags$table(class='table constraint-table',tags$thead(tags$tr(lapply(c('Parameter',if(target!='__defaults__')'Override defaults','Fixed value','Lower bound','Upper bound'),tags$th))),tags$tbody(lapply(keys,function(k) {
       z<-if(target!='__defaults__'&&!k%in%names(rules))defaults[[k]]else rules[[k]]
-      tags$tr(tags$th(k),if(target!='__defaults__')tags$td(checkboxInput(paste0('constraint_',k,'_override'),paste('Override',k),k%in%names(rules))),lapply(c('fixed','lower','upper'),function(part)tags$td(textInput(paste0('constraint_',k,'_',part),paste(k,part),if(is.null(z[[part]]))''else as.character(z[[part]])))))
+      label <- if (k == 'hill') 'Hill coefficient' else k
+      tags$tr(tags$th(label),if(target!='__defaults__')tags$td(checkboxInput(paste0('constraint_',k,'_override'),paste('Override',label),k%in%names(rules))),lapply(c('fixed','lower','upper'),function(part)tags$td(textInput(paste0('constraint_',k,'_',part),paste(label,part),constraint_field_value(k,z[[part]])))))
     }))))
   })
   observeEvent(input$fit_constraints_open,{
@@ -702,10 +719,10 @@ server <- function(input, output, session) {
       div(class='constraint-dialog',
        p('Defaults apply to all groups. For a specific group, enable Override. Blank override fields mean free fitting. Apply saves all groups; Cancel discards edits.'),
        selectizeInput('constraint_target_choice','Edit constraints for',choices=c('Defaults (all groups)'='__defaults__',setNames(groups,groups)),selected='__defaults__',options=list(dropdownParent='body')),
-       if(method=='fourpl')p('EC50 uses original X. Hill is the natural-logistic coefficient; conventional base-10 slope = Hill / ln(10).'),
-       if(method=='threepl')p('Conventional Hill slope is fixed at +1 (increasing response). Bottom, Top and EC50 remain adjustable. EC50 uses the original X scale.'),
+       if(method=='fourpl')p('Enter the Hill coefficient on the same scale as Analysis results. EC50 uses the original X scale.'),
+       if(method=='threepl')p('The Hill coefficient is fixed at +1 for an increasing response. Bottom, Top and EC50 remain adjustable. EC50 uses the original X scale.'),
        uiOutput('constraint_fields'),
-       checkboxGroupInput('constraint_shared','Parameters to share in Shared / global fitting',choices=keys,selected=unlist(r$shared),inline=TRUE),
+       checkboxGroupInput('constraint_shared','Parameters to share in Shared / global fitting',choices=setNames(keys,ifelse(keys=='hill','Hill coefficient',keys)),selected=unlist(r$shared),inline=TRUE),
        p('Shared parameters are estimated jointly only when Fitting design is Shared / global fit. Their group bounds must overlap and their fixed values must agree. Fixed and active-bound parameters have no reported uncertainty.')),
       footer=tagList(modalButton('Cancel'),actionButton('fit_constraints_apply','Apply constraints',class='btn-primary'))))
   })
@@ -717,7 +734,7 @@ server <- function(input, output, session) {
   observeEvent(input$fit_constraints_apply,tryCatch({
     method<-constraint_method();req(identical(method,settings()$method));store_constraint_fields(constraint_target());r<-constraint_draft();r$shared<-if(length(input$constraint_shared))as.list(input$constraint_shared)else NULL
     rules<-pc_fit_constraints(settings()$fit_constraints);rules[[method]]<-if(length(r))r else NULL
-    text<-if(length(rules))as.character(jsonlite::toJSON(rules,auto_unbox=TRUE))else '{}';pc_fit_constraints(text)
+    text<-if(length(rules))as.character(jsonlite::toJSON(rules,auto_unbox=TRUE,digits=17))else '{}';pc_fit_constraints(text)
     if(identical(settings()$fit_mode,'global')&&!length(r$shared))stop('Select at least one shared parameter for global fitting.')
     updateTextInput(session,'fit_constraints',value=text);removeModal()
   },error=function(e)showNotification(conditionMessage(e),type='error')))

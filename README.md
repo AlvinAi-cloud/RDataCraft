@@ -5,16 +5,18 @@ publication-quality figures. It combines editable tables, linked graphs,
 statistical workflows, curve fitting, PCA, multi-panel layouts and reviewed custom
 R scripts with optional AI assistance.
 
-**v0.6** provides native desktop windows for Intel Mac, Apple Silicon, Windows x64
+RDataCraft provides native desktop windows for Intel Mac, Apple Silicon, Windows x64
 and Ubuntu 24.04 LTS amd64. Mac and Windows bundle R and the required packages.
 The Ubuntu `.deb` installs its compatible R 4.3 engine through Ubuntu’s package
 manager and includes the app’s R package library; no manual R setup is needed.
 Scientific calculations run locally.
 
-In **v0.6**, Analysis → Parameter constraints supports fixed values, bounds and
+Analysis → Parameter constraints supports fixed values, bounds and
 group-specific overrides. Choose independent fits or joint shared/global fitting
 while keeping curves together on one graph. A three-parameter dose-response model
-fixes the conventional Hill slope at +1. The AI Assistant reliably delivers large
+fixes the Hill coefficient at +1. In v0.6.1, constraints and results use the
+same standard Hill coefficient, and fixed-Hill fits can retry from the measured
+dose range. The AI Assistant reliably delivers large
 requests, recovers from timeouts and avoids repeated account-status messages.
 Constraint dialogs and AI panels adapt to smaller windows.
 

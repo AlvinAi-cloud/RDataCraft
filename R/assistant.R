@@ -27,6 +27,7 @@ pc_ai_parameters <- function(op, defaults, allowed) {
 pc_ai_context <- function(tab,s,name,share=FALSE) {
   context <- list(table=name,rows=nrow(tab),columns=as.list(names(tab)),settings=s,
     graphs=as.list(pc_graphs(s$layout)),analyses=as.list(pc_methods(s$layout)),values_shared=isTRUE(share))
+  context$settings$fit_constraints <- pc_scale_fit_hill(s$fit_constraints, 1 / log(10))
   if(isTRUE(share)) {
     tsv <- pc_table_text(tab)
     if(nchar(tsv,type="bytes")>180000) stop("The active table is too large to share with AI (180 KB maximum). Use local tools or a smaller table.",call.=FALSE)
@@ -46,7 +47,7 @@ pc_ai_instructions <- function() paste(
   "No operations are applied until the user reviews the preview. Operations run on a new copy of the active table. Maximum 6 operations.",
   "Every operation has type, short title, and parameters [{key,value}] with all values encoded as strings. Booleans: true/false. Sizes: mm, font_size: pt.",
   "graph: create a linked graph view using current settings plus supported formatting keys from context.settings (except layout and analysis options). Prefer show_p=false when only styling. graph IDs must come from context.graphs. Multiple graph operations create multiple linked views. Subsequent operations use the latest graph settings.",
-  "For preset regression constraints, analysis may set fit_constraints to a JSON object encoded as a string, keyed by model ID then parameter name, with numeric fixed/lower/upper fields. Never guess scientific constraints; confirm values with the user. Empty object clears constraints. Parameter names are provided in context.fit_parameters. For fourpl: bottom, top, EC50 (original X scale), hill (natural-logistic coefficient, conventional slope times ln(10)). Use groups inside a model constraint object for group-specific parameter overrides; an empty parameter object clears its inherited constraint. Use shared as an array of parameter names and fit_mode=global with fit_scope=all for a joint fit. Never infer which parameters should be shared. threepl fixes conventional Hill slope to +1, not the internal natural-logistic coefficient. Example: {\"fourpl\":{\"bottom\":{\"fixed\":0},\"top\":{\"fixed\":100}}}. Propose only for review, never automatically apply.",
+  "For preset regression constraints, analysis may set fit_constraints to a JSON object encoded as a string, keyed by model ID then parameter name, with numeric fixed/lower/upper fields. Never guess scientific constraints; confirm values with the user. Empty object clears constraints. Parameter names are provided in context.fit_parameters. For fourpl: bottom, top, EC50 (original X scale), hill (the standard Hill coefficient, as shown in results). Use groups inside a model constraint object for group-specific parameter overrides; an empty parameter object clears its inherited constraint. Use shared as an array of parameter names and fit_mode=global with fit_scope=all for a joint fit. Never infer which parameters should be shared. threepl fixes the Hill coefficient at +1. Example: {\"fourpl\":{\"bottom\":{\"fixed\":0},\"top\":{\"fixed\":100}}}. Propose only for review, never automatically apply.",
   "analysis: set method, fit_constraints, group1, group2, correction, null_mean, fit_weight, fit_replicates, fit_scope, fit_mode (independent/global). Method IDs must come from context.analyses. Runs R analysis and creates a new analysis/graph view when needed. Never manually calculate reported P values.",
   "layout: arrange the generated views; keys columns (1..3), title, width, height, gap, margin, label_size, scale_text, arrangement (grid or hero). If no generated graph exists, include the current graph. Layout application can be undone in Figure layout.",
   "rename_columns: keys are existing column names, values are new unique column names (1..100 chars).",
@@ -81,7 +82,9 @@ pc_ai_prepare <- function(tab,s,name,plan) {
       changes<-pc_ai_parameters(op,pc_defaults(),graph_allowed)
       s<-pc_graph_edit(tab,s,changes);new_view(title)
     } else if(kind=="analysis") {
-      changes<-pc_ai_parameters(op,pc_defaults(),analysis_allowed);s[names(changes)]<-changes
+      changes<-pc_ai_parameters(op,pc_defaults(),analysis_allowed)
+      if (!is.null(changes$fit_constraints)) changes$fit_constraints <- pc_scale_fit_hill(changes$fit_constraints, log(10))
+      s[names(changes)]<-changes
       s<-pc_decode_project(list(format="rdatacraft",schema_version=1L,data_tsv=pc_table_text(tab),settings=s))$settings
       # Keep an analysis in its own view, with reproducible R-computed results.
       a<-pc_analyze(pc_normalize(tab,s$layout),s$method,s$group1,s$group2,s)

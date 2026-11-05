@@ -610,7 +610,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         return ready
     }
     @objc func about() {
-        NSApp.orderFrontStandardAboutPanel(options: [.applicationName: "RDataCraft", .applicationVersion: "v0.6", .credits: NSAttributedString(string: "Scientific plotting and statistics\nR-powered data analysis and publication-ready figures.\nAvailable for Mac, Windows and Ubuntu.")])
+        NSApp.orderFrontStandardAboutPanel(options: [.applicationName: "RDataCraft", .applicationVersion: "v0.6.1", .credits: NSAttributedString(string: "Scientific plotting and statistics\nR-powered data analysis and publication-ready figures.\nAvailable for Mac, Windows and Ubuntu.")])
     }
     @objc func showExamples() { send(["type":"examples"]) }
     @objc func showHelp() {
@@ -1033,7 +1033,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         _ = try await webView.evaluateJavaScript("document.getElementById('add_tutorial').click()")
         try await waitUntil("document.getElementById('layout').value==='multiple' && document.getElementById('method').value==='pca' && document.querySelector('#pca_scree tbody tr')!==null && !document.documentElement.classList.contains('shiny-busy')")
         try await waitUntil("document.getElementById('pca_variable_pick').selectize.items.length===5 && !document.getElementById('pca_variable_pick').selectize.items.includes('SampleID') && document.querySelector('#pca_scores .dataTables_info')?.textContent.includes('12 entries')===true")
-        try await waitUntil("document.querySelector('.version-label')?.textContent.includes('v0.6')===true && Object.keys(document.getElementById('graph_view').selectize.options).length===3")
+        try await waitUntil("document.querySelector('.version-label')?.textContent.includes('v0.6.1')===true && Object.keys(document.getElementById('graph_view').selectize.options).length===3")
         try imageData(try await webView.takeSnapshot(configuration:nil)).write(to:folder.appendingPathComponent("pca-analysis.png"))
         for key in ["scores","loadings","scree","preprocessing"] {
             let file=folder.appendingPathComponent("pca-\(key).csv")
@@ -1048,7 +1048,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         let file=folder.appendingPathComponent("PCA teaching workflow.rdatacraft")
         nextTestDestination=file;saveAs();try await waitForFile(file)
         let saved=try JSONSerialization.jsonObject(with:Data(contentsOf:file)) as? [String:Any]
-        guard saved?["app_version"] as? String == "0.6",let settings=saved?["settings"] as? [String:Any],let selected=settings["pca_variables"] as? String,!selected.contains("SampleID"),selected.contains("CellArea") else {throw HostError.failed("PCA example settings or release version were not saved correctly.")}
+        guard saved?["app_version"] as? String == "0.6.1",let settings=saved?["settings"] as? [String:Any],let selected=settings["pca_variables"] as? String,!selected.contains("SampleID"),selected.contains("CellArea") else {throw HostError.failed("PCA example settings or release version were not saved correctly.")}
         return ["PCA in the shared Help example selector", "PCA walkthrough visible", "PCA example adds 12 observations", "PCA selects measurements without numeric IDs", "three linked PCA views", "four PCA CSV exports", "PCA scores graph", "PCA settings and version saved"]
     }
     func workflowTest() async {

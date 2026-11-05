@@ -5,36 +5,48 @@ pc_curve_results <- function(result, normalized, settings) {
   series <- if (identical(settings$fit_scope, "all")) normalized$groups else settings$group1
   status <- if (is.null(result$fit_status)) data.frame(series=series,status="Fitted",detail="") else result$fit_status
   series <- as.character(status$series)
-  parameters <- result$parameters
+  parameters <- pc_report_parameters(result$parameters)
   rows <- list()
   number <- function(x) if (length(x)!=1L || !is.finite(x)) NA_real_ else unname(x)
-  get_parameter <- function(group, name, field="estimate") {
-    if (is.null(parameters) || !field %in% names(parameters)) return(NA_real_)
+  get_parameter <- function(group, name, field="estimate", numeric=TRUE) {
+    if (is.null(parameters) || !field %in% names(parameters)) return(if(numeric) NA_real_ else NULL)
     p <- parameters
     if ("series" %in% names(p)) p <- p[p$series==group,,drop=FALSE]
-    number(p[p$parameter==name,field])
+    value <- p[p$parameter==name,field]
+    if(numeric) number(value) else if(length(value)==1L && !is.na(value)) value else NULL
   }
-  add <- function(label, fun, ci=NULL, se=FALSE) {
+  add <- function(label, fun, ci=NULL, se=FALSE, ci_method=NULL) {
     rows[[length(rows)+1L]] <<- list(label=label,se=se,cells=lapply(series,function(group) {
       if (!identical(as.character(status$status[match(group,status$series)]),"Fitted")) return(list(value=NA_real_,ci=NULL))
-      list(value=number(fun(group)),ci=if(is.null(ci)) NULL else ci(group))
+      limits <- if(is.null(ci)) NULL else ci(group)
+      method <- if(!is.null(ci_method)) ci_method(group)
+      if(!is.null(ci_method) && is.null(method) && any(is.finite(limits))) method <- "Wald"
+      list(value=number(fun(group)),ci=limits,ci_method=method)
     }))
   }
+  parameter_ci <- function(group, key) c(get_parameter(group,key,"ci_low"),get_parameter(group,key,"ci_high"))
+  interval_method <- function(group, key) get_parameter(group,key,"ci_method",numeric=FALSE)
+  add_parameter <- function(label, key) {
+    add(label,function(g) get_parameter(g,key),function(g) parameter_ci(g,key),
+        ci_method=if(settings$method %in% pc_nonlinear_methods()) function(g) interval_method(g,key))
+  }
   if (settings$method %in% c("fourpl","threepl")) {
-    add("Bottom",function(g) get_parameter(g,"bottom"))
+    add_parameter("Bottom","bottom")
     natural <- "EC50" %in% parameters$parameter
-    add("Top",function(g) if(natural)get_parameter(g,"top")else get_parameter(g,"bottom")+exp(get_parameter(g,"logSpan")))
-    add("EC50",function(g) if(natural)get_parameter(g,"EC50")else 10^get_parameter(g,"logEC50"),function(g) if(natural)c(get_parameter(g,"EC50","ci_low"),get_parameter(g,"EC50","ci_high"))else 10^c(get_parameter(g,"logEC50","ci_low"),get_parameter(g,"logEC50","ci_high")))
+    if(natural) add_parameter("Top","top")
+    else add("Top",function(g) get_parameter(g,"bottom")+exp(get_parameter(g,"logSpan")))
+    add("EC50",function(g) if(natural)get_parameter(g,"EC50")else 10^get_parameter(g,"logEC50"),function(g) if(natural)c(get_parameter(g,"EC50","ci_low"),get_parameter(g,"EC50","ci_high"))else 10^c(get_parameter(g,"logEC50","ci_low"),get_parameter(g,"logEC50","ci_high")),
+        ci_method=function(g) interval_method(g,if(natural) "EC50" else "logEC50"))
     # nls fits log10(EC50). Convert its SE to the EC50 scale by the delta method.
     add("SE of EC50",function(g) if(natural)get_parameter(g,"EC50","se")else log(10)*10^get_parameter(g,"logEC50")*get_parameter(g,"logEC50","se"),se=TRUE)
-    if(settings$method=="threepl")add("Hill slope (fixed)",function(g) 1)
-    else add("Hill coefficient",function(g) get_parameter(g,"hill"),function(g) c(get_parameter(g,"hill","ci_low"),get_parameter(g,"hill","ci_high")))
+    if(settings$method=="threepl")add("Hill coefficient (fixed)",function(g) get_parameter(g,"hill"))
+    else add_parameter("Hill coefficient","hill")
     if(settings$method!="threepl")add("SE of Hill coefficient",function(g) get_parameter(g,"hill","se"),se=TRUE)
   } else if (!is.null(parameters)) {
     labels <- c("intercept"="Intercept","slope"="Slope","(Intercept)"="Intercept","x"="Slope","I(x^2)"="Quadratic coefficient","I(x^3)"="Cubic coefficient","log(x)"="Log coefficient")
     for (key in unique(as.character(parameters$parameter))) local({
       name <- key; label <- if(name %in% names(labels)) unname(labels[name]) else name
-      add(label,function(g) get_parameter(g,name),function(g) c(get_parameter(g,name,"ci_low"),get_parameter(g,name,"ci_high")))
+      add_parameter(label,name)
     })
   }
   diagnostics <- function(group) {
@@ -69,6 +81,14 @@ pc_analysis_results_ui <- function(result, normalized, settings) {
     return(shiny::tags$table(class="table shiny-table table-spacing-m",shiny::tags$tbody(lapply(seq_len(nrow(m)),function(i) shiny::tags$tr(lapply(m[i,,drop=FALSE],shiny::tags$td))))))
   }
   fmt <- function(x) if(length(x)!=1L || !is.finite(x)) "—" else format(signif(x,4),trim=TRUE,scientific=abs(x)>=1e6 || (x!=0 && abs(x)<1e-4))
+  format_ci <- function(cell) {
+    ci <- cell$ci
+    if(length(ci)!=2L || !any(is.finite(ci))) limit <- "CI unavailable"
+    else if(all(is.finite(ci))) limit <- paste(vapply(ci,fmt,character(1)),collapse=" to ")
+    else if(is.finite(ci[1])) limit <- paste("Lower limit",fmt(ci[1]))
+    else limit <- paste("Upper limit",fmt(ci[2]))
+    paste(c(limit,cell$ci_method),collapse=" · ")
+  }
   shiny::tagList(
     shiny::div(class="curve-results-scroll",role="region",tabindex="0",`aria-label`="Results by fitted curve; scroll horizontally to compare series",
       shiny::tags$table(class="table shiny-table curve-results-table",
@@ -81,8 +101,8 @@ pc_analysis_results_ui <- function(result, normalized, settings) {
         shiny::tags$tbody(lapply(display$rows,function(row) shiny::tags$tr(class=if(row$se) "curve-se-row" else NULL,
           shiny::tags$th(scope="row",row$label,if(any(vapply(row$cells,function(x) !is.null(x$ci),logical(1)))) shiny::span(class="curve-ci-label","Estimate · 95% CI")),
           lapply(row$cells,function(cell) shiny::tags$td(shiny::span(class="curve-estimate",fmt(cell$value)),
-            if(!is.null(cell$ci)) shiny::span(class="curve-ci",if(length(cell$ci)==2L && all(is.finite(cell$ci))) paste(vapply(cell$ci,fmt,character(1)),collapse=" to ") else "CI unavailable")))))))),
-    if(display$fourpl) shiny::p(class="curve-results-note",if(settings$method=="threepl") "Conventional Hill slope is fixed at +1. SE and intervals apply only to estimated parameters. EC50 uses the original X scale; no unit is inferred." else "SE = standard error. EC50 uses the original X scale; no concentration unit is inferred. Hill uses the natural-logistic scale. Fixed and active-bound parameters have no reported uncertainty."))
+            if(!is.null(cell$ci)) shiny::span(class="curve-ci",format_ci(cell))))))))),
+    if(display$fourpl) shiny::p(class="curve-results-note",if(settings$method=="threepl") "The Hill coefficient is fixed at +1. SE and intervals apply only to estimated parameters. EC50 uses the original X scale." else "SE = standard error. EC50 uses the original X scale. Fixed parameters and estimates at a bound have no reported uncertainty."))
 }
 
 # CSV cells retain numerical precision; display rounding is applied only in HTML.
@@ -106,6 +126,10 @@ pc_analysis_results_csv <- function(result, normalized, settings) {
         cells[[length(cells)+1L]] <- vapply(row$cells,function(x) pc_export_cell(if(length(x$ci)==2L) x$ci[i] else NA_real_),character(1))
       }
     }
+    if(any(vapply(row$cells,function(x) !is.null(x$ci_method),logical(1)))) {
+      labels <- c(labels,paste(row$label,"95% CI method"))
+      cells[[length(cells)+1L]] <- vapply(row$cells,function(x) pc_export_cell(x$ci_method),character(1))
+    }
   }
   out <- data.frame(Measure=labels,do.call(rbind,cells),check.names=FALSE,stringsAsFactors=FALSE)
   names(out) <- c("Parameter / measure",d$series)
@@ -122,7 +146,7 @@ pc_result_labels <- function(keys) {
     status="Status",total="Total",group1="First group",group2="Second group",estimate="Estimate",
     p="P value",p_raw="Unadjusted P value",significance="Significance",effect="Effect",df="Degrees of freedom",
     sum_squares="Sum of squares",mean_square="Mean square",F="F statistic",parameter="Coefficient",
-    se="Standard error",series="Series",detail="Detail",time="Time",at_risk="At risk",survival="Survival probability",
+    se="Standard error",ci_method="95% CI method",series="Series",detail="Detail",time="Time",at_risk="At risk",survival="Survival probability",
     x="X",observed="Observed Y",fitted="Fitted Y",residual="Residual",weight="Weight")
   ifelse(keys %in% names(labels),unname(labels[keys]),keys)
 }
@@ -165,7 +189,7 @@ pc_fit_metrics_table <- function(result,normalized,settings,detail=FALSE) {
   if(is.null(curves)) return(NULL)
   m <- result$metrics
   if(is.null(m) || !nrow(m)) return(NULL)
-  keep <- if(detail) c("Equation","Replicates / weighting","Source observations / fitted points","P value (slope = 0)","Conventional Hill slope (base 10)") else
+  keep <- if(detail) c("Equation","Replicates / weighting","Source observations / fitted points","P value (slope = 0)") else
     c("Residual degrees of freedom","SSE","SSE (original Y scale)","Weighted SSE","AIC")
   rows <- keep[keep %in% m$measure]
   if(!length(rows)) return(NULL)
@@ -207,11 +231,13 @@ pc_summary_results_ui <- function(result,normalized,settings) {
 
 pc_parameters_csv <- function(result,normalized,settings) {
   curves <- pc_curve_results(result,normalized,settings)
-  p <- result$parameters
+  p <- pc_report_parameters(result$parameters)
   if(is.null(curves) || is.null(p) || !nrow(p)) return(p)
   labels <- character();cells <- list()
-  for(k in unique(as.character(p$parameter))) for(field in intersect(c("estimate","se","ci_low","ci_high"),names(p))) {
-    labels <- c(labels,paste(k,pc_result_labels(field),sep=" · "))
+  for(k in unique(as.character(p$parameter))) for(field in intersect(c("estimate","se","ci_low","ci_high","ci_method"),names(p))) {
+    if(field=="ci_method" && all(is.na(p$ci_method[p$parameter==k]))) next
+    label <- if (k == "hill") "Hill coefficient" else k
+    labels <- c(labels,paste(label,pc_result_labels(field),sep=" · "))
     cells[[length(cells)+1L]] <- vapply(curves$series,function(g) {
       z<-p[p$parameter==k,,drop=FALSE];if("series" %in% names(z)) z<-z[z$series==g,,drop=FALSE]
       pc_export_cell(if(nrow(z)==1L) z[[field]] else NA_real_)
@@ -245,7 +271,7 @@ pc_model_details_ui <- function(result,normalized,settings) {
     section("Comparisons",comparison,"comparison_table"),
     section("Factor effects",result$effects,"effects_table"),
     if(!is.null(result$parameters) && nrow(result$parameters)) t$details(t$summary("Complete model coefficients and uncertainty"),
-      if(settings$method=="fourpl" && !"EC50" %in% result$parameters$parameter) t$p(class="muted","These are the fitted coefficients: logSpan = ln(Top − Bottom), logEC50 = log10(EC50), and hill is the natural-logistic coefficient. The response-scale plateaus and EC50 are in Analysis results above."),
+      if(settings$method=="fourpl" && !"EC50" %in% result$parameters$parameter) t$p(class="muted","logSpan = ln(Top − Bottom) and logEC50 = log10(EC50). The response-scale plateaus and EC50 are in Analysis results above."),
       section("Model coefficients",pc_parameters_csv(result,normalized,settings),"parameters_table",!is.null(curve))),
     section("Fit status",result$fit_status,"fit_status_table"),
     section("Expected counts",pc_expected_counts(result),"expected_counts_table",p_values=FALSE),

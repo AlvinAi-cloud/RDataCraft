@@ -26,8 +26,41 @@ p<-pc_decode_project(pc_project(tab,s));check(p$settings$fit_mode=='global'&&p$s
 x<-10^seq(-2,2,length.out=40);tab<-data.frame(X=as.character(x),A=as.character(100*x/(5+x)+sin(seq_along(x))*.03),B=as.character(10+80*x/(5+x)+cos(seq_along(x))*.03));n<-pc_normalize(tab,'xy');s$method<-'threepl';s$fit_mode<-'independent';s$fit_constraints<-'{}';r<-pc_analyze(n,'threepl',options=s)
 check(max(abs(r$parameters$estimate[r$parameters$parameter=='hill']-log(10)))<1e-12,'3PL fixes conventional Hill=1, not natural-logistic hill=1')
 check(max(abs(r$parameters$estimate[r$parameters$parameter=='EC50']-5))<.03,'three-parameter dose response recovers EC50')
+o <- s
+o$method <- 'fourpl'
+o$fit_constraints <- pc_scale_fit_hill('{"fourpl":{"hill":{"fixed":1}}}',log(10))
+equivalent <- pc_analyze(n,'fourpl',options=o)
+check(isTRUE(all.equal(r$curve,equivalent$curve,tolerance=1e-12)),'3PL and 4PL fixed at Hill=1 fit the same curves')
+csv <- pc_analysis_results_csv(r,n,s)
+check(max(abs(as.numeric(csv[csv[[1]]=='Hill coefficient (fixed)',-1])-1))<1e-14,'three-parameter results display the fixed standard Hill coefficient')
+midpoint <- r$parameters[r$parameters$series=='A' & r$parameters$parameter=='EC50',]
+limits <- c(midpoint$ci_low,midpoint$ci_high)
+other <- equivalent$parameters[equivalent$parameters$series=='A' & equivalent$parameters$parameter=='EC50',]
+check(identical(limits,c(other$ci_low,other$ci_high)),'equivalent fixed-Hill models report the same profile limits')
+observations <- r$diagnostics[r$diagnostics$series=='A',]
+sse <- sum(observations$residual^2)
+profile_f <- vapply(limits,function(limit) {
+  fraction <- observations$x/(observations$x+limit)
+  (deviance(lm(observations$observed~fraction))-sse)/(sse/(nrow(observations)-3))
+},numeric(1))
+check(max(abs(profile_f-qf(.95,1,nrow(observations)-3)))<1e-5,'both profile limits reach the 95% extra-sum-of-squares threshold after refitting the plateaus')
+check(csv[csv[[1]]=='EC50 95% CI method','A']=='Profile likelihood' &&
+      grepl('Profile likelihood',as.character(pc_analysis_results_ui(r,n,s)),fixed=TRUE),
+      'results and Results CSV identify the profile-likelihood method')
+bounded <- s
+bounded$fit_scope <- 'selected'
+bounded$fit_constraints <- sprintf('{"threepl":{"EC50":{"upper":%.17g}}}',mean(c(midpoint$estimate,midpoint$ci_high)))
+bounded_result <- pc_analyze(n,'threepl','A',options=bounded)
+bounded_midpoint <- bounded_result$parameters[bounded_result$parameters$parameter=='EC50',]
+check(is.finite(bounded_midpoint$ci_low) && is.na(bounded_midpoint$ci_high),
+      'a parameter bound inside the profile interval is not printed as a confidence limit')
 s$fit_mode<-'global';s$fit_constraints<-'{"threepl":{"shared":["EC50"]}}';r<-pc_analyze(n,'threepl',options=s)
 check(max(abs(r$parameters$estimate[r$parameters$parameter=='EC50']-5))<.03,'nonlinear global 3PL recovers shared EC50 with different plateaus')
+shared_ec50 <- subset(r$parameters,parameter=='EC50')
+check(all(shared_ec50$ci_method=='Profile likelihood') &&
+      all(is.finite(shared_ec50$ci_low)) && all(is.finite(shared_ec50$ci_high)) &&
+      length(unique(shared_ec50$ci_low))==1L && length(unique(shared_ec50$ci_high))==1L,
+      'shared EC50 gets one joint profile interval reused for both curves')
 check(r$metrics$value[r$metrics$measure=='Joint free parameters']=='5','global 3PL has five free coefficients for two curves sharing EC50')
 check(!grepl('assistant_connection_summary',as.character(pc_assistant_ui()),fixed=TRUE),'repeated connection status is absent from Operations and results')
 cat(checks,'checks passed\n')

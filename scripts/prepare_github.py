@@ -9,7 +9,7 @@ import zipfile
 from preflight import audit
 
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = "0.6"
+VERSION = "0.6.1"
 
 
 def main():

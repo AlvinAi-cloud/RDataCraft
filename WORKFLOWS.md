@@ -141,8 +141,8 @@ independent observation.
 Method & assumptions precedes Analysis results. Regression tables place each fitted
 curve in a column; scroll horizontally while parameter labels remain fixed.
 Results CSV exports numerical estimates, SEs and separate confidence limits. EC50
-uses the entered X scale without an inferred unit. Its SE uses the delta method;
-the displayed Hill coefficient and its SE use the model's natural-logistic scale.
+uses the entered X scale. Its SE uses the delta method. The Hill coefficient,
+its standard error and its confidence limits use the standard Hill scale.
 
 For fitting, Summary & diagnostics contains residual degrees of freedom, SSE,
 weighted SSE and AIC when supplied by the engine. Source observation summaries
@@ -228,7 +228,7 @@ may need a one-time manual removal after verifying the new stable-name app.
 
 In Analysis, select an XY regression model and choose **Parameter constraints…**. Leave fields blank to estimate freely, enter a fixed number to hold a parameter constant, or enter lower/upper bounds. Apply commits the dialog; Cancel leaves the fit unchanged. Clear all fields to restore unrestricted fitting. These settings belong to the current model and view; in Independent fits mode, fitting all series applies them independently to each series.
 
-For dose-response fitting, Bottom and Top are response values, EC50 uses the original X scale, and Hill is the existing natural-logistic coefficient (conventional base-10 Hill slope multiplied by ln(10)). Positive scale parameters require positive values. Fixed parameters have no estimated SE or CI. Degrees of freedom count only free parameters; uncertainty is conditional on the fixed values, and intervals at active bounds are omitted.
+For dose-response fitting, Bottom and Top are response values and EC50 uses the original X scale. Enter the Hill coefficient on the same scale as Analysis results. Positive scale parameters require positive values. Fixed parameters have no estimated SE or CI. Degrees of freedom count only free parameters. Uncertainty is conditional on the fixed values, and intervals at active bounds are omitted.
 
 The AI can propose these settings, for example “Fix Bottom at 0 and Top at 100; limit EC50 to 1–20”. It creates a reviewable analysis preview; Apply creates a new table copy. Advanced R remains available for custom equations and fitting designs beyond the independent and shared/global presets. Studies using constraints require v0.6 or later.
 
@@ -238,6 +238,8 @@ In **Analysis → Parameter constraints…**, select **Defaults (all groups)** o
 
 **Fitting design → Shared / global fit** is a separate choice. Select All Y series, then select parameters to share in the constraint dialog. The engine performs one joint least-squares fit with shared coefficients counted once and other coefficients estimated separately for each curve. Bounds for a shared coefficient are intersected across groups. Conflicting fixed values or disjoint bounds reject the fit. Joint uncertainty uses the full joint covariance and residual degrees of freedom; it is conditional on any fixed coefficients. Global fitting does not automatically test group differences or account for repeated measures.
 
-**Three-parameter dose-response (Hill=1)** fixes the conventional base-10 Hill slope to +1 (increasing response): `Y = Bottom + (Top-Bottom)*X/(EC50+X)`. This is the internal natural-logistic coefficient `ln(10)`, not 1. Bottom, Top and EC50 may be estimated, fixed, bounded or shared. X must be positive and EC50 is on the entered X scale. For a decreasing dose-response curve, use four-parameter fitting with a negative Hill coefficient.
+**Three-parameter dose-response (Hill=1)** fixes the Hill coefficient at +1 for an increasing response. The equation is `Y = Bottom + (Top-Bottom)*X/(EC50+X)`. The four-parameter model with the Hill coefficient fixed at +1 gives the same curve. Bottom, Top and EC50 may be estimated, fixed, bounded or shared. X must be positive and EC50 is on the entered X scale. For a decreasing dose-response curve, use four-parameter fitting with a negative Hill coefficient.
+
+Nonlinear dose response, power, exponential, one-phase kinetics, Michaelis–Menten and Gaussian fits use 95% profile-likelihood intervals for fitted coefficients. RDataCraft refits the other free coefficients with the original weights and bounds. A limit is unavailable if the profile cannot resolve a crossing. Shared nonlinear fits use a joint profile up to 12 free parameters and Wald intervals above that size. Ordinary linear, polynomial and logarithmic regression use t intervals.
 
 On smaller displays, constraint fields scroll horizontally within the dialog and long dialog content scrolls vertically. With AI open, Figure settings remain available below the plot at narrower widths rather than disappearing; both panels retain independent visibility controls. Conversation, composer and operation results retain their own scrolling regions.

@@ -244,27 +244,37 @@ pc_fourpl <- function(n, group, options = list()) {
   if(abs(mid)<1e-8) mid<-0
   log_span<-log(span);if(abs(log_span)<1e-8) log_span<-0
   bottom_start<-min(a$value);if(abs(bottom_start)<max(span,1)*1e-8) bottom_start<-0
+  lower <- function(direction) c(bottom=-Inf,logSpan=log(span)-8,hill=if(direction>0) .02 else -10,logEC50=min(logx)-3)
+  upper <- function(direction) c(bottom=Inf,logSpan=log(span)+8,hill=if(direction>0) 10 else -.02,logEC50=max(logx)+3)
   fits <- lapply(c(1, -1), function(direction) tryCatch(stats::nls(value ~ bottom + exp(logSpan) * plogis(hill * (log10(x) - logEC50)), data = a,
     start = list(bottom = bottom_start, logSpan = log_span, hill = direction, logEC50 = mid), weights=a$.weight, algorithm = "port",
-    lower = c(bottom = -Inf, logSpan = log(span) - 8, hill = if (direction > 0) 0.02 else -10, logEC50 = min(logx) - 3),
-    upper = c(bottom = Inf, logSpan = log(span) + 8, hill = if (direction > 0) 10 else -0.02, logEC50 = max(logx) + 3),
+    lower = lower(direction), upper = upper(direction),
     control = stats::nls.control(maxiter = 500, warnOnly = FALSE)), error = function(e) NULL))
   fits <- Filter(Negate(is.null), fits)
   if (!length(fits)) stop("The four-parameter curve did not converge. Check concentration range and whether both plateaus are sampled.", call. = FALSE)
   fit <- fits[[which.min(vapply(fits, deviance, numeric(1)))]]; co <- coef(fit); se <- summary(fit)$coefficients[, 2]; crit <- qt(0.975, df.residual(fit))
   if (any(!is.finite(se))) stop("Curve parameter uncertainty could not be estimated. Add concentrations spanning both plateaus.", call. = FALSE)
-  ec <- 10^co["logEC50"]; ec_ci <- 10^(co["logEC50"] + c(-1, 1) * crit * se["logEC50"])
+  profile <- !isFALSE(options$profile_ci)
+  limits <- cbind(co - crit * se, co + crit * se)
+  if (profile) {
+    predict_at <- function(p) with(as.list(p), bottom + exp(logSpan) * plogis(hill * (logx - logEC50)))
+    direction <- sign(co[["hill"]])
+    limits <- pc_profile_parameters(co, se, lower(direction), upper(direction), names(co), names(co),
+                                    predict_at, a$value, a$.weight, df.residual(fit))
+  }
+  ec <- 10^co["logEC50"]; ec_ci <- 10^limits["logEC50",]
   grid <- data.frame(x = 10^seq(min(logx), max(logx), length.out = 200))
   r$curve <- data.frame(x = grid$x, fit = as.numeric(predict(fit, grid)))
   r$n <- nrow(a)
   r$diagnostics <- data.frame(x = a$x, observed = a$value, fitted = fitted(fit), residual = residuals(fit),weight=a$.weight)
-  r$parameters <- data.frame(parameter = names(co), estimate = as.numeric(co), se = as.numeric(se), ci_low = as.numeric(co - crit * se), ci_high = as.numeric(co + crit * se))
-  r$metrics <- rbind(pc_metric("Series", group), pc_metric("Bottom / top", paste(pc_fmt(c(co["bottom"], co["bottom"] + exp(co["logSpan"]))), collapse = " / ")), pc_metric("EC50 / IC50 (halfway between plateaus)", pc_fmt(ec)), pc_metric("EC50 / IC50 approximate 95% CI", paste(pc_fmt(ec_ci), collapse = " to ")), pc_metric("Hill coefficient (natural-logistic scale)", pc_fmt(co["hill"])), pc_metric("Conventional Hill slope (base 10)", pc_fmt(co["hill"] / log(10))), pc_metric("Residual SD", pc_fmt(summary(fit)$sigma)), pc_metric("Residual degrees of freedom", df.residual(fit)))
-  r$notes <- c("Unweighted four-parameter least-squares fit on the original Y scale: bottom + (top − bottom) / (1 + exp(−h × (log10(X) − log10(EC50)))). Positive h gives an increasing curve; negative h gives inhibition. X must be concentrations, not their logarithms.", "Approximate local t/Wald intervals can be unreliable with poorly identified plateaus. No global fit comparison, weighting, robust fit, or profile-likelihood CI is provided. The graph shows the fitted curve without a confidence band.")
+  r$parameters <- data.frame(parameter = names(co), estimate = as.numeric(co), se = as.numeric(se), ci_low = limits[,1], ci_high = limits[,2])
+  if (profile) r$parameters$ci_method <- "Profile likelihood"
+  r$metrics <- rbind(pc_metric("Series", group), pc_metric("Bottom / top", paste(pc_fmt(c(co["bottom"], co["bottom"] + exp(co["logSpan"]))), collapse = " / ")), pc_metric("EC50 / IC50 (halfway between plateaus)", pc_fmt(ec)), pc_metric("EC50 / IC50 approximate 95% CI", paste(pc_fmt(ec_ci), collapse = " to ")), pc_metric("Residual SD", pc_fmt(summary(fit)$sigma)), pc_metric("Residual degrees of freedom", df.residual(fit)))
+  r$notes <- c("Unweighted four-parameter least-squares fit on the original Y scale: Bottom + (Top − Bottom) / (1 + (EC50 / X)^n). A positive Hill coefficient n gives an increasing curve and a negative n gives a decreasing curve. Enter concentrations on the original X scale.",
+    if(profile) paste(pc_profile_note(), "Intervals are conditional on the fitted curve direction.") else "Intervals use the local Wald approximation.")
   r$notes[1] <- sub("Unweighted",if(prep$weighting=="none") "Unweighted" else paste("Weighted",prep$weighting),r$notes[1])
   r$metrics <- rbind(r$metrics,pc_metric("Replicates / weighting",paste(prep$mode,prep$weighting,sep=" / ")),
     pc_metric("SSE (original Y scale)",pc_fmt(sum(residuals(fit)^2))),pc_metric("Weighted SSE",pc_fmt(sum(a$.weight*residuals(fit)^2))),pc_metric("AIC",pc_fmt(AIC(fit))))
-  r$notes[2] <- sub("weighting, ","",r$notes[2],fixed=TRUE)
   r$notes <- c(r$notes,paste("Replicate fitting:",prep$mode,"; source observations:",prep$raw_n,"; fitted points:",nrow(a)))
   if (co["logEC50"] < min(logx) || co["logEC50"] > max(logx) || abs(co["hill"]) > 9.9 || abs(co["hill"]) < 0.021) r$notes <- c(r$notes, "Fit warning: midpoint is outside the measured concentration range or the slope reached a fitting bound. Parameter estimates may be unreliable.")
   r

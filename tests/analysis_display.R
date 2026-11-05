@@ -16,7 +16,8 @@ p <- a$parameters[a$parameters$series=='Reference',];get <- function(key,field='
 check(near(value('Bottom'),get('bottom')) && near(value('Top'),get('bottom')+exp(get('logSpan'))),'bottom and top are shown on the response scale')
 check(near(value('EC50'),10^get('logEC50')),'EC50 is displayed on the entered X scale')
 check(near(value('SE of EC50'),log(10)*10^get('logEC50')*get('logEC50','se')),'EC50 standard error uses the delta method rather than the log-scale SE')
-check(near(value('Hill coefficient'),get('hill')) && near(value('SE of Hill coefficient'),get('hill','se')),'Hill estimate and SE use the same model coefficient scale')
+check(near(value('Hill coefficient'),get('hill')/log(10)) && near(value('SE of Hill coefficient'),get('hill','se')/log(10)),'Hill estimate and SE use the standard Hill exponent')
+check(near(d$rows[[5]]$cells[[1]]$ci,c(get('hill','ci_low'),get('hill','ci_high'))/log(10)),'Hill confidence limits use the same scale as the estimate')
 check(near(d$rows[[3]]$cells[[1]]$ci,10^c(get('logEC50','ci_low'),get('logEC50','ci_high'))),'EC50 confidence limits retain the fitted log-scale transformation')
 check(identical(a,before),'presentation does not alter full analysis metrics, parameters or exports')
 html <- as.character(pc_analysis_results_ui(a,n,s))
@@ -53,6 +54,8 @@ check(any(pc_analysis_results_csv(partial,nn,s)[[1]]=='Fit detail'),'CSV include
 check(identical(pc_summary_results_csv(a,n,s)$Measure,c('Residual degrees of freedom','SSE (original Y scale)','Weighted SSE','AIC')),'fitting summary exports the displayed diagnostic measures')
 coeff<-pc_parameters_csv(a,n,s)
 check(near(as.numeric(coeff[coeff[[1]]=='logEC50 · Standard error','Reference']),get('logEC50','se')),'complete coefficient CSV preserves the actual fitted log-scale SE')
+check(near(as.numeric(coeff[coeff[[1]]=='Hill coefficient · Estimate','Reference']),value('Hill coefficient')),'coefficient CSV uses the same Hill estimate as the results table')
+check(near(pc_public_result(a)$parameters$estimate[a$parameters$parameter=='hill'],a$parameters$estimate[a$parameters$parameter=='hill']/log(10)),'public results expose the standard Hill coefficient')
 check(grepl('logEC50 = log10(EC50)',as.character(pc_model_details_ui(a,n,s)),fixed=TRUE),'model details explain transformed coefficient scales')
 check(identical(a,before),'new summaries and CSVs leave the numerical result unchanged')
 for(method in c('linear','quadratic','fourpl')) {

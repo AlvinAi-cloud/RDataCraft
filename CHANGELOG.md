@@ -1,3 +1,10 @@
+# v0.6.1
+
+- Use the standard Hill coefficient in dose-response results, constraints and exports.
+- Retry dose-response fits with a fixed Hill coefficient from the observed dose range when the first fit fails.
+- Report profile-likelihood EC50 confidence limits for independent dose-response fits with a fixed Hill coefficient.
+- Extend profile-likelihood intervals to other nonlinear regressions and to shared nonlinear fits with up to 12 free parameters.
+
 # v0.6
 
 - Fix incomplete AI request delivery through nonblocking pipes; preserve large

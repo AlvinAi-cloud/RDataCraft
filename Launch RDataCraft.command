@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 RDATACRAFT_ROOT="$(cd "$(dirname "$0")" && pwd)"
-RDATACRAFT_CANDIDATES=("RDataCraft.app" "RDataCraft Local Preview.app")
+RDATACRAFT_CANDIDATES=("RDataCraft 0.6 Review.app" "RDataCraft.app" "RDataCraft Local Preview.app")
 for RDATACRAFT_NAME in "${RDATACRAFT_CANDIDATES[@]}"; do
   RDATACRAFT_APP="$RDATACRAFT_ROOT/dist/$RDATACRAFT_NAME"
   if [[ -d "$RDATACRAFT_APP" ]]; then
