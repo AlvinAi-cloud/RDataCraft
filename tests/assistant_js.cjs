@@ -40,3 +40,18 @@ element('r_code').value='result <- list(text="latest edit")';element('r_title').
 element('r_run').listeners.click();
 check(inputs.at(-1).key==='r_submit' && inputs.at(-1).value.r_code==='result <- list(text="latest edit")' && inputs.at(-1).value.r_use_saved===true && inputs.at(-1).value.r_timeout==='30','Run captures the currently reviewed script, package list and input choice together');
 console.log(`${checks} checks passed`);
+
+// The installed Ubuntu test must follow the current assistant markup. The account
+// summary was intentionally removed; guidance remains in the normal status area.
+const ubuntuSource=fs.readFileSync('desktop/linux/linux_tests.py','utf8');
+const ubuntuMatch=ubuntuSource.match(/step\(command\('assistant'\),"([^"]+)"/);
+assert.ok(ubuntuMatch,'Ubuntu assistant predicate is present');
+const ubuntuPredicate=ubuntuMatch[1];
+const ubuntuNodes={assistant_panel:{hidden:false},assistant_status:{textContent:'No provider connected · set up through AI → Accounts and Models… Local tools work offline.'}};
+const ubuntuDocument={body:{classList:{contains:name=>name==='assistant-open'}},getElementById:id=>ubuntuNodes[id]||null};
+check(vm.runInNewContext(ubuntuPredicate,{document:ubuntuDocument})===true,'Ubuntu installed-app check accepts the removed duplicate summary and actual disconnected guidance');
+ubuntuNodes.assistant_status.textContent='Ready';
+check(vm.runInNewContext(ubuntuPredicate,{document:ubuntuDocument})===false,'Ubuntu installed-app check still requires disconnected-account setup guidance');
+ubuntuNodes.assistant_status.textContent='Set up through AI → Accounts and Models…';ubuntuNodes.assistant_connection_summary={textContent:'Repeated connection status'};
+check(vm.runInNewContext(ubuntuPredicate,{document:ubuntuDocument})===false,'Ubuntu installed-app check rejects a reintroduced duplicate account summary');
+console.log(`${checks} total checks passed`);
