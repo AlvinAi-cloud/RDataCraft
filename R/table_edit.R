@@ -7,6 +7,7 @@ pc_rename_header_settings <- function(s, before, after) {
   if (length(old)!=length(new)) return(s)
   rename <- function(values) {i<-match(values,old);keep<-!is.na(i);values[keep]<-new[i[keep]];values}
   for(key in c("group1","group2","xy_compare_group1","xy_compare_group2")) s[[key]]<-rename(s[[key]])
+  s<-pc_rename_fit_groups(s,old,new)
   styles <- pc_series_styles(s$series_styles)
   if (length(styles)) {
     # Retired style keys must not collide with a newly named, active series.

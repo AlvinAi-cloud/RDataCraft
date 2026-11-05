@@ -1,3 +1,19 @@
+# v0.6
+
+- Fix incomplete AI request delivery through nonblocking pipes; preserve large
+  UTF-8 messages, bound request duration and recover after cancellation/timeouts.
+- Add fixed and bounded regression parameters with Defaults and per-group overrides.
+  Constraint changes remain drafts until Apply and persist in study files.
+- Add separate shared/global joint least-squares fitting with shared coefficients,
+  intersected bounds, conflict detection and joint degrees of freedom/uncertainty.
+- Add three-parameter increasing dose response with conventional Hill slope +1.
+- Keep all independently or globally fitted curves on the same editable graph;
+  preserve group overrides through series renames and aligned CSV exports.
+- Remove repeated AI account/model status from Operations & results and adapt
+  constraint editing, Figure settings and AI panels for smaller windows.
+- Studies using the new fitting options require v0.6 or later (schema 14/15).
+  Existing studies remain readable. Stable installer filenames are retained.
+
 # v0.5
 
 - Move account setup access to the native AI menu; disconnected assistant guidance

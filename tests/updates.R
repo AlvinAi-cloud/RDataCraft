@@ -2,6 +2,7 @@ app<-source('app.R')$value
 checks<-0L
 check<-function(x,label) {if(!isTRUE(x)) stop('FAIL: ',label);checks<<-checks+1L;cat('PASS:',label,'\n')}
 fails<-function(x) inherits(tryCatch(force(x),error=identity),'error')
+check(pc_update_newer('v0.6','0.5') && !pc_update_newer('0.6','0.6'),'v0.6 upgrades v0.5 while the current version is not offered as its own update')
 check(pc_update_newer('v0.5','0.42') && pc_update_newer('0.42','0.41'),'update ordering respects the project’s historical decimal release numbers')
 check(!pc_update_newer('0.41','0.5') && !pc_update_newer('0.5','0.5'),'older and matching releases are not offered as upgrades')
 check(pc_update_newer('0.5.1','0.5') && pc_update_newer('1.0','0.99'),'patch and major updates compare correctly')

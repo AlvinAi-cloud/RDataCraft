@@ -24,7 +24,7 @@ Each New study opens another window with its own R engine. Closing an edited stu
 
 For source development, install official x64 R and the .NET 10 SDK, then run `Rscript --vanilla scripts/install.R`. The CMD launcher uses the native executable when packaged. Without it, the source launcher retains the optional local browser workflow. PowerShell execution follows the user's normal execution policy; the launcher does not bypass it.
 
-Double-click **Validate RDataCraft.cmd** to run the R regression suites with the bundled Windows engine, without installing Python or Node. It uses synthetic fixtures and writes logs plus `artifacts/validation-native-0.42.json`; it does not open or change user studies. This utility requires a Windows run to provide Windows execution evidence. The Python runner adds the JavaScript checks when Node is available.
+Double-click **Validate RDataCraft.cmd** to run the R regression suites with the bundled Windows engine, without installing Python or Node. It uses synthetic fixtures and writes logs plus `artifacts/validation-native-0.6.json`; it does not open or change user studies. This utility requires a Windows run to provide Windows execution evidence. The Python runner adds the JavaScript checks when Node is available.
 
 Build the portable bundle on Windows after installing matching dependencies:
 
@@ -42,7 +42,7 @@ The assistant's offline tools run on all three targets. The connected assistant 
 
 Windows packages contain an x64 GUI executable and bundled Windows R. The host can be cross-compiled, but its embedded-window tests must run on Windows. Windows ARM is not included in the verified target set.
 
-## Ubuntu 24.04 LTS amd64 (v0.5)
+## Ubuntu 24.04 LTS amd64 (v0.5 and later)
 
 Download `RDataCraft-ubuntu-amd64.deb` and install through the Ubuntu package
 installer or `sudo apt install ./RDataCraft-ubuntu-amd64.deb`. Internet access is

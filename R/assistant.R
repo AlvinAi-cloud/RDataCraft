@@ -34,6 +34,7 @@ pc_ai_context <- function(tab,s,name,share=FALSE) {
     context$data_check <- tryCatch({n<-pc_normalize(tab,s$layout);list(summary=pc_summary(n),analysis=pc_public_result(pc_analyze(n,s$method,s$group1,s$group2,s)))},error=function(e) list(error=conditionMessage(e)))
   }
   installed<-pc_pkg_installed()
+  context$fit_parameters<-setNames(lapply(c("linear","fourpl","threepl",unname(pc_regression_methods())),pc_fit_parameters),c("linear","fourpl","threepl",unname(pc_regression_methods())))
   context$advanced_r<-list(available=TRUE,execution='reviewed script in separate R process; never automatic',packages=unname(as.list(unique(installed[,'Package']))))
   context
 }
@@ -45,7 +46,8 @@ pc_ai_instructions <- function() paste(
   "No operations are applied until the user reviews the preview. Operations run on a new copy of the active table. Maximum 6 operations.",
   "Every operation has type, short title, and parameters [{key,value}] with all values encoded as strings. Booleans: true/false. Sizes: mm, font_size: pt.",
   "graph: create a linked graph view using current settings plus supported formatting keys from context.settings (except layout and analysis options). Prefer show_p=false when only styling. graph IDs must come from context.graphs. Multiple graph operations create multiple linked views. Subsequent operations use the latest graph settings.",
-  "analysis: set method, group1, group2, correction, null_mean, fit_weight, fit_replicates, fit_scope. Method IDs must come from context.analyses. Runs R analysis and creates a new analysis/graph view when needed. Never manually calculate reported P values.",
+  "For preset regression constraints, analysis may set fit_constraints to a JSON object encoded as a string, keyed by model ID then parameter name, with numeric fixed/lower/upper fields. Never guess scientific constraints; confirm values with the user. Empty object clears constraints. Parameter names are provided in context.fit_parameters. For fourpl: bottom, top, EC50 (original X scale), hill (natural-logistic coefficient, conventional slope times ln(10)). Use groups inside a model constraint object for group-specific parameter overrides; an empty parameter object clears its inherited constraint. Use shared as an array of parameter names and fit_mode=global with fit_scope=all for a joint fit. Never infer which parameters should be shared. threepl fixes conventional Hill slope to +1, not the internal natural-logistic coefficient. Example: {\"fourpl\":{\"bottom\":{\"fixed\":0},\"top\":{\"fixed\":100}}}. Propose only for review, never automatically apply.",
+  "analysis: set method, fit_constraints, group1, group2, correction, null_mean, fit_weight, fit_replicates, fit_scope, fit_mode (independent/global). Method IDs must come from context.analyses. Runs R analysis and creates a new analysis/graph view when needed. Never manually calculate reported P values.",
   "layout: arrange the generated views; keys columns (1..3), title, width, height, gap, margin, label_size, scale_text, arrangement (grid or hero). If no generated graph exists, include the current graph. Layout application can be undone in Figure layout.",
   "rename_columns: keys are existing column names, values are new unique column names (1..100 chars).",
   "transform: operation is log10, ln, zscore, or percent_control; reference is a control column for percent_control (column data only). Transforms affect the copied table only. Set the appropriate y_label on a subsequent graph.",
@@ -68,8 +70,8 @@ pc_ai_prepare <- function(tab,s,name,plan) {
     return(list(answer=answer,operations=plan$operations,reports=list(),r_draft=list(title=pc_ai_text(op$title,100),code=values$code,packages=packages)))
   }
   source <- tab; linked <- list(); active <- NULL; reports <- list(); layout <- NULL
-  graph_allowed <- setdiff(names(pc_defaults()),c("layout","method","group1","group2","correction","null_mean","fit_weight","fit_replicates","fit_scope"))
-  analysis_allowed <- c("method","group1","group2","correction","null_mean","fit_weight","fit_replicates","fit_scope","pca_scale","pca_missing","pca_variables","pca_label_column","pca_group_column","pca_x","pca_y","pca_labels")
+  graph_allowed <- setdiff(names(pc_defaults()),c("layout","method","fit_mode","fit_constraints","group1","group2","correction","null_mean","fit_weight","fit_replicates","fit_scope"))
+  analysis_allowed <- c("method","fit_mode","fit_constraints","group1","group2","correction","null_mean","fit_weight","fit_replicates","fit_scope","pca_scale","pca_missing","pca_variables","pca_label_column","pca_group_column","pca_x","pca_y","pca_labels")
   new_view <- function(title) {id<-paste0("V",length(linked)+1L);linked[[id]]<<-pc_view(s,title);active<<-id}
   for(op in plan$operations) {
     if(!is.list(op) || !setequal(names(op),c("type","title","parameters"))) stop("Invalid assistant operation.",call.=FALSE)
@@ -94,6 +96,7 @@ pc_ai_prepare <- function(tab,s,name,plan) {
       names(tab)<-labels
       new_groups<-pc_normalize(tab,s$layout,allow_empty=TRUE)$groups
       for(key in c("group1","group2")) {i<-match(s[[key]],old_groups);if(!is.na(i)) s[[key]]<-new_groups[i]}
+      s<-pc_rename_fit_groups(s,old_groups,new_groups)
       # Existing per-series styles refer to old labels.
       s$series_styles<-"{}"
     } else if(kind=="transform") {
@@ -152,7 +155,6 @@ pc_assistant_ui <- function() {
         shiny::p(class='assistant-note assistant-shortcut','⌘ / Ctrl + Enter to send · Review changes before applying')),
       shiny::tags$section(class='assistant-review',`aria-label`='Operations & results',shiny::h3('Operations & results'),
         shiny::div(class='assistant-region-scroll',
-          shiny::div(class='assistant-connection',shiny::textOutput('assistant_connection_summary')),
           shiny::div(role='status',`aria-live`='polite',shiny::textOutput('assistant_status')),
           shiny::uiOutput('assistant_operations'),
           shiny::tags$details(class='assistant-local-tools',shiny::tags$summary('Local tools · no model required'),

@@ -81,7 +81,7 @@ check('RDataCraftDocument.ico' in (ROOT/'desktop/windows/RDataCraft.csproj').rea
 with tempfile.TemporaryDirectory() as temporary:
     root = Path(temporary)
     for name in ["app.R", "README.md", "LICENSE", ".gitignore", "R/help.R",
-                 "R/updates.R", "scripts/check_updates.R", "desktop/linux/rdatacraft.py", "scripts/package_linux.py", "scripts/test_linux_installer.py", "R/power.R", "R/power_pilot.R", "www/dropdowns.js", "tests/power_pilot.R",
+                 "R/fit_constraints.R", "tests/fit_constraints.R", "tests/global_fits.R", "R/updates.R", "scripts/check_updates.R", "desktop/linux/rdatacraft.py", "scripts/package_linux.py", "scripts/test_linux_installer.py", "R/power.R", "R/power_pilot.R", "www/dropdowns.js", "tests/power_pilot.R",
                  "scripts/test.py", ".github/workflows/platform-builds.yml"]:
         file = root / name
         file.parent.mkdir(parents=True, exist_ok=True)

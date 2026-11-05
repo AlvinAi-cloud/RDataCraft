@@ -92,3 +92,5 @@ source("R/regression.R", local = TRUE)
 source("R/statistics.R", local = TRUE)
 
 source("R/multifit.R", local = TRUE)
+
+source('R/fit_constraints.R',local=TRUE)

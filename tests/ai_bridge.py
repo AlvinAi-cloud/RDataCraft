@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Exercise R -> bundled native service -> local mock provider, with no real accounts."""
-import argparse,json,os,subprocess,tempfile,threading
+import argparse,json,os,subprocess,tempfile,threading,time
 from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 from pathlib import Path
 ROOT=Path(__file__).resolve().parent.parent
@@ -15,7 +15,9 @@ class Provider(BaseHTTPRequestHandler):
     def do_POST(self):
         value=json.loads(self.rfile.read(int(self.headers['Content-Length'])))
         self.requests.append(('POST',self.path,self.headers.get('Authorization'),value))
-        self.reply({'choices':[{'finish_reason':'stop','message':{'content':json.dumps({'answer':'Synthetic native bridge answer','operations':[]})}}]})
+        if any(marker in value['messages'][1]['content'] for marker in ('__synthetic_delay__','__synthetic_crash__')):time.sleep(4)
+        try:self.reply({'choices':[{'finish_reason':'stop','message':{'content':json.dumps({'answer':'Synthetic native bridge answer','operations':[]})}}]})
+        except (BrokenPipeError,ConnectionResetError):pass # Expected after cancellation.
 p=argparse.ArgumentParser();p.add_argument('--helper',type=Path,required=True);args=p.parse_args()
 server=ThreadingHTTPServer(('127.0.0.1',0),Provider);threading.Thread(target=server.serve_forever,daemon=True).start()
 try:
@@ -25,9 +27,12 @@ try:
         runner=[str(ROOT/'scripts/rscript.sh')] if os.name!='nt' else [os.environ.get('RDATACRAFT_RSCRIPT','Rscript'),'--vanilla']
         subprocess.run(runner+['tests/ai_bridge.R'],cwd=ROOT,env=environment,check=True)
         posts=[r for r in Provider.requests if r[0]=='POST'];gets=[r for r in Provider.requests if r[0]=='GET']
-        assert len(posts)==1 and len(gets)==1,'Only explicit discovery and Send contact the provider'
+        assert len(posts) in (5,6) and len(gets)==1,'Only explicit discovery and Send requests contact the provider'
+        assert all(json.loads(r[3]['messages'][1]['content'])['user_request'] in ('Explain the active graph.','Explain this synthetic context.','__synthetic_delay__','__synthetic_crash__','After service restart.') for r in posts),'Provider requests remain explicit even during recovery'
         assert all(r[2]=='Bearer synthetic-bridge-key' for r in Provider.requests),'API authentication reaches only the selected local mock endpoint'
         assert posts[0][3]['model']=='synthetic-model'
         assert 'user_request' in posts[0][3]['messages'][1]['content']
+        shared=json.loads(posts[1][3]['messages'][1]['content'])
+        assert shared['context']['notes']=='Long context with Unicode β and μ. '*6000,'Partial pipe writes retain every byte of large UTF-8 context'
         print('PASS: provider saw only explicit discovery and Send, with the chosen model')
 finally:server.shutdown();server.server_close()

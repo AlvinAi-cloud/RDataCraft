@@ -22,7 +22,7 @@ EXAMPLES = {
     "Prism workflow improvements.rdatacraft", "RDataCraft examples.rdatacraft",
     "Regression model gallery.rdatacraft", "XY replicates example.rdatacraft",
     "dose-response.csv", "treatment.csv", "xy.csv", "RDataCraft help.html",
-    "XY curve fitting review.rdatacraft",
+    "XY curve fitting review.rdatacraft", "Group fitting review.rdatacraft",
 }
 
 
@@ -72,7 +72,7 @@ def audit(source):
                 if target and not (file.parent / target).exists():
                     findings.append(f"Broken local link: {label} → {target}")
     for required in ["app.R", "README.md", "LICENSE", ".gitignore", "R/help.R",
-                     "R/updates.R", "scripts/check_updates.R", "desktop/linux/rdatacraft.py", "scripts/package_linux.py", "scripts/test_linux_installer.py", "R/power.R", "R/power_pilot.R", "www/dropdowns.js", "tests/power_pilot.R",
+                     "R/fit_constraints.R", "tests/fit_constraints.R", "tests/global_fits.R", "R/updates.R", "scripts/check_updates.R", "desktop/linux/rdatacraft.py", "scripts/package_linux.py", "scripts/test_linux_installer.py", "R/power.R", "R/power_pilot.R", "www/dropdowns.js", "tests/power_pilot.R",
                      "scripts/test.py", ".github/workflows/platform-builds.yml"]:
         if not (source / required).is_file():
             findings.append(f"Required source missing: {required}")

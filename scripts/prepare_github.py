@@ -9,7 +9,7 @@ import zipfile
 from preflight import audit
 
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = "0.5"
+VERSION = "0.6"
 
 
 def main():
@@ -31,6 +31,9 @@ def main():
     for name in ["R", "www", "config", "desktop", "scripts", "tests", "examples", "licenses", "docs", ".github"]:
         shutil.copytree(ROOT / name, destination / name, symlinks=True,
                         ignore=shutil.ignore_patterns(".DS_Store", "__pycache__", "*.pyc", "cache", "bin", "obj", "target"))
+    # The public launcher prefers the stable built app, excluding local review bundles.
+    launcher=destination/'Launch RDataCraft.command'
+    launcher.write_text(launcher.read_text().replace(f'"RDataCraft {VERSION} Review.app" ',''))
     (destination / ".gitignore").write_text(
         ".DS_Store\n__pycache__/\n*.pyc\n.Rhistory\n.RData\nRplots.pdf\n"
         "/runtime*/\n/downloads/\n/dist/\n/artifacts/\n/Codex handoff/\n"

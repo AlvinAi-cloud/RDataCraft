@@ -36,8 +36,9 @@ pc_ai_response_text <- function(value) {
   if(!is.list(plan) || !is.character(plan$answer) || length(plan$answer)!=1L || !is.list(plan$operations)) stop('The model did not return a valid operation plan. Try again.')
   text
 }
-pc_connected_ai <- function(deliver,connection_event=function(...) NULL,helper=pc_ai_helper(),profile=pc_ai_profile()) {
-  worker<-NULL;callbacks<-list();counter<-0L;generation<-0L;request_id<-NULL;connected<-NULL;model<-'';account_id<-NULL;connection_info<-NULL;restoring<-FALSE;queued<-list();discovery_seq<-0L
+pc_connected_ai <- function(deliver,connection_event=function(...) NULL,helper=pc_ai_helper(),profile=pc_ai_profile(),timeout=180) {
+  worker<-NULL;callbacks<-list();outbox<-list();counter<-0L;generation<-0L;request_id<-NULL;request_callback<-NULL;connected<-NULL;model<-'';account_id<-NULL;connection_info<-NULL;restoring<-FALSE;queued<-list();discovery_seq<-0L
+  if(!is.numeric(timeout) || length(timeout)!=1L || !is.finite(timeout) || timeout<=0) stop('Invalid assistant timeout.')
   status_text<-function() {
     if(is.null(connected)) 'No provider connected · set up through AI → Accounts and Models… Local tools work offline.' else paste('Connected ·',connected,'·',if(nzchar(model)) model else 'choose a model')
   }
@@ -45,21 +46,42 @@ pc_connected_ai <- function(deliver,connection_event=function(...) NULL,helper=p
     cb<-callbacks[[message$id]];callbacks[[message$id]]<<-NULL
     if(!is.null(cb)) tryCatch(cb(message),error=function(e) connection_event(list(error='Could not read the AI connection response.')))
   }
-  poll<-function(token) {
-    if(token!=generation || is.null(worker)) return(invisible(NULL))
-    lines<-tryCatch(worker$read_output_lines(),error=function(e) character())
-    for(line in lines) if(nchar(line,type='bytes')<=1500000) tryCatch(receive(jsonlite::fromJSON(line,simplifyVector=FALSE)),error=function(e) NULL)
-    if(worker$is_alive()) later::later(function() poll(token),.1) else {
-      worker<<-NULL;connected<<-NULL
-      pending<-callbacks;callbacks<<-list()
-      for(cb in pending) cb(list(ok=FALSE,error='The AI connection service stopped. Reopen Accounts and Models to reconnect.'))
+  flush_input<-function() {
+    # processx writes to a nonblocking pipe and returns the UNWRITTEN raw bytes.
+    # Keep those bytes in order, including the newline ending each JSON frame.
+    while(length(outbox)) {
+      remaining<-worker$write_input(outbox[[1]])
+      if(length(remaining)) {outbox[[1]]<<-remaining;break}
+      outbox<<-outbox[-1L]
     }
   }
+  service_failed<-function(message) {
+    p<-worker;worker<<-NULL;connected<<-NULL;outbox<<-list();restoring<<-FALSE;queued<<-list();generation<<-generation+1L
+    pending<-callbacks;callbacks<<-list()
+    if(!is.null(p)&&p$is_alive()) {try(p$close_input(),silent=TRUE);later::later(function(){if(p$is_alive())try(p$kill_tree(),silent=TRUE)},35)}
+    for(cb in pending) try(cb(list(ok=FALSE,error=message)),silent=TRUE)
+  }
+  poll<-function(token) {
+    if(token!=generation || is.null(worker)) return(invisible(NULL))
+    tryCatch(flush_input(),error=function(e) service_failed('Could not deliver the complete AI request. Reconnect and try again.'))
+    if(is.null(worker)) return(invisible(NULL))
+    # Drain diagnostics without retaining provider bodies or credentials.
+    try(worker$read_error(),silent=TRUE)
+    lines<-tryCatch(worker$read_output_lines(),error=function(e) {service_failed('The AI connection could not be read. Reconnect and try again.');character()})
+    if(is.null(worker)) return(invisible(NULL))
+    for(line in lines) if(nchar(line,type='bytes')<=1500000) tryCatch(receive(jsonlite::fromJSON(line,simplifyVector=FALSE)),error=function(e) NULL)
+    if(worker$is_alive()) later::later(function() poll(token),.1) else service_failed('The AI connection service stopped. Reopen Accounts and Models to reconnect.')
+  }
+
   send<-function(action,body=list(),callback=function(...) NULL) {
-    if(is.null(worker) || !worker$is_alive()) stop('The bundled AI connection service is unavailable. Rebuild or reinstall RDataCraft v0.5.')
-    counter<<-counter+1L;id<-paste0('c',counter);callbacks[[id]]<<-callback
+    if(is.null(worker) || !worker$is_alive()) stop('The bundled AI connection service is unavailable. Rebuild or reinstall RDataCraft v0.6.')
+    counter<<-counter+1L;id<-paste0('c',counter)
     value<-c(list(id=id,action=action),body)
-    worker$write_input(paste0(jsonlite::toJSON(value,auto_unbox=TRUE,null='null',digits=NA),'\n'))
+    frame<-charToRaw(enc2utf8(paste0(jsonlite::toJSON(value,auto_unbox=TRUE,null='null',digits=NA),'\n')))
+    if(length(frame)>600000L) stop('The AI request is too large to deliver. Reduce the shared context.')
+    if(length(outbox)>=8L) stop('The AI connection is busy delivering earlier requests. Try again shortly.')
+    callbacks[[id]]<<-callback;outbox<<-c(outbox,list(frame))
+    flush_input()
     invisible(id)
   }
   publish<-function(message) {
@@ -77,7 +99,7 @@ pc_connected_ai <- function(deliver,connection_event=function(...) NULL,helper=p
   }
   ensure<-function() {
     if(!is.null(worker) && worker$is_alive()) return(invisible(NULL))
-    if(is.null(helper)) stop('This copy does not include the AI connection service. Rebuild or reinstall RDataCraft v0.5.')
+    if(is.null(helper)) stop('This copy does not include the AI connection service. Rebuild or reinstall RDataCraft v0.6.')
     dir.create(profile,recursive=TRUE,showWarnings=FALSE,mode='0700');Sys.chmod(profile,'0700')
     worker<<-processx::process$new(helper,c('--profile',normalizePath(profile,winslash='/',mustWork=TRUE)),stdin='|',stdout='|',stderr='|',cleanup_tree=TRUE)
     generation<<-generation+1L;later::later(local({token<-generation;function() poll(token)}),.1)
@@ -107,25 +129,32 @@ pc_connected_ai <- function(deliver,connection_event=function(...) NULL,helper=p
       payload<-jsonlite::toJSON(list(user_request=body$prompt,context=body$context,recent_conversation=body$history),auto_unbox=TRUE,null='null')
       if(nchar(payload,type='bytes')>350000) stop('The assistant context is too large.')
       instruction<-paste(body$instructions,'Return only one JSON object with answer and operations matching this schema. Do not use Markdown fences.',jsonlite::toJSON(body$schema,auto_unbox=TRUE,null='null'))
-      send('request',list(model=model,system=instruction,prompt=payload),function(message) {
+      request_callback<<-send('request',list(model=model,system=instruction,prompt=payload),function(message) {
         if(!identical(request_id,current)) return(invisible(NULL))
-        request_id<<-NULL
+        request_id<<-NULL;request_callback<<-NULL
         response<-tryCatch({if(!isTRUE(message$ok)) stop(message$error);pc_ai_response_text(message$value)},error=identity)
         if(inherits(response,'error')) deliver(list(type='ai-result',id=current,ok=FALSE,message=conditionMessage(response))) else deliver(list(type='ai-result',id=current,ok=TRUE,response=response))
       })
-    },error=function(e) {request_id<<-NULL;deliver(list(type='ai-result',id=body$id,ok=FALSE,message=conditionMessage(e)))})
+      later::later(function() {
+        if(!identical(request_id,current)) return(invisible(NULL))
+        cancel(current)
+        deliver(list(type='ai-result',id=current,ok=FALSE,message='The AI request timed out. No changes were applied. Check the connection and try again; the provider may still count usage.'))
+      },timeout)
+    },error=function(e) {request_id<<-NULL;if(!is.null(request_callback)) callbacks[[request_callback]]<<-NULL;request_callback<<-NULL;deliver(list(type='ai-result',id=body$id,ok=FALSE,message=conditionMessage(e)))})
   }
   cancel<-function(id=NULL,announce=FALSE) {
     current<-request_id
     if(!is.null(id) && !identical(id,current)) return(invisible(NULL))
     request_id<<-NULL
+    if(!is.null(request_callback)) callbacks[[request_callback]]<<-NULL
+    request_callback<<-NULL
     if(!is.null(worker) && worker$is_alive()) try(send('cancel'),silent=TRUE)
     if(announce && !is.null(current)) deliver(list(type='ai-result',id=current,ok=FALSE,message='Request stopped. No changes were applied.'))
   }
   close<-function() {
     cancel();generation<<-generation+1L
     if(!is.null(worker) && worker$is_alive()) {try(worker$close_input(),silent=TRUE);p<-worker;later::later(function() {if(p$is_alive()) try(p$kill_tree(),silent=TRUE)},35)}
-    callbacks<<-list();worker<<-NULL
+    callbacks<<-list();outbox<<-list();worker<<-NULL
   }
   list(start=start,cancel=cancel,close=close,status=status_text,command=command,account=function() account_id)
 }

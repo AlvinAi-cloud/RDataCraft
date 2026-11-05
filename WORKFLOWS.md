@@ -223,3 +223,21 @@ request, compares it with the installed version and offers the matching installe
 It sends no observations, AI credentials or file paths and installs nothing by
 itself. Download, close the app and install the update. Legacy version-named apps
 may need a one-time manual removal after verifying the new stable-name app.
+
+### Fixed and bounded fitting parameters
+
+In Analysis, select an XY regression model and choose **Parameter constraints…**. Leave fields blank to estimate freely, enter a fixed number to hold a parameter constant, or enter lower/upper bounds. Apply commits the dialog; Cancel leaves the fit unchanged. Clear all fields to restore unrestricted fitting. These settings belong to the current model and view; in Independent fits mode, fitting all series applies them independently to each series.
+
+For dose-response fitting, Bottom and Top are response values, EC50 uses the original X scale, and Hill is the existing natural-logistic coefficient (conventional base-10 Hill slope multiplied by ln(10)). Positive scale parameters require positive values. Fixed parameters have no estimated SE or CI. Degrees of freedom count only free parameters; uncertainty is conditional on the fixed values, and intervals at active bounds are omitted.
+
+The AI can propose these settings, for example “Fix Bottom at 0 and Top at 100; limit EC50 to 1–20”. It creates a reviewable analysis preview; Apply creates a new table copy. Advanced R remains available for custom equations and fitting designs beyond the independent and shared/global presets. Studies using constraints require v0.6 or later.
+
+### Different constraints by group and shared/global fitting (v0.6)
+
+In **Analysis → Parameter constraints…**, select **Defaults (all groups)** or a named data group. Defaults apply unless a group enables **Override** for a parameter. An enabled override with blank fields estimates that parameter freely, even if the default fixes it. Edits are retained while switching groups; Apply commits all edits and Cancel discards them. All fitted curves remain on the same graph.
+
+**Fitting design → Shared / global fit** is a separate choice. Select All Y series, then select parameters to share in the constraint dialog. The engine performs one joint least-squares fit with shared coefficients counted once and other coefficients estimated separately for each curve. Bounds for a shared coefficient are intersected across groups. Conflicting fixed values or disjoint bounds reject the fit. Joint uncertainty uses the full joint covariance and residual degrees of freedom; it is conditional on any fixed coefficients. Global fitting does not automatically test group differences or account for repeated measures.
+
+**Three-parameter dose-response (Hill=1)** fixes the conventional base-10 Hill slope to +1 (increasing response): `Y = Bottom + (Top-Bottom)*X/(EC50+X)`. This is the internal natural-logistic coefficient `ln(10)`, not 1. Bottom, Top and EC50 may be estimated, fixed, bounded or shared. X must be positive and EC50 is on the entered X scale. For a decreasing dose-response curve, use four-parameter fitting with a negative Hill coefficient.
+
+On smaller displays, constraint fields scroll horizontally within the dialog and long dialog content scrolls vertically. With AI open, Figure settings remain available below the plot at narrower widths rather than disappearing; both panels retain independent visibility controls. Conversation, composer and operation results retain their own scrolling regions.

@@ -1,5 +1,6 @@
 # Independent fits share a model family, never parameters or a pooled P value.
 pc_multifit <- function(n, method, options) {
+  if(identical(options$fit_mode,'global'))return(pc_global_fit(n,method,options))
   options$fit_scope <- "selected"
   results <- lapply(n$groups, function(g) tryCatch(pc_analyze(n, method, g, options = options), error = identity))
   names(results) <- n$groups

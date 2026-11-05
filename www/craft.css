@@ -502,3 +502,18 @@ body[data-runtime="desktop"] .welcome-prism {display:none}
 .assistant-open .studio-layout .canvas-card{min-width:0}
 @media(max-width:1100px){.assistant-open{--ai-panel-width:330px;--open-navigator-width:220px}.assistant-open .sidebar{width:220px;flex-basis:220px}.assistant-open:not(.inspector-hidden) .studio-layout{grid-template-columns:minmax(0,1fr) 240px}}
 @media(max-width:850px){.assistant-open{--ai-panel-width:300px;--open-navigator-width:180px}.assistant-open .sidebar{width:180px;flex-basis:180px}}
+/* Constraint editing remains usable on short displays; footer stays reachable. */
+.constraint-dialog{max-height:calc(100dvh - 190px);overflow:auto;overscroll-behavior:contain}
+.constraint-table-scroll{max-width:100%;overflow:auto;max-height:42dvh}
+.constraint-table{min-width:550px;margin-bottom:8px}
+.constraint-table .form-group{margin:0;min-width:105px}
+.constraint-table .control-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.constraint-table th{white-space:nowrap;vertical-align:middle}
+.constraint-table .checkbox label{font-size:12px;white-space:normal}
+@media(max-height:760px){.assistant-workspace{gap:7px}.assistant-conversation{min-height:65px!important}.assistant-review{min-height:65px!important}.assistant-composer{min-height:155px!important}.assistant-composer textarea{min-height:64px;max-height:110px}.assistant-panel .assistant-heading{padding:7px 12px}.assistant-panel .assistant-note{margin:3px 0}}
+@media(max-width:1100px){.assistant-open{--ai-panel-width:310px;--open-navigator-width:180px}.assistant-open .sidebar{width:180px;flex-basis:180px}.assistant-open:not(.inspector-hidden) .studio-layout{grid-template-columns:minmax(0,1fr)}.assistant-open:not(.inspector-hidden) .inspector{position:static;max-height:35dvh;overflow:auto}.assistant-open .content{padding:12px}.analysis-controls{min-width:0}.analysis-controls .form-group{min-width:0}}
+@media(max-width:700px){.assistant-open{--ai-panel-width:min(330px,48vw);--open-navigator-width:0px}.assistant-open .sidebar{display:none}.assistant-open .main-shell{width:calc(100% - var(--ai-panel-width));min-width:0}.assistant-panel .assistant-heading h2{font-size:16px}.assistant-panel .assistant-workspace{padding:7px;gap:7px}.constraint-dialog{max-height:calc(100dvh - 165px)}.modal-dialog{margin:8px;max-width:calc(100vw - 16px)}}
+.constraint-table{table-layout:fixed;width:100%}
+.constraint-table th:first-child{width:100px}
+.constraint-table .shiny-input-container{width:100%!important;min-width:95px}
+.constraint-table input.form-control{width:100%;min-width:95px}

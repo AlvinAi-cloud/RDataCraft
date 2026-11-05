@@ -12,7 +12,7 @@ pc_defaults <- function() list(layout = "column", method = "welch", graph = "poi
   axis_line_width = 0.55, point_shape = 0, line_width = 0, override_x_title = FALSE, override_y_title = FALSE,
   xy_connections = "auto", xy_show_fit = TRUE, xy_fit_band = TRUE,
   xy_compare = FALSE, xy_compare_group1 = "", xy_compare_group2 = "", xy_compare_correction = "holm", xy_compare_significant_only = TRUE,
-  fit_weight = "none", fit_replicates = "individual", fit_scope = "selected", series_styles = "{}", x_tick_step = "", y_tick_step = "", x_tick_angle = 0, ref_x = "", ref_y = "", x_axis_length = 0, y_axis_length = 0,
+  fit_constraints = "{}", fit_mode = "independent", fit_weight = "none", fit_replicates = "individual", fit_scope = "selected", series_styles = "{}", x_tick_step = "", y_tick_step = "", x_tick_angle = 0, ref_x = "", ref_y = "", x_axis_length = 0, y_axis_length = 0,
   pca_scale = TRUE, pca_missing = "error", pca_variables = "", pca_label_column = "", pca_group_column = "", pca_x = 1, pca_y = 2, pca_labels = FALSE)
 
 pc_palettes <- list(craft = c("#247763", "#D6A64D", "#6B9CC3", "#A18AB9", "#D18491", "#5FA88F"),

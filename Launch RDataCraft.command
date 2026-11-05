@@ -1,11 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 RDATACRAFT_ROOT="$(cd "$(dirname "$0")" && pwd)"
-RDATACRAFT_CANDIDATES=("RDataCraft Local Preview.app" "RDataCraft.app")
+RDATACRAFT_CANDIDATES=("RDataCraft.app" "RDataCraft Local Preview.app")
 for RDATACRAFT_NAME in "${RDATACRAFT_CANDIDATES[@]}"; do
   RDATACRAFT_APP="$RDATACRAFT_ROOT/dist/$RDATACRAFT_NAME"
   if [[ -d "$RDATACRAFT_APP" ]]; then
-    exec /usr/bin/open "$RDATACRAFT_APP" "$@"
+    exec /usr/bin/open -a "$RDATACRAFT_APP" "$@"
   fi
 done
 printf 'Extract the matching Mac ZIP in dist/ or build the native app as described in PLATFORM_SUPPORT.md.\n' >&2

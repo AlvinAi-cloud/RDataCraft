@@ -7,7 +7,8 @@ pc_project <- function(tab, settings, worksheets = NULL, active = "D1", figure_l
   if (!is.null(worksheets)) uses_replicates <- uses_replicates || any(vapply(worksheets, function(sh)
     identical(sh$settings$layout, "xy") && pc_xy_structure(pc_read_text(sh$data_tsv, "\t"))$n > 1L, logical(1)))
   if (uses_replicates && is.null(worksheets)) {worksheets <- list(D1 = pc_sheet(tab, settings, "Observation table")); active <- "D1"}
-  p <- list(format = "rdatacraft", schema_version = if (is.null(worksheets)) 1L else 3L, app_version = "0.5",
+  if(((!is.null(settings$fit_constraints) && settings$fit_constraints!='{}')||identical(settings$method,'threepl')||identical(settings$fit_mode,'global')) && is.null(worksheets)) {worksheets<-list(D1=pc_sheet(tab,settings,'Observation table'));active<-'D1'}
+  p <- list(format = "rdatacraft", schema_version = if (is.null(worksheets)) 1L else 3L, app_version = "0.6",
        saved_at = format(Sys.time(), tz = "UTC", usetz = TRUE),
        data_tsv = pc_table_text(tab), settings = settings,
        environment = list(r_version = as.character(getRversion()),
@@ -52,6 +53,10 @@ pc_project <- function(tab, settings, worksheets = NULL, active = "D1", figure_l
     p$schema_version<-13L
     if(is.null(p$worksheets)) {p$worksheets<-list(D1=pc_sheet(tab,settings,"Observation table"));p$active<-"D1"}
   }
+  constrained<-function(s) !is.null(s$fit_constraints) && s$fit_constraints!='{}'
+  if(constrained(settings)||(!is.null(worksheets)&&any(vapply(worksheets,function(sh)any(vapply(sh$views,function(v)constrained(v$settings),logical(1))),logical(1)))))p$schema_version<-14L
+  uses_global<-function(s) identical(s$fit_mode,'global') || grepl('"groups"',if(is.null(s$fit_constraints)) '{}' else s$fit_constraints,fixed=TRUE) || grepl('"shared"',if(is.null(s$fit_constraints)) '{}' else s$fit_constraints,fixed=TRUE) || identical(s$method,'threepl')
+  if(uses_global(settings)||(!is.null(worksheets)&&any(vapply(worksheets,function(sh)any(vapply(sh$views,function(v)uses_global(v$settings),logical(1))),logical(1)))))p$schema_version<-15L
   p
 }
 pc_import_reports <- function(reports=NULL) {
@@ -67,7 +72,7 @@ pc_load_project <- function(path) {
 }
 
 pc_decode_project <- function(p) {
-  if (!p$format %in% c("rdatacraft", "plotcraft") || !p$schema_version %in% c(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 13L)) stop("This is not a supported RDataCraft project.", call. = FALSE)
+  if (!p$format %in% c("rdatacraft", "plotcraft") || !p$schema_version %in% c(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 15L)) stop("This is not a supported RDataCraft project.", call. = FALSE)
   tab <- pc_read_text(p$data_tsv, "\t")
   defaults <- pc_defaults()
   settings <- defaults
@@ -76,13 +81,14 @@ pc_decode_project <- function(p) {
                   graph = unique(unlist(lapply(unname(pc_layouts()), function(x) unname(pc_graphs(x))))),
                   correction = c("holm", "bonferroni", "BH"), annotation = c("p", "stars"),
                   error = c("none", "sd", "sem", "ci"), palette = names(pc_palettes), legend_position = c("auto", "top", "bottom", "left", "right", "none"), pca_missing=c("error","complete"),
-                  xy_connections=c("auto","none","connect"),xy_compare_correction=c("holm","bonferroni","none"),fit_scope=c("selected","all"),fit_weight=c("none","inv_y2","replicate_sd"),fit_replicates=c("individual","mean"))
+                  xy_connections=c("auto","none","connect"),xy_compare_correction=c("holm","bonferroni","none"),fit_mode=c("independent","global"),fit_scope=c("selected","all"),fit_weight=c("none","inv_y2","replicate_sd"),fit_replicates=c("individual","mean"))
   bounds <- list(null_mean = c(-1e12, 1e12), font_size = c(4, 24), point_size = c(1, 6), width = c(25.4, 400), height = c(25.4, 300), dpi = c(72, 600),
     title_size = c(0,48), axis_title_size = c(0,48), axis_tick_size = c(0,48), axis_line_width = c(0.1,3), point_shape = c(0,25), line_width = c(0,4), x_tick_angle = c(0,90), x_axis_length = c(0,350), y_axis_length = c(0,250), pca_x=c(1,50), pca_y=c(1,50))
   for (name in names(defaults)) {
     v <- p$settings[[name]]
     if (is.null(v)) next
     if (name == "pca_variables") {if(!is.character(v) || length(v)!=1L || is.na(v) || nchar(v)>6000) stop("Invalid PCA variable selection.");settings[[name]]<-v;next}
+    if (name == "fit_constraints") {pc_fit_constraints(v);settings[[name]]<-v;next}
     if (name == "series_styles") {pc_series_styles(v); settings[[name]] <- v; next}
     if (length(v) != 1L || is.list(v) || is.na(v)) stop("Invalid project setting: ", name, call. = FALSE)
     if (name %in% c("text_color", "axis_color") && (!is.character(v) || !grepl("^#[0-9a-fA-F]{6}$", v))) stop("Choose a valid color for ", name, call. = FALSE)
@@ -104,7 +110,7 @@ pc_decode_project <- function(p) {
   pc_normalize(tab, settings$layout, allow_empty = TRUE, allow_incomplete = TRUE)
   if (!is.null(p$study_name)) p$study_name <- pc_study_name(p$study_name)
   out <- list(r_analyses=pc_r_records(p$r_analyses),import_reports=pc_import_reports(p$import_reports),prism_sources=pc_prism_archives(p$prism_sources),study_name = p$study_name, table = tab, settings = settings, environment = p$environment, figure_layout = pc_layout_settings(p$figure_layout))
-  if (p$schema_version %in% c(2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 13L)) {
+  if (p$schema_version %in% c(2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 15L)) {
     book <- p$worksheets
     if (!is.list(book) || !length(book) || length(book) > 100 || is.null(names(book)) || anyDuplicated(names(book)) || any(!grepl("^D[0-9]+$", names(book)))) stop("Invalid workbook worksheets.", call. = FALSE)
     for (id in names(book)) {

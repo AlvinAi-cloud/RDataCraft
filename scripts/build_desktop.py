@@ -13,7 +13,7 @@ from runtime_inventory import write_notices
 from build_ai import build as build_ai
 
 ROOT = Path(__file__).resolve().parent.parent
-VERSION = "0.5"
+VERSION = "0.6"
 
 
 def run(*args):

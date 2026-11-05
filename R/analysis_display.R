@@ -1,6 +1,6 @@
 # Presentation only: preserve complete analysis objects and export precision.
 pc_curve_results <- function(result, normalized, settings) {
-  models <- c("linear", "fourpl", unname(pc_regression_methods()))
+  models <- c("linear", "fourpl", "threepl", unname(pc_regression_methods()))
   if (is.null(result) || normalized$layout != "xy" || !settings$method %in% models) return(NULL)
   series <- if (identical(settings$fit_scope, "all")) normalized$groups else settings$group1
   status <- if (is.null(result$fit_status)) data.frame(series=series,status="Fitted",detail="") else result$fit_status
@@ -20,16 +20,18 @@ pc_curve_results <- function(result, normalized, settings) {
       list(value=number(fun(group)),ci=if(is.null(ci)) NULL else ci(group))
     }))
   }
-  if (identical(settings$method,"fourpl")) {
+  if (settings$method %in% c("fourpl","threepl")) {
     add("Bottom",function(g) get_parameter(g,"bottom"))
-    add("Top",function(g) get_parameter(g,"bottom")+exp(get_parameter(g,"logSpan")))
-    add("EC50",function(g) 10^get_parameter(g,"logEC50"),function(g) 10^c(get_parameter(g,"logEC50","ci_low"),get_parameter(g,"logEC50","ci_high")))
+    natural <- "EC50" %in% parameters$parameter
+    add("Top",function(g) if(natural)get_parameter(g,"top")else get_parameter(g,"bottom")+exp(get_parameter(g,"logSpan")))
+    add("EC50",function(g) if(natural)get_parameter(g,"EC50")else 10^get_parameter(g,"logEC50"),function(g) if(natural)c(get_parameter(g,"EC50","ci_low"),get_parameter(g,"EC50","ci_high"))else 10^c(get_parameter(g,"logEC50","ci_low"),get_parameter(g,"logEC50","ci_high")))
     # nls fits log10(EC50). Convert its SE to the EC50 scale by the delta method.
-    add("SE of EC50",function(g) log(10)*10^get_parameter(g,"logEC50")*get_parameter(g,"logEC50","se"),se=TRUE)
-    add("Hill coefficient",function(g) get_parameter(g,"hill"),function(g) c(get_parameter(g,"hill","ci_low"),get_parameter(g,"hill","ci_high")))
-    add("SE of Hill coefficient",function(g) get_parameter(g,"hill","se"),se=TRUE)
+    add("SE of EC50",function(g) if(natural)get_parameter(g,"EC50","se")else log(10)*10^get_parameter(g,"logEC50")*get_parameter(g,"logEC50","se"),se=TRUE)
+    if(settings$method=="threepl")add("Hill slope (fixed)",function(g) 1)
+    else add("Hill coefficient",function(g) get_parameter(g,"hill"),function(g) c(get_parameter(g,"hill","ci_low"),get_parameter(g,"hill","ci_high")))
+    if(settings$method!="threepl")add("SE of Hill coefficient",function(g) get_parameter(g,"hill","se"),se=TRUE)
   } else if (!is.null(parameters)) {
-    labels <- c("(Intercept)"="Intercept","x"="Slope","I(x^2)"="Quadratic coefficient","I(x^3)"="Cubic coefficient","log(x)"="Log coefficient")
+    labels <- c("intercept"="Intercept","slope"="Slope","(Intercept)"="Intercept","x"="Slope","I(x^2)"="Quadratic coefficient","I(x^3)"="Cubic coefficient","log(x)"="Log coefficient")
     for (key in unique(as.character(parameters$parameter))) local({
       name <- key; label <- if(name %in% names(labels)) unname(labels[name]) else name
       add(label,function(g) get_parameter(g,name),function(g) c(get_parameter(g,name,"ci_low"),get_parameter(g,name,"ci_high")))
@@ -46,9 +48,9 @@ pc_curve_results <- function(result, normalized, settings) {
     if(sst==0) NA_real_ else 1-sum(z$residual^2)/sst
   })
   # Keep the existing engine's residual-SD definition, including weighting.
-  add("Residual SD",function(g) {
+  add(if(identical(settings$fit_mode,"global")) "Residual SD (joint)" else "Residual SD",function(g) {
     m <- result$metrics; if("series" %in% names(m)) m <- m[m$series==g,,drop=FALSE]
-    value <- m$value[m$measure %in% c("Residual SD","RMSE (original Y scale)")]
+    value <- m$value[m$measure %in% c("Residual SD","RMSE (original Y scale)","Joint residual SD")]
     if(length(value)==1L) return(suppressWarnings(as.numeric(value)))
     z <- diagnostics(g); p <- parameters
     if(!is.null(p) && "series" %in% names(p)) p <- p[p$series==g,,drop=FALSE]
@@ -57,7 +59,7 @@ pc_curve_results <- function(result, normalized, settings) {
   })
   add("Observations (n)",function(g) sum(normalized$data$group==g))
   if (identical(settings$fit_replicates,"mean")) add("Fitted points (n)",function(g) nrow(diagnostics(g)))
-  list(series=series,status=status,rows=rows,fourpl=identical(settings$method,"fourpl"))
+  list(series=series,status=status,rows=rows,fourpl=settings$method %in% c("fourpl","threepl"))
 }
 
 pc_analysis_results_ui <- function(result, normalized, settings) {
@@ -80,7 +82,7 @@ pc_analysis_results_ui <- function(result, normalized, settings) {
           shiny::tags$th(scope="row",row$label,if(any(vapply(row$cells,function(x) !is.null(x$ci),logical(1)))) shiny::span(class="curve-ci-label","Estimate · 95% CI")),
           lapply(row$cells,function(cell) shiny::tags$td(shiny::span(class="curve-estimate",fmt(cell$value)),
             if(!is.null(cell$ci)) shiny::span(class="curve-ci",if(length(cell$ci)==2L && all(is.finite(cell$ci))) paste(vapply(cell$ci,fmt,character(1)),collapse=" to ") else "CI unavailable")))))))),
-    if(display$fourpl) shiny::p(class="curve-results-note","SE = standard error. EC50 is on the entered X scale; no concentration unit is inferred. Hill coefficient uses the model’s natural-logistic scale; EC50 SE is a delta-method approximation."))
+    if(display$fourpl) shiny::p(class="curve-results-note",if(settings$method=="threepl") "Conventional Hill slope is fixed at +1. SE and intervals apply only to estimated parameters. EC50 uses the original X scale; no unit is inferred." else "SE = standard error. EC50 uses the original X scale; no concentration unit is inferred. Hill uses the natural-logistic scale. Fixed and active-bound parameters have no reported uncertainty."))
 }
 
 # CSV cells retain numerical precision; display rounding is applied only in HTML.
@@ -243,7 +245,7 @@ pc_model_details_ui <- function(result,normalized,settings) {
     section("Comparisons",comparison,"comparison_table"),
     section("Factor effects",result$effects,"effects_table"),
     if(!is.null(result$parameters) && nrow(result$parameters)) t$details(t$summary("Complete model coefficients and uncertainty"),
-      if(settings$method=="fourpl") t$p(class="muted","These are the fitted coefficients: logSpan = ln(Top − Bottom), logEC50 = log10(EC50), and hill is the natural-logistic coefficient. The response-scale plateaus and EC50 are in Analysis results above."),
+      if(settings$method=="fourpl" && !"EC50" %in% result$parameters$parameter) t$p(class="muted","These are the fitted coefficients: logSpan = ln(Top − Bottom), logEC50 = log10(EC50), and hill is the natural-logistic coefficient. The response-scale plateaus and EC50 are in Analysis results above."),
       section("Model coefficients",pc_parameters_csv(result,normalized,settings),"parameters_table",!is.null(curve))),
     section("Fit status",result$fit_status,"fit_status_table"),
     section("Expected counts",pc_expected_counts(result),"expected_counts_table",p_values=FALSE),

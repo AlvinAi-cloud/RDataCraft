@@ -77,7 +77,11 @@ shiny::testServer(app,{
  check(assistant$busy(),'unrelated model responses are ignored')
  session$setInputs(assistant_response=list(id=req$id,ok=TRUE,response=jsonlite::toJSON(list(answer='Synthetic model answer',operations=list()),auto_unbox=TRUE)));session$flushReact()
  check(!assistant$busy() && is.null(assistant$ready()) && length(workbook())==2,'answer-only model response leaves workbook unchanged')
+ session$setInputs(assistant_submit=list(prompt='A stalled synthetic request',share=FALSE,nonce=99));session$flushReact();timed_id<-assistant$pending()$id
+ session$setInputs(assistant_response=list(id=timed_id,ok=FALSE,message='The AI request timed out. No changes were applied.'));session$flushReact()
+ check(!assistant$busy() && is.null(assistant$pending()) && is.null(assistant$ready()) && grepl('timed out',output$assistant_status),'a transport timeout clears the thinking state and displays the failure')
  session$setInputs(assistant_prompt='Style the graph',assistant_send=3);session$flushReact();id<-assistant$pending()$id
+ check(assistant$busy() && !is.null(id),'a new request can start after a transport timeout')
  session$setInputs(assistant_stop=1);session$flushReact()
  session$setInputs(assistant_response=list(id=id,ok=TRUE,response=jsonlite::toJSON(pc_ai_local_plan('polish',settings()),auto_unbox=TRUE)));session$flushReact()
  check(!assistant$busy() && is.null(assistant$ready()),'stopped requests cannot apply a late model response')

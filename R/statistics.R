@@ -1,7 +1,7 @@
 pc_methods <- function(layout) switch(layout,
   multiple = c("Principal component analysis (PCA)"="pca","Descriptive statistics"="descriptive"),
   column = c("Descriptive statistics" = "descriptive", "Welch's unpaired t test" = "welch", "Student's unpaired t test (equal variances)" = "student", "Paired t test (match by row)" = "paired", "Mann–Whitney test" = "mann", "Wilcoxon matched-pairs signed rank" = "signedrank", "One-sample t test" = "onesample", "One-way ANOVA + Tukey comparisons" = "anova", "Welch's one-way ANOVA" = "welchanova", "Kruskal–Wallis + corrected rank comparisons" = "kruskal", "Repeated-measures one-way ANOVA" = "rm_anova", "Friedman matched-groups test" = "friedman", "Multiple unpaired Welch t tests" = "multiple", "Shapiro–Wilk normality by group" = "normality"),
-  xy = c("Descriptive statistics" = "descriptive", "Linear regression" = "linear", pc_regression_methods(), "Pearson correlation" = "pearson", "Spearman rank correlation" = "spearman", "Four-parameter dose-response curve" = "fourpl", "Area under curve (trapezoidal)" = "auc"),
+  xy = c("Descriptive statistics" = "descriptive", "Linear regression" = "linear", pc_regression_methods(), "Pearson correlation" = "pearson", "Spearman rank correlation" = "spearman", "Four-parameter dose-response curve" = "fourpl", "Three-parameter dose-response (Hill=1)"="threepl", "Area under curve (trapezoidal)" = "auc"),
   grouped = c("Descriptive statistics" = "descriptive", "Ordinary two-way ANOVA (balanced design)" = "twoway", "Compare groups within each factor level" = "simpleeffects"),
   contingency = c("Count summary" = "descriptive", "Fisher's exact test (2 × 2)" = "fisher", "Chi-square independence test" = "chisquare"),
   survival = c("Kaplan–Meier estimates" = "kaplan", "Log-rank (Mantel–Cox) test" = "logrank"))
@@ -20,8 +20,11 @@ pc_stars <- function(p) ifelse(!is.finite(p), "", ifelse(p <= 0.0001, "****", if
 pc_analyze <- function(normalized, method = "descriptive", group1 = NULL, group2 = NULL, options = list()) {
   n <- normalized; d <- n$data
   if(n$layout=="multiple") return(pc_analyze_multiple(n,method,utils::modifyList(pc_defaults(),options)))
-  if (n$layout == "xy" && identical(options$fit_scope, "all") && method %in% c("linear", "fourpl", unname(pc_regression_methods())))
+  if(n$layout=='xy'&&length(pc_fit_parameters(method))) {missing_groups<-setdiff(names(pc_fit_constraints(options$fit_constraints)[[method]]$groups),n$groups);if(length(missing_groups))stop('Constraints refer to missing series: ',paste(missing_groups,collapse=', '),'. Remove their overrides in Parameter constraints.')}
+  if(n$layout=='xy'&&length(pc_fit_parameters(method))&&identical(options$fit_mode,'global')&&!identical(options$fit_scope,'all'))stop('Choose All Y series for shared / global fitting.')
+  if (n$layout == "xy" && identical(options$fit_scope, "all") && method %in% c("linear", "fourpl", "threepl", unname(pc_regression_methods())))
     return(pc_multifit(n, method, options))
+  if(n$layout=='xy' && length(pc_fit_parameters(method)) && (method=='threepl'||length(pc_fit_rules(options,method,group1))||length(pc_fit_constraints(options$fit_constraints)[[method]]$groups))) return(pc_constrained_fit(n,method,group1,options))
   if(n$layout=="xy" && (method %in% unname(pc_regression_methods()) || (method=="linear" &&
     ((!is.null(options$fit_weight) && options$fit_weight!="none") || (!is.null(options$fit_replicates) && options$fit_replicates!="individual")))))
     return(pc_regression(n,method,group1,options))

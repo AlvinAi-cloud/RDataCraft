@@ -204,11 +204,14 @@ ui <- fluidPage(
                   onDropdownOpen=I("function(dropdown) { var box=this.$control[0].getBoundingClientRect(), below=window.innerHeight-box.bottom-12, above=box.top-12, upward=below<240 && above>below, height=Math.max(100,Math.min(420,upward?above:below)); dropdown.addClass('analysis-method-menu'); dropdown.find('.selectize-dropdown-content').css('max-height',height+'px'); if(upward) dropdown.css('top',window.scrollY+box.top-dropdown.outerHeight()); }"))),
                 conditionalPanel("input.layout === 'xy'", p(class="muted", "XY statistics: choose Pearson or Spearman correlation to assess association, regression to model Y versus X, or area under the curve to summarize a series. Comparing treatments across X or time may require a repeated-measures or mixed-effects model; use Advanced R for that design.")),
                 conditionalPanel("['welch','student','paired','mann','signedrank','onesample','linear','pearson','spearman','fourpl','origin','quadratic','cubic','logarithmic','power','exponential','decay','association','michaelis','gaussian'].indexOf(input.method) !== -1 && (input.layout !== 'xy' || input.fit_scope !== 'all' || ['pearson','spearman'].indexOf(input.method) !== -1)", selectInput("group1", "First group / regression series", choices = c("Control", "Treatment A", "Treatment B"))),
-                conditionalPanel("input.layout === 'xy' && ['linear','fourpl','origin','quadratic','cubic','logarithmic','power','exponential','decay','association','michaelis','gaussian'].indexOf(input.method) !== -1",
-                  selectInput("fit_scope","Fit series",c("Selected Y series only"="selected","All Y series — separate fit per group"="all")),
+                conditionalPanel("input.layout === 'xy' && ['linear','fourpl','threepl','origin','quadratic','cubic','logarithmic','power','exponential','decay','association','michaelis','gaussian'].indexOf(input.method) !== -1",
+                  selectInput("fit_scope","Fit series",c("Selected Y series only"="selected","All Y series"="all")),
+                  selectInput("fit_mode","Fitting design",c("Independent fits"="independent","Shared / global fit"="global")),
                   selectInput("fit_replicates","Fit replicates",c("Fit individual observations"="individual","Fit mean Y at each X"="mean")),
+                  actionButton("fit_constraints_open","Parameter constraints…"),
+                  div(style="display:none",textInput("fit_constraints",NULL,"{}")),
                   selectInput("fit_weight","Regression weighting",c("Equal weights"="none","1 / Y² (nonzero Y)"="inv_y2","Replicate SD (requires repeated X)"="replicate_sd")),
-                  p(class="muted","Models fit the original Y scale. Fit every series independently to draw all fitted curves on the same graph. Curves are available with scatter, mean/error and shaded-band views; Residuals shows fit diagnostics.")),
+                  p(class="muted","Models fit the original Y scale. Choose independent fits or share selected parameters in a joint global fit; all series remain on the same graph. Curves are available with scatter, mean/error and shaded-band views; Residuals shows fit diagnostics.")),
                 conditionalPanel("['welch','student','paired','mann','signedrank'].indexOf(input.method) !== -1", selectInput("group2", "Second group", choices = c("Treatment A", "Control", "Treatment B"))),
                 conditionalPanel("input.method === 'onesample'", numericInput("null_mean", "Hypothesized population mean", 0)),
                 conditionalPanel("['multiple','kruskal','simpleeffects'].indexOf(input.method) !== -1", selectInput("correction", "Multiple-comparison correction", c("Holm (family-wise error)" = "holm", "Bonferroni (family-wise error)" = "bonferroni", "Benjamini–Hochberg (false discovery rate)" = "BH")))),
@@ -274,7 +277,7 @@ ui <- fluidPage(
                 fileInput("open_project", "Project file", accept = c(".rdcraft", ".rdatacraft", ".json", ".plotcraft"), placeholder = "Choose a RDataCraft project"),
                 downloadButton("save_project_copy", "Save current project", class = "btn-primary")),
               div(class = "card-surface", h3("About this version"),
-                  p("RDataCraft v0.5 · Scientific plotting and statistics"),
+                  p("RDataCraft v0.6 · Scientific plotting and statistics"),
                   p("R-powered data analysis and publication-ready figures for Mac and Windows."),
                   p("Six table types including PCA, named worksheets, matched and independent group tests, factorial ANOVA, correlation, dose-response fitting, survival analysis, categorical tests, diagnostic graphs, and reproducible reports."),
                   p("Treat each row as an independent experimental unit unless using a paired test. Technical replicates must not be counted as independent biological replicates."),
@@ -528,14 +531,14 @@ server <- function(input, output, session) {
   }, server = TRUE)
   output$xy_fit_scope_note <- renderText({
     label <- names(pc_methods("xy"))[match(input$method, pc_methods("xy"))]
-    if (!input$method %in% c("linear", "fourpl", unname(pc_regression_methods()))) return("Choose a regression model in Analysis to draw fitted curves.")
+    if (!input$method %in% c("linear", "fourpl", "threepl", unname(pc_regression_methods()))) return("Choose a regression model in Analysis to draw fitted curves.")
     paste(label, "·", if (identical(input$fit_scope, "all")) "All Y series fitted independently" else paste("Selected series:", input$group1))
   })
   observeEvent(input$xy_fit_all, {
     req(identical(input$layout, "xy"))
     updateSelectInput(session, "fit_scope", selected="all")
     updateCheckboxInput(session, "xy_show_fit", value=TRUE)
-    if (!input$method %in% c("linear", "fourpl", unname(pc_regression_methods()))) {
+    if (!input$method %in% c("linear", "fourpl", "threepl", unname(pc_regression_methods()))) {
       updateTabsetPanel(session,"workspace",selected="analysis");page("analysis");session$sendCustomMessage("rdatacraft-page","analysis")
       showNotification("Choose a regression model; each Y series will be fitted independently.",type="message")
     }
@@ -671,12 +674,60 @@ server <- function(input, output, session) {
     scalar <- function(x) if (is.null(x) || !length(x)) "" else as.character(x)
     if (all(vapply(names(pc_defaults()), function(key) identical(scalar(input[[key]]), scalar(target[[key]])), logical(1)))) restoring_settings(NULL)
   })
+  constraint_method<-reactiveVal(NULL);constraint_draft<-reactiveVal(list());constraint_target<-reactiveVal('__defaults__')
+  store_constraint_fields<-function(target) {
+    method<-constraint_method();r<-isolate(constraint_draft());current<-list()
+    for(k in pc_fit_parameters(method)) {
+      if(target!='__defaults__'&&!isTRUE(input[[paste0('constraint_',k,'_override')]]))next
+      z<-list()
+      for(part in c('fixed','lower','upper')) {value<-input[[paste0('constraint_',k,'_',part)]];text<-if(is.null(value))''else trimws(value);if(nzchar(text)) {v<-suppressWarnings(as.numeric(text));if(!is.finite(v))stop('Enter finite numbers or leave fields blank.');z[[part]]<-v}}
+      if(length(z)||target!='__defaults__')current[[k]]<-z
+    }
+    if(target=='__defaults__') {r<-c(current,r[intersect(names(r),c('groups','shared'))])}else {if(is.null(r$groups))r$groups<-list();r$groups[[target]]<-if(length(current))current else NULL;if(!length(r$groups))r$groups<-NULL}
+    constraint_draft(r)
+  }
+  output$constraint_fields<-renderUI({
+    method<-constraint_method();req(method);target<-constraint_target();r<-constraint_draft();keys<-pc_fit_parameters(method)
+    defaults<-r[setdiff(names(r),c('groups','shared'))];rules<-if(target=='__defaults__')defaults else r$groups[[target]]
+    div(class='constraint-table-scroll',tags$table(class='table constraint-table',tags$thead(tags$tr(lapply(c('Parameter',if(target!='__defaults__')'Override defaults','Fixed value','Lower bound','Upper bound'),tags$th))),tags$tbody(lapply(keys,function(k) {
+      z<-if(target!='__defaults__'&&!k%in%names(rules))defaults[[k]]else rules[[k]]
+      tags$tr(tags$th(k),if(target!='__defaults__')tags$td(checkboxInput(paste0('constraint_',k,'_override'),paste('Override',k),k%in%names(rules))),lapply(c('fixed','lower','upper'),function(part)tags$td(textInput(paste0('constraint_',k,'_',part),paste(k,part),if(is.null(z[[part]]))''else as.character(z[[part]])))))
+    }))))
+  })
+  observeEvent(input$fit_constraints_open,{
+    method<-settings()$method;keys<-pc_fit_parameters(method);req(length(keys));constraint_method(method);constraint_target('__defaults__')
+    r<-pc_fit_constraints(settings()$fit_constraints)[[method]];if(is.null(r))r<-list();constraint_draft(r)
+    groups<-union(pc_normalize(raw(),'xy')$groups,names(r$groups))
+    showModal(modalDialog(title='Parameter constraints',size='l',
+      div(class='constraint-dialog',
+       p('Defaults apply to all groups. For a specific group, enable Override. Blank override fields mean free fitting. Apply saves all groups; Cancel discards edits.'),
+       selectizeInput('constraint_target_choice','Edit constraints for',choices=c('Defaults (all groups)'='__defaults__',setNames(groups,groups)),selected='__defaults__',options=list(dropdownParent='body')),
+       if(method=='fourpl')p('EC50 uses original X. Hill is the natural-logistic coefficient; conventional base-10 slope = Hill / ln(10).'),
+       if(method=='threepl')p('Conventional Hill slope is fixed at +1 (increasing response). Bottom, Top and EC50 remain adjustable. EC50 uses the original X scale.'),
+       uiOutput('constraint_fields'),
+       checkboxGroupInput('constraint_shared','Parameters to share in Shared / global fitting',choices=keys,selected=unlist(r$shared),inline=TRUE),
+       p('Shared parameters are estimated jointly only when Fitting design is Shared / global fit. Their group bounds must overlap and their fixed values must agree. Fixed and active-bound parameters have no reported uncertainty.')),
+      footer=tagList(modalButton('Cancel'),actionButton('fit_constraints_apply','Apply constraints',class='btn-primary'))))
+  })
+  observeEvent(input$constraint_target_choice,{
+    next_target<-input$constraint_target_choice
+    if(identical(next_target,constraint_target()))return()
+    tryCatch({store_constraint_fields(constraint_target());constraint_target(next_target)},error=function(e){showNotification(conditionMessage(e),type='error');updateSelectizeInput(session,'constraint_target_choice',selected=constraint_target())})
+  },ignoreInit=TRUE,priority=100)
+  observeEvent(input$fit_constraints_apply,tryCatch({
+    method<-constraint_method();req(identical(method,settings()$method));store_constraint_fields(constraint_target());r<-constraint_draft();r$shared<-if(length(input$constraint_shared))as.list(input$constraint_shared)else NULL
+    rules<-pc_fit_constraints(settings()$fit_constraints);rules[[method]]<-if(length(r))r else NULL
+    text<-if(length(rules))as.character(jsonlite::toJSON(rules,auto_unbox=TRUE))else '{}';pc_fit_constraints(text)
+    if(identical(settings()$fit_mode,'global')&&!length(r$shared))stop('Select at least one shared parameter for global fitting.')
+    updateTextInput(session,'fit_constraints',value=text);removeModal()
+  },error=function(e)showNotification(conditionMessage(e),type='error')))
+  observeEvent(input$fit_mode,{if(identical(input$fit_mode,'global'))updateSelectInput(session,'fit_scope',selected='all')},ignoreInit=TRUE)
   update_settings <- function(s) {
     restoring_settings(s); pending(s); restore_revision(isolate(restore_revision()) + 1L)
     for (key in names(s)) {
       v <- s[[key]]
       if (key %in% c("layout", "method", "graph", "error", "palette", "dpi", "group1", "group2", "correction", "annotation", "legend_position", "pca_missing", "pca_label_column", "pca_group_column")) updateSelectInput(session, key, selected = v)
-      else if (key %in% c("fit_weight","fit_replicates","fit_scope","xy_connections","xy_compare_group1","xy_compare_group2","xy_compare_correction")) updateSelectInput(session,key,selected=v)
+      else if (key %in% c("fit_mode","fit_weight","fit_replicates","fit_scope","xy_connections","xy_compare_group1","xy_compare_group2","xy_compare_correction")) updateSelectInput(session,key,selected=v)
       else if (is.logical(v)) updateCheckboxInput(session, key, value = v)
       else if (is.numeric(v)) updateNumericInput(session, key, value = v)
       else updateTextInput(session, key, value = v)
@@ -807,7 +858,7 @@ server <- function(input, output, session) {
   },error=function(e) {notify_error(e);session$sendCustomMessage("rdatacraft-vector-error",conditionMessage(e))}))
   observeEvent(input$fit_curve,tryCatch({
     if(current_layout()!="xy") stop("Create or select an XY table to fit a curve.")
-    if(!settings()$method %in% c("linear","fourpl",unname(pc_regression_methods()))) updateSelectInput(session,"method",selected="linear")
+    if(!settings()$method %in% c("linear","fourpl","threepl",unname(pc_regression_methods()))) updateSelectInput(session,"method",selected="linear")
     updateSelectInput(session,"graph",selected="scatter")
     updateTabsetPanel(session,"workspace",selected="analysis");page("analysis");session$sendCustomMessage("rdatacraft-page","analysis")
   },error=notify_error))

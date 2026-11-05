@@ -25,11 +25,11 @@ pc_assistant_server <- function(input,output,session,capture,apply_result,open_r
       shiny::updateSelectInput(session,'ai_model_list',choices=choices,selected=selected)
     }
     session$sendCustomMessage('rdatacraft-ai-connection',c(value,list(loginBusy=FALSE)))
-    if(!is.null(value$status)) notify(value$status)
+    if(!is.null(value$status) && !busy()) notify(if(startsWith(value$status,'Connected ·')) 'Ready. Ask about your analysis or describe a change.' else value$status)
     if(!is.null(value$error)) notify(value$error)
   })})
   pending<-shiny::reactiveVal(NULL); ready<-shiny::reactiveVal(NULL); history<-shiny::reactiveVal(list())
-  busy<-shiny::reactiveVal(FALSE); status<-shiny::reactiveVal("Check connection to use the connected model. Local tools work offline.")
+  busy<-shiny::reactiveVal(FALSE); status<-shiny::reactiveVal("Ask about your analysis or describe a change. Local tools work offline.")
   notify<-function(message) {status(message);session$sendCustomMessage("rdatacraft-ai-state",list(busy=busy(),message=message))}
   fingerprint<-function(state) digest::digest(list(state$sheet,state$view,state$name,state$table,state$settings),algo="xxhash64")
   record<-function(role,text) {h<-isolate(history());history(tail(c(h,list(list(role=role,text=substr(text,1,20000)))),30))}
@@ -43,7 +43,7 @@ pc_assistant_server <- function(input,output,session,capture,apply_result,open_r
     shiny::showModal(pc_ai_connections_ui())
     tryCatch(transport$command('status'),error=function(e) notify(conditionMessage(e)))
   })
-  shiny::observeEvent(input$assistant_status_check,{notify(transport$status());tryCatch(transport$command('status'),error=function(e) notify(conditionMessage(e)))})
+  shiny::observeEvent(input$assistant_status_check,{if(!busy()) notify(if(startsWith(transport$status(),'Connected ·')) 'Ready. Ask about your analysis or describe a change.' else transport$status());tryCatch(transport$command('status'),error=function(e) notify(conditionMessage(e)))})
   shiny::observeEvent(input$assistant_native_status,notify(pc_ai_text(input$assistant_native_status$message,1000)))
   send_request<-function(prompt,share) tryCatch({
     if(busy()) {notify("Finish or stop the current request first.");return()}

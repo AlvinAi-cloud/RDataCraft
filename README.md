@@ -5,11 +5,18 @@ publication-quality figures. It combines editable tables, linked graphs,
 statistical workflows, curve fitting, PCA, multi-panel layouts and reviewed custom
 R scripts with optional AI assistance.
 
-**v0.5** provides native desktop windows for Intel Mac, Apple Silicon, Windows x64
+**v0.6** provides native desktop windows for Intel Mac, Apple Silicon, Windows x64
 and Ubuntu 24.04 LTS amd64. Mac and Windows bundle R and the required packages.
 The Ubuntu `.deb` installs its compatible R 4.3 engine through Ubuntu’s package
 manager and includes the app’s R package library; no manual R setup is needed.
 Scientific calculations run locally.
+
+In **v0.6**, Analysis → Parameter constraints supports fixed values, bounds and
+group-specific overrides. Choose independent fits or joint shared/global fitting
+while keeping curves together on one graph. A three-parameter dose-response model
+fixes the conventional Hill slope at +1. The AI Assistant reliably delivers large
+requests, recovers from timeouts and avoids repeated account-status messages.
+Constraint dialogs and AI panels adapt to smaller windows.
 
 The optional AI Assistant connects to your own ChatGPT account, OpenAI, Claude,
 Gemini or an OpenAI-compatible service. Configure it through **AI → Accounts and
@@ -61,6 +68,11 @@ uncertainty, and export editable vector figures.
 
 **Compact analysis results.** Compare curve parameters in columns, review
 assumptions and diagnostics, and export numerical tables as CSV.
+
+**Fixed, bounded and shared fitting parameters:** edit defaults or specific groups,
+then choose independent curves or a joint global fit.
+
+![RDataCraft v0.6 parameter constraints dialog at a 1024 by 700 desktop window](docs/screenshots/constraints.png)
 
 ![RDataCraft analysis page with fitted-curve parameter tables and CSV export](docs/screenshots/analysis-results.jpg)
 
@@ -250,7 +262,7 @@ Prepare an upload without publishing:
 
 ```sh
 python3 scripts/prepare_github.py
-python3 scripts/preflight.py --source dist/RDataCraft-0.5-GitHub
+python3 scripts/preflight.py --source dist/RDataCraft-0.6-GitHub
 ```
 
 Use the generated **source folder contents**, rather than the entire development

@@ -13,7 +13,7 @@ def run(app,window):
   app.quit()
  def step(action,predicate,label):steps.append((action,predicate,label))
  def command(name):return lambda:window.command(name)
- step(lambda:None,"document.querySelector('.version-label')?.textContent.includes('v0.5') && document.getElementById('data_grid')!==null",'native window loads the installed interface')
+ step(lambda:None,"document.querySelector('.version-label')?.textContent.includes('v0.6') && document.getElementById('data_grid')!==null",'native window loads the installed interface')
  step(lambda:window.open_file(__import__('rdatacraft').BACKEND/'examples/RDataCraft examples.rdatacraft'),"document.getElementById('study_name').value==='RDataCraft examples' && document.querySelector('#data_grid tbody td')!==null && !document.documentElement.classList.contains('shiny-busy')",'opens a teaching study through the native bridge')
  step(command('figure'),"window.RDataCraftGraph?.ready()===true && !!document.querySelector('#figure svg.graph-interactive')",'bundled packages render an interactive graph')
  step(command('assistant'),"document.body.classList.contains('assistant-open') && !document.getElementById('assistant_panel').hidden && document.getElementById('assistant_connection')===null && document.getElementById('assistant_connection_summary').textContent.includes('AI → Accounts and Models')",'disconnected assistant points to the AI menu without a settings button')
@@ -29,7 +29,7 @@ def run(app,window):
  def finish():
   path=folder/'saved-study.rdcraft'
   if not path.exists():return True
-  value=json.loads(path.read_text());assert value['app_version']=='0.5' and value['r_analyses'][0]['result']['status']=='success'
+  value=json.loads(path.read_text());assert value['app_version']=='0.6' and value['r_analyses'][0]['result']['status']=='success'
   if second[0] is None:second[0]=app.open_window(new=True);return True
   if not second[0].ready:return True
   if not second_open[0]:
@@ -39,7 +39,7 @@ def run(app,window):
   engine=window.engine;other_engine=second[0].engine
   window.shutdown();window.destroy();second[0].shutdown();second[0].destroy()
   assert engine.poll() is not None and other_engine.poll() is not None;record('closing windows stops their own R engines')
-  (folder/'validation.json').write_text(json.dumps(dict(version='0.5',status='passed',native_window=True,embedded_webkit=True,external_browser_launched=False,engine_cleanup_verified=True,checks=checks),indent=2));app.quit();return False
+  (folder/'validation.json').write_text(json.dumps(dict(version='0.6',status='passed',native_window=True,embedded_webkit=True,external_browser_launched=False,engine_cleanup_verified=True,checks=checks),indent=2));app.quit();return False
  def tick():
   nonlocal position,checking,deadline
   if checking:return True

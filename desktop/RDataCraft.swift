@@ -20,7 +20,7 @@ final class RDataCraftApp: NSObject, NSApplicationDelegate {
     var quitQueue: [RDataCraftWindow] = []
     var testQuitReply: ((Bool) -> Void)?
     var testFolder: URL? {
-        let prefixes=["--assistant-test=","--multiwindow-test=","--studio-test=","--workflow-test=","--smoke-test=","--navigator-test=","--paste-test=","--graph-test=","--planning-test="]
+        let prefixes=["--fitting-test=","--assistant-test=","--multiwindow-test=","--studio-test=","--workflow-test=","--smoke-test=","--navigator-test=","--paste-test=","--graph-test=","--planning-test="]
         guard let flag=CommandLine.arguments.first(where:{value in prefixes.contains(where:{value.hasPrefix($0)})}) else {return nil}
         return URL(fileURLWithPath:String(flag.split(separator:"=",maxSplits:1)[1]),isDirectory:true)
     }
@@ -610,7 +610,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         return ready
     }
     @objc func about() {
-        NSApp.orderFrontStandardAboutPanel(options: [.applicationName: "RDataCraft", .applicationVersion: "v0.5 · Development preview", .credits: NSAttributedString(string: "Scientific plotting and statistics\nR-powered data analysis and publication-ready figures.\nAvailable for Mac, Windows and Ubuntu.")])
+        NSApp.orderFrontStandardAboutPanel(options: [.applicationName: "RDataCraft", .applicationVersion: "v0.6", .credits: NSAttributedString(string: "Scientific plotting and statistics\nR-powered data analysis and publication-ready figures.\nAvailable for Mac, Windows and Ubuntu.")])
     }
     @objc func showExamples() { send(["type":"examples"]) }
     @objc func showHelp() {
@@ -1033,7 +1033,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         _ = try await webView.evaluateJavaScript("document.getElementById('add_tutorial').click()")
         try await waitUntil("document.getElementById('layout').value==='multiple' && document.getElementById('method').value==='pca' && document.querySelector('#pca_scree tbody tr')!==null && !document.documentElement.classList.contains('shiny-busy')")
         try await waitUntil("document.getElementById('pca_variable_pick').selectize.items.length===5 && !document.getElementById('pca_variable_pick').selectize.items.includes('SampleID') && document.querySelector('#pca_scores .dataTables_info')?.textContent.includes('12 entries')===true")
-        try await waitUntil("document.querySelector('.version-label')?.textContent.includes('v0.5')===true && Object.keys(document.getElementById('graph_view').selectize.options).length===3")
+        try await waitUntil("document.querySelector('.version-label')?.textContent.includes('v0.6')===true && Object.keys(document.getElementById('graph_view').selectize.options).length===3")
         try imageData(try await webView.takeSnapshot(configuration:nil)).write(to:folder.appendingPathComponent("pca-analysis.png"))
         for key in ["scores","loadings","scree","preprocessing"] {
             let file=folder.appendingPathComponent("pca-\(key).csv")
@@ -1048,7 +1048,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         let file=folder.appendingPathComponent("PCA teaching workflow.rdatacraft")
         nextTestDestination=file;saveAs();try await waitForFile(file)
         let saved=try JSONSerialization.jsonObject(with:Data(contentsOf:file)) as? [String:Any]
-        guard saved?["app_version"] as? String == "0.5",let settings=saved?["settings"] as? [String:Any],let selected=settings["pca_variables"] as? String,!selected.contains("SampleID"),selected.contains("CellArea") else {throw HostError.failed("PCA example settings or release version were not saved correctly.")}
+        guard saved?["app_version"] as? String == "0.6",let settings=saved?["settings"] as? [String:Any],let selected=settings["pca_variables"] as? String,!selected.contains("SampleID"),selected.contains("CellArea") else {throw HostError.failed("PCA example settings or release version were not saved correctly.")}
         return ["PCA in the shared Help example selector", "PCA walkthrough visible", "PCA example adds 12 observations", "PCA selects measurements without numeric IDs", "three linked PCA views", "four PCA CSV exports", "PCA scores graph", "PCA settings and version saved"]
     }
     func workflowTest() async {
@@ -1320,6 +1320,45 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
             app.testQuitReply=nil;app.stopAll();Darwin.exit(0)
         } catch {fail(error.localizedDescription)}
     }
+    func fittingWorkflowTest(_ folder:URL) async throws -> [String] {
+        send(["type":"open","path":backend.appendingPathComponent("examples/Group fitting review.rdatacraft").path])
+        try await waitUntil("document.getElementById('layout').value==='xy' && !document.documentElement.classList.contains('shiny-busy')")
+        command("analysis")
+        try await waitUntil("document.getElementById('method').selectize.options.threepl!==undefined && document.querySelector('#analysis_metrics table')!==null && !document.documentElement.classList.contains('shiny-busy')")
+        try await Task.sleep(nanoseconds:600_000_000)
+        _ = try await webView.evaluateJavaScript("document.getElementById('method').selectize.setValue('threepl');document.getElementById('fit_scope').selectize.setValue('all')")
+        try await waitUntil("document.getElementById('method').value==='threepl' && !document.documentElement.classList.contains('shiny-busy')")
+        window.setContentSize(NSSize(width:1024,height:700))
+        _ = try await webView.evaluateJavaScript("document.getElementById('fit_constraints_open').click()")
+        try await waitUntil("document.getElementById('constraint_bottom_fixed')!==null && document.getElementById('constraint_target_choice').selectize.options['__defaults__']!==undefined")
+        _ = try await webView.evaluateJavaScript("for(const [k,v] of Object.entries({bottom:0,top:100})){let f=document.getElementById('constraint_'+k+'_fixed');f.value=v;f.dispatchEvent(new Event('change',{bubbles:true}));}")
+        try await Task.sleep(nanoseconds:400_000_000)
+        _ = try await webView.evaluateJavaScript("var c=document.getElementById('constraint_target_choice').selectize; c.setValue(Object.keys(c.options).find(k=>k!=='__defaults__'))")
+        try await waitUntil("document.querySelector('[id$=_override]')!==null")
+        _ = try await webView.evaluateJavaScript("document.getElementById('constraint_bottom_override').click();var f=document.getElementById('constraint_bottom_fixed');f.value='5';f.dispatchEvent(new Event('change',{bubbles:true}));")
+        try await Task.sleep(nanoseconds:400_000_000)
+        _ = try await webView.evaluateJavaScript("document.getElementById('constraint_target_choice').selectize.setValue('__defaults__')")
+        try await waitUntil("document.getElementById('constraint_bottom_override')===null && document.getElementById('constraint_bottom_fixed').value==='0'")
+        try await waitUntil("(()=>{const b=document.getElementById('fit_constraints_apply').getBoundingClientRect();return b.bottom<=innerHeight && b.top>=0})()")
+        try imageData(try await webView.takeSnapshot(configuration:nil)).write(to:folder.appendingPathComponent("constraints-1024.png"))
+        _ = try await webView.evaluateJavaScript("document.querySelector('#shiny-modal .modal-footer [data-dismiss=modal]').click()")
+        try await waitUntil("document.querySelector('#shiny-modal')===null")
+        _ = try await webView.evaluateJavaScript("document.getElementById('fit_constraints_open').click()")
+        try await waitUntil("document.getElementById('constraint_target_choice')?.selectize!==undefined && document.getElementById('constraint_bottom_fixed')!==null")
+        _ = try await webView.evaluateJavaScript("for(const [k,v] of Object.entries({bottom:0,top:100})){let f=document.getElementById('constraint_'+k+'_fixed');f.value=v;f.dispatchEvent(new Event('change',{bubbles:true}));} document.querySelector('#constraint_shared input[value=EC50]').click()")
+        try await Task.sleep(nanoseconds:400_000_000)
+        _ = try await webView.evaluateJavaScript("document.getElementById('fit_constraints_apply').click()")
+        try await waitUntil("document.querySelector('#shiny-modal')===null && document.getElementById('fit_constraints').value.includes('EC50')")
+        _ = try await webView.evaluateJavaScript("document.getElementById('fit_mode').selectize.setValue('global')")
+        try await waitUntil("document.querySelector('#analysis_notes')?.textContent.includes('Global fit:')===true && !document.documentElement.classList.contains('shiny-busy')")
+        command("figure")
+        try await waitUntil("document.querySelector('#nav_figure.active')!==null && window.RDataCraftGraph?.ready()===true")
+        command("assistant")
+        try await waitUntil("document.body.classList.contains('assistant-open') && document.getElementById('assistant_connection_summary')===null")
+        try await waitUntil("(()=>{const a=document.getElementById('assistant_panel').getBoundingClientRect(),b=document.getElementById('assistant_send').getBoundingClientRect();return a.right<=innerWidth+1 && b.bottom<=innerHeight && b.left>=a.left})()")
+        try imageData(try await webView.takeSnapshot(configuration:nil)).write(to:folder.appendingPathComponent("assistant-1024.png"))
+        return ["three parameter method", "all-series fitting", "small-screen constraint dialog", "defaults persist across group switch", "specific-group override", "visible Apply button", "cancel unchanged constraints", "global fitting selection and joint result", "global curves rendered together", "no duplicate account status", "visible small-screen AI Send"]
+    }
     func assistantLayoutTest(_ folder:URL) async throws -> [String] {
         send(["type":"open","path":backend.appendingPathComponent("examples/RDataCraft examples.rdatacraft").path])
         try await waitUntil("document.getElementById('study_name').value==='RDataCraft examples' && !document.documentElement.classList.contains('shiny-busy')")
@@ -1327,7 +1366,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         try await waitUntil("window.RDataCraftGraph?.ready()===true && !!document.querySelector('#figure svg.graph-interactive')")
         if (try await webView.evaluateJavaScript("document.body.classList.contains('inspector-hidden')")) as? Bool == true {command("inspector")}
         command("assistant")
-        try await waitUntil("document.body.classList.contains('assistant-open') && document.getElementById('assistant_connection')===null && document.getElementById('assistant_connection_summary').textContent.includes('AI → Accounts and Models')")
+        try await waitUntil("document.body.classList.contains('assistant-open') && document.getElementById('assistant_connection')===null && document.getElementById('assistant_connection_summary')===null")
         try await waitUntil("(()=>{const a=document.getElementById('assistant_panel').getBoundingClientRect(),b=document.querySelector('.inspector').getBoundingClientRect();return b.width>0 && b.right<=a.left+2 && b.top<a.bottom;})()")
         try imageData(try await webView.takeSnapshot(configuration:nil)).write(to:folder.appendingPathComponent("assistant-and-figure-settings.png"))
         command("inspector")
@@ -1336,7 +1375,7 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
         try await waitUntil("!document.body.classList.contains('inspector-hidden') && document.body.classList.contains('assistant-open')")
         command("assistant")
         try await waitUntil("!document.body.classList.contains('assistant-open') && !document.body.classList.contains('inspector-hidden')")
-        return ["disconnected AI menu instruction", "no account button in assistant", "figure settings tile next to AI", "independent inspector hide", "independent inspector show", "assistant close preserves inspector"]
+        return ["no repeated account status in assistant", "no account button in assistant", "figure settings tile next to AI", "independent inspector hide", "independent inspector show", "assistant close preserves inspector"]
     }
     func smokeTest() async {
         if CommandLine.arguments.contains(where:{$0.hasPrefix("--multiwindow-test=")}) {await multiwindowTest();return}
@@ -1347,6 +1386,11 @@ final class RDataCraftWindow: NSObject, NSWindowDelegate,
                 throw HostError.failed("Use a new empty folder for each native smoke test.")
             }
             try fm.createDirectory(at: folder, withIntermediateDirectories: true)
+            if CommandLine.arguments.contains(where:{$0.hasPrefix("--fitting-test=")}) {
+                let checks=try await fittingWorkflowTest(folder)
+                try JSONSerialization.data(withJSONObject:["status":"passed","checks":checks],options:[.prettyPrinted,.sortedKeys]).write(to:folder.appendingPathComponent("report.json"))
+                stopEngine();Darwin.exit(0)
+            }
             if CommandLine.arguments.contains(where:{$0.hasPrefix("--assistant-test=")}) {
                 let checks=try await assistantLayoutTest(folder)
                 try JSONSerialization.data(withJSONObject:["status":"passed","checks":checks],options:[.prettyPrinted,.sortedKeys]).write(to:folder.appendingPathComponent("report.json"))
